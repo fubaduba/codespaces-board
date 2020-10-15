@@ -1,7 +1,7 @@
 import * as core from '@actions/core'
 import {env} from './utils/env'
 
-// add .env file support
+// add .env file support for dev purposes
 require('dotenv').config()
 
 import {AuthorizationError} from './errors/AuthorizationError'
@@ -46,7 +46,7 @@ const renderProject = async (
   )
   const wrappedIssues = [...wrappedProgressIssues, ...wrappedDoneIssues]
 
-  const projectTitle = `### ${project.name}`
+  const projectTitle = `## ${project.name}`
   const inWorkIssuesString = renderIssuesBlock(
     `🏗️  In work (${doneIssues.length}/${
       progressIssues.length + doneIssues.length
@@ -93,7 +93,14 @@ async function run(): Promise<void> {
         })
       )
 
-      console.log(result.join('\n') + '\n');
+      const issueBody = result.join('\n') + '\n';
+      const { status } = await projectKit.updateBoardIssue(TEST_CONFIG.boardIssue, issueBody);
+
+      if (status !== 200) {
+        throw new Error(`Failed to update the issue ${TEST_CONFIG.boardIssue}.`);
+      }
+
+      console.log(`Successfully updated the board issue.`);
     }
   } catch (error) {
     console.error(error);

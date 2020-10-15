@@ -21,9 +21,7 @@ const renderIssuesList = (issues: IWrappedIssue[]) => {
 
 export const renderIssuesBlock = (title: string, issues: IWrappedIssue[]) => {
     return [
-        '',
         renderTitle(title),
-        '',
         renderIssuesList(issues),
     ].join('\n');
 }

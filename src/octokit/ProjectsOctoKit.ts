@@ -6,6 +6,7 @@ import { TProjectColumns } from '../interfaces/TProjectColumns';
 import { TRepoIssue } from '../interfaces/TRepoIssue';
 import { OctoKitBase } from './OctoKitBase';
 import { TColumnTypes } from '../interfaces/TColumnTypes';
+import { parseIssueUrl } from '../utils/parseIssueUrl';
 
 type TColumnsMap = Record<TColumnTypes, TProjectColumn>;
 
@@ -122,5 +123,16 @@ export class ProjectsOctoKit extends OctoKitBase {
     });
 
     return cardIssues;
+  }
+
+  public updateBoardIssue = async (issueUrl: string, body: string): Promise<any> => {
+    const { owner, repo, issueNumber } = parseIssueUrl(issueUrl);
+
+    return await this.kit.issues.update({
+      owner,
+      repo,
+      issue_number: issueNumber,
+      body,
+    });
   }
 }
