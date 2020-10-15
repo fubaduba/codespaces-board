@@ -43,15 +43,18 @@ export class ProjectsOctoKit extends OctoKitBase {
 
   public getAllProjects = async (
     repos: IRepoSourceConfig[]
-  ): Promise<TProject[]> => {
+  ): Promise<{ repo: IRepoSourceConfig, projects: TProject[] }[]> => {
     const result = []
 
     for (let repo of repos) {
       const projects = await this.getRepoProjects(repo)
-      result.push(...projects)
+      result.push({
+        repo,
+        projects
+      })
     }
 
-    return result
+    return result;
   }
 
   public getColumns = async (project: TProject): Promise<TColumnsMap> => {
