@@ -82,6 +82,7 @@ export class ProjectsOctoKit extends OctoKitBase {
     const issues = await this.kit.paginate(this.kit.issues.listForRepo, {
       repo: repo.repo,
       owner: repo.owner,
+      state: 'all',
     });
 
     return issues;

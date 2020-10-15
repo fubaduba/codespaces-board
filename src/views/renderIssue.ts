@@ -4,15 +4,15 @@ import { TRepoIssue } from '../interfaces/TRepoIssue';
 const mapColumnToEmoji = (column: TColumnTypes) => {
     switch (column) {
         case TColumnTypes.InProgress: {
-            return '🏃';
+            return '🏃  ';
         }
 
         case TColumnTypes.Done: {
-            return '🙌';
+            return '';
         }
 
         case TColumnTypes.Committed: {
-            return '📅';
+            return '';
         }
 
         default:
@@ -48,5 +48,5 @@ export const renderIssue = (column: TColumnTypes, issue: TRepoIssue) => {
         const issueState = mapIssueStateToListItemState(issue);
         const assignees = renderAssignees(issue);
 
-        return `- [${issueState}] ${mapColumnToEmoji(column)} ${title} ${html_url} ${assignees}`;
+        return `- [${issueState}] ${mapColumnToEmoji(column)}${title} ${html_url} ${assignees}`;
 }

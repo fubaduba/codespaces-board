@@ -8,10 +8,10 @@ export const TEST_CONFIG: IConfig = {
       repo: 'codespaces-board',
       projects: [1, 2],
     },
-    {
-      owner: 'legomushroom',
-      repo: 'codespaces-board',
-      projects: [1],
-    }
+    // {
+    //   owner: 'legomushroom',
+    //   repo: 'codespaces-board',
+    //   projects: [3],
+    // }
   ]
 };

@@ -10,10 +10,47 @@ import { TEST_CONFIG } from './testConfig';
 import { TColumnTypes } from './interfaces/TColumnTypes';
 import { IWrappedIssue } from './interfaces/IWrappedIssue';
 import { renderIssuesBlock } from './views/renderIssuesBlock';
+import { TRepoIssue } from './interfaces/TRepoIssue';
+import { TProject } from './interfaces/TProject';
 
 export const OWNER = 'legomushroom';
 export const REPO = 'codespaces-board';
 const TOKEN_NAME = 'REPO_GITHUB_PAT';
+
+const renderProject = async (projectKit: ProjectsOctoKit, project: TProject): Promise<string> => {
+  const columns = await projectKit.getColumns(project);
+  const issues = await projectKit.getRepoIssues(TEST_CONFIG.repos[0]);
+  const progressIssues = await projectKit.filterIssuesForColumnCards(issues, columns[TColumnTypes.InProgress]);
+  const doneIssues = await projectKit.filterIssuesForColumnCards(issues, columns[TColumnTypes.Done]);
+  const backlogIssues = await projectKit.filterIssuesForColumnCards(issues, columns[TColumnTypes.Committed]);
+
+  const wrappedProgressIssues: IWrappedIssue[] = progressIssues.map(wrapIssue(TColumnTypes.InProgress));
+  const wrappedDoneIssues: IWrappedIssue[] = doneIssues.map(wrapIssue(TColumnTypes.Done));
+  const wrappedIssues = [...wrappedProgressIssues, ...wrappedDoneIssues];
+
+  const projectTitle = `### ${project.name}`;
+  const inWorkIssuesString = renderIssuesBlock(`🏗️  In work (${doneIssues.length}/${progressIssues.length + doneIssues.length})`, wrappedIssues);
+
+  const wrappedBacklogIssues: IWrappedIssue[] = backlogIssues.map(wrapIssue(TColumnTypes.Committed));
+
+  const backlogIssuesString = renderIssuesBlock(`📅  Backlog (${wrappedBacklogIssues.length})`, wrappedBacklogIssues);
+
+  return [
+    '',
+    projectTitle,
+    inWorkIssuesString,
+    backlogIssuesString,
+  ].join('\n');
+}
+
+const wrapIssue = (column: TColumnTypes) => {
+  return (issue: TRepoIssue) => {
+    return {
+      column,
+      issue,
+    };
+  };
+}
 
 async function run(): Promise<void> {
   try {
@@ -25,18 +62,13 @@ async function run(): Promise<void> {
 
     const projectKit = new ProjectsOctoKit(token);
     const projects = await projectKit.getAllProjects(TEST_CONFIG.repos);
-    const columns = await projectKit.getColumns(projects[0]);
-    const issues = await projectKit.getRepoIssues(TEST_CONFIG.repos[0]);
-    const columnIssues = await projectKit.filterIssuesForColumnCards(issues, columns[TColumnTypes.Committed]);
 
-    const wrappedIssues: IWrappedIssue[] = columnIssues.map((issue) => {
-      return {
-        column: TColumnTypes.InProgress,
-        issue,
-      };
-    });
+    const result = await Promise.all(projects.map((project) => {
+      return renderProject(projectKit, project);
+    }));
 
-    console.log(renderIssuesBlock(projects[0].name, wrappedIssues));
+    console.log(result.join('\n') + '\n');
+
   } catch (error) {
     console.error(error);
     core.setFailed(error.message)
