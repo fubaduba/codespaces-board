@@ -1,19 +1,32 @@
 import * as core from '@actions/core'
-import {wait} from './wait'
+import { env } from './utils/env';
+
+// add .env file support
+require('dotenv').config();
+
+import { AuthorizationError } from './errors/AuthorizationError';
+import { ProjectsOctoKit } from './octokit/ProjectsOctoKit';
+import { TEST_CONFIG } from './testConfig';
+
+export const OWNER = 'legomushroom';
+export const REPO = 'codespaces-board';
+const TOKEN_NAME = 'REPO_GITHUB_PAT';
 
 async function run(): Promise<void> {
   try {
-    const ms: string = core.getInput('milliseconds')
-    core.debug(`Waiting ${ms} milliseconds ...`) // debug is only output if you set the secret `ACTIONS_RUNNER_DEBUG` to true
+    const token = env(TOKEN_NAME) ?? core.getInput('token');
 
-    core.debug(new Date().toTimeString())
-    await wait(parseInt(ms, 10))
-    core.debug(new Date().toTimeString())
+    if (!token) {
+      throw new AuthorizationError('No token found.');
+    }
 
-    core.setOutput('time', new Date().toTimeString())
+    const projectsOctoKit = new ProjectsOctoKit(token);
+    const projects = await projectsOctoKit.getAllProjects(TEST_CONFIG.repos);
+
+    console.log(projects);
   } catch (error) {
     core.setFailed(error.message)
   }
 }
 
-run()
+run();
