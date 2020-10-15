@@ -7,6 +7,7 @@ import { TRepoIssue } from '../interfaces/TRepoIssue';
 import { OctoKitBase } from './OctoKitBase';
 import { TColumnTypes } from '../interfaces/TColumnTypes';
 import { parseIssueUrl } from '../utils/parseIssueUrl';
+import { parseFileUrl } from '../utils/parseFileUrl';
 
 type TColumnsMap = Record<TColumnTypes, TProjectColumn>;
 
@@ -125,7 +126,7 @@ export class ProjectsOctoKit extends OctoKitBase {
     return cardIssues;
   }
 
-  public updateBoardIssue = async (issueUrl: string, body: string): Promise<any> => {
+  public updateBoardIssue = async (issueUrl: string, body: string) => {
     const { owner, repo, issueNumber } = parseIssueUrl(issueUrl);
 
     return await this.kit.issues.update({
@@ -134,5 +135,21 @@ export class ProjectsOctoKit extends OctoKitBase {
       issue_number: issueNumber,
       body,
     });
+  }
+
+  public getBoardHeaderText = async (fileUrl: string): Promise<string> => {
+    const fileRef = parseFileUrl(fileUrl);
+
+    const { data } = await this.kit.repos.getContent({
+      accept: 'application/vnd.github.VERSION.raw',
+      ...fileRef,
+    });
+
+    const { content } = data;
+
+    const buff = Buffer.from(content, 'base64');
+    const text = buff.toString('ascii');
+
+    return text;
   }
 }

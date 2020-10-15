@@ -94,7 +94,24 @@ async function run(): Promise<void> {
       )
 
       const issueBody = result.join('\n') + '\n';
-      const { status } = await projectKit.updateBoardIssue(TEST_CONFIG.boardIssue, issueBody);
+
+      let header;
+      if (TEST_CONFIG.headerFileUrl) {
+        header = await projectKit.getBoardHeaderText(TEST_CONFIG.headerFileUrl);
+      }
+
+      let footer;
+      if (TEST_CONFIG.footerFileUrl) {
+        footer = await projectKit.getBoardHeaderText(TEST_CONFIG.footerFileUrl);
+      }
+
+      const issueContents = [
+        header,
+        issueBody,
+        footer,
+      ].join('\n');
+
+      const { status } = await projectKit.updateBoardIssue(TEST_CONFIG.boardIssue, issueContents);
 
       if (status !== 200) {
         throw new Error(`Failed to update the issue ${TEST_CONFIG.boardIssue}.`);
