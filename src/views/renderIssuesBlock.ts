@@ -4,7 +4,7 @@ import { renderIssue } from './renderIssue';
 import { IWrappedIssue } from '../interfaces/IWrappedIssue';
 
 const renderTitle = (title: string) => {
-    return `- ${title}`;
+    return `- **${title}**`;
 }
 
 const renderIssuesList = (issues: IWrappedIssue[]) => {

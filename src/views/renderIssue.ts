@@ -24,7 +24,7 @@ const mapColumnToEmoji = (column: TColumnTypes) => {
     }
 
     case TColumnTypes.Done: {
-      return '';
+      return '✅  ';
     }
 
     default:
@@ -34,16 +34,16 @@ const mapColumnToEmoji = (column: TColumnTypes) => {
   }
 };
 
-const mapIssueStateToListItemState = (issue: TRepoIssue) => {
-  switch (issue.state) {
-    case 'open': {
-      return ' ';
-    }
-    default: {
-      return 'x';
-    }
-  }
-};
+// const mapIssueStateToListItemState = (issue: TRepoIssue) => {
+//   switch (issue.state) {
+//     case 'open': {
+//       return '';
+//     }
+//     default: {
+//       return '✅';
+//     }
+//   }
+// };
 
 const renderAssignees = (issue: TRepoIssue) => {
   const { assignees } = issue;
@@ -61,10 +61,10 @@ const renderAssignees = (issue: TRepoIssue) => {
 
 export const renderIssue = (column: TColumnTypes, issue: TRepoIssue) => {
   const { title, html_url } = issue;
-  const issueState = mapIssueStateToListItemState(issue);
+  // const issueState = mapIssueStateToListItemState(issue);
   const assignees = renderAssignees(issue);
 
-  return `- [${issueState}] ${mapColumnToEmoji(
+  return `- ${mapColumnToEmoji(
     column,
   )}${title} ${html_url} ${assignees}`;
 };
