@@ -1,79 +1,123 @@
-import * as core from '@actions/core'
-import {env} from './utils/env'
+import * as core from '@actions/core';
+import { env } from './utils/env';
 
 // add .env file support for dev purposes
-require('dotenv').config()
+require('dotenv').config();
 
-import {AuthorizationError} from './errors/AuthorizationError'
-import {ProjectsOctoKit} from './octokit/ProjectsOctoKit'
-import {TEST_CONFIG} from './testConfig'
-import {TColumnTypes} from './interfaces/TColumnTypes'
-import {IWrappedIssue} from './interfaces/IWrappedIssue'
-import {renderIssuesBlock} from './views/renderIssuesBlock'
-import {TRepoIssue} from './interfaces/TRepoIssue'
-import {TProject} from './interfaces/TProject'
-import {IRepoSourceConfig} from './interfaces/IRepoSourceConfig'
+import { AuthorizationError } from './errors/AuthorizationError';
+import { ProjectsOctoKit } from './octokit/ProjectsOctoKit';
+import { TEST_CONFIG } from './testConfig';
+import { TColumnTypes } from './interfaces/TColumnTypes';
+import { IWrappedIssue } from './interfaces/IWrappedIssue';
+import { renderIssuesBlock } from './views/renderIssuesBlock';
+import { TRepoIssue } from './interfaces/TRepoIssue';
+import { TProject } from './interfaces/TProject';
+import { IRepoSourceConfig } from './interfaces/IRepoSourceConfig';
 
-export const OWNER = 'legomushroom'
-export const REPO = 'codespaces-board'
-const TOKEN_NAME = 'REPO_GITHUB_PAT'
+export const OWNER = 'legomushroom';
+export const REPO = 'codespaces-board';
+const TOKEN_NAME = 'REPO_GITHUB_PAT';
 
 const renderProject = async (
   projectKit: ProjectsOctoKit,
   repo: IRepoSourceConfig,
-  project: TProject
+  project: TProject,
 ): Promise<string> => {
-  const columns = await projectKit.getColumns(project)
-  const issues = await projectKit.getRepoIssues(repo)
-  const progressIssues = await projectKit.filterIssuesForColumnCards(
-    issues,
-    columns[TColumnTypes.InProgress]
-  )
-  const doneIssues = await projectKit.filterIssuesForColumnCards(
-    issues,
-    columns[TColumnTypes.Done]
-  )
+  const columns = await projectKit.getColumns(project);
+  const issues = await projectKit.getRepoIssues(repo);
+
   const backlogIssues = await projectKit.filterIssuesForColumnCards(
     issues,
-    columns[TColumnTypes.Committed]
-  )
+    columns,
+    TColumnTypes.Backlog,
+  );
 
-  const wrappedProgressIssues: IWrappedIssue[] = progressIssues.map(
-    wrapIssue(TColumnTypes.InProgress)
-  )
-  const wrappedDoneIssues: IWrappedIssue[] = doneIssues.map(
-    wrapIssue(TColumnTypes.Done)
-  )
-  const wrappedIssues = [...wrappedProgressIssues, ...wrappedDoneIssues]
+  const committedIssues = await projectKit.filterIssuesForColumnCards(
+    issues,
+    columns,
+    TColumnTypes.Committed,
+  );
 
-  const projectTitle = `## ${project.name}`
+  const blockedIssues = await projectKit.filterIssuesForColumnCards(
+    issues,
+    columns,
+    TColumnTypes.Blocked,
+  );
+
+  const progressIssues = await projectKit.filterIssuesForColumnCards(
+    issues,
+    columns,
+    TColumnTypes.InProgress,
+  );
+
+  const inReviewIssues = await projectKit.filterIssuesForColumnCards(
+    issues,
+    columns,
+    TColumnTypes.InReview,
+  );
+
+  const waitingToDeployIssues = await projectKit.filterIssuesForColumnCards(
+    issues,
+    columns,
+    TColumnTypes.WaitingToDeploy,
+  );
+
+  const doneIssues = await projectKit.filterIssuesForColumnCards(
+    issues,
+    columns,
+    TColumnTypes.Done,
+  );
+
+  const inWorkIssues = [...progressIssues, ...inReviewIssues];
+  const doneOrDeployIssues = [...waitingToDeployIssues, ...doneIssues];
+  const allPlannedIssues = [...blockedIssues, ...committedIssues, ...inWorkIssues, ...doneOrDeployIssues];
+
+  const doneRate = doneOrDeployIssues.length / allPlannedIssues.length;
+  const inWorkRate = inWorkIssues.length / allPlannedIssues.length;
+  const committedRate = committedIssues.length / allPlannedIssues.length;
+
+  const donePercent = Math.round(100 * doneRate);
+  const inWorkPercent = Math.round(100 * inWorkRate);
+  const committedPercent = Math.round(100 * committedRate);
+
+  const blockedIssuesString = renderIssuesBlock(
+    `⚠️  ${blockedIssues.length} Blocked`,
+    blockedIssues,
+    false,
+  );
+
+  const inWorkCount = `${inWorkIssues.length}/${allPlannedIssues.length}`;
   const inWorkIssuesString = renderIssuesBlock(
-    `🏗️  In work (${doneIssues.length}/${
-      progressIssues.length + doneIssues.length
-    })`,
-    wrappedIssues
-  )
+    `🏃  ${inWorkCount} In work (${inWorkPercent}%)`,
+    inWorkIssues,
+  );
 
-  const wrappedBacklogIssues: IWrappedIssue[] = backlogIssues.map(
-    wrapIssue(TColumnTypes.Committed)
-  )
+  const committedIssuesString = renderIssuesBlock(
+    `💪 ${committedIssues.length} Committed (${committedPercent}%)`,
+    committedIssues,
+  );
 
-  const backlogIssuesString = renderIssuesBlock(
-    `📅  Backlog (${wrappedBacklogIssues.length})`,
-    wrappedBacklogIssues
-  )
+  const doneCount = `${doneOrDeployIssues.length}/${allPlannedIssues.length}`;
+  const doneIssuesString = renderIssuesBlock(
+    `✅ ${doneCount} Done (${donePercent}%)`,
+    doneOrDeployIssues,
+  );
 
-  return ['', projectTitle, inWorkIssuesString, backlogIssuesString].join('\n')
-}
+  const projectTitle = `## ${project.name} - ${donePercent}% done`;
+  const projectLink = `Link: [${project.name}](${project.html_url})`;
+  const backlogIssuesCountString = `\n*Backlog: ${backlogIssues.length} issues*`
 
-const wrapIssue = (column: TColumnTypes) => {
-  return (issue: TRepoIssue) => {
-    return {
-      column,
-      issue
-    }
-  }
-}
+  return [
+    '',
+    projectTitle,
+    projectLink,
+    blockedIssuesString,
+    committedIssuesString,
+    inWorkIssuesString,
+    doneIssuesString,
+    backlogIssuesCountString,
+  ].join('\n');
+};
 
 async function run(): Promise<void> {
   try {
@@ -86,12 +130,12 @@ async function run(): Promise<void> {
     const projectKit = new ProjectsOctoKit(token);
     const repoProjects = await projectKit.getAllProjects(TEST_CONFIG.repos);
 
-    for (let { repo, projects } of repoProjects ) {
+    for (let { repo, projects } of repoProjects) {
       const result = await Promise.all(
-        projects.map(project => {
-          return renderProject(projectKit, repo, project)
-        })
-      )
+        projects.map((project) => {
+          return renderProject(projectKit, repo, project);
+        }),
+      );
 
       const issueBody = result.join('\n') + '\n';
 
@@ -105,19 +149,20 @@ async function run(): Promise<void> {
         footer = await projectKit.getBoardHeaderText(TEST_CONFIG.footerFileUrl);
       }
 
-      const issueContents = [
-        header,
-        issueBody,
-        footer,
-      ].join('\n');
+      const issueContents = [header, issueBody, footer].join('\n');
 
-      const { status } = await projectKit.updateBoardIssue(TEST_CONFIG.boardIssue, issueContents);
+      const { status } = await projectKit.updateBoardIssue(
+        TEST_CONFIG.boardIssue,
+        issueContents,
+      );
 
       if (status !== 200) {
-        throw new Error(`Failed to update the issue ${TEST_CONFIG.boardIssue}.`);
+        throw new Error(
+          `Failed to update the issue ${TEST_CONFIG.boardIssue}`,
+        );
       }
 
-      console.log(`Successfully updated the board issue.`);
+      console.log(`Successfully updated the board issue ${TEST_CONFIG.boardIssue}`);
     }
   } catch (error) {
     console.error(error);
@@ -125,4 +170,4 @@ async function run(): Promise<void> {
   }
 }
 
-run()
+run();

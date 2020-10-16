@@ -8,20 +8,42 @@ import { OctoKitBase } from './OctoKitBase';
 import { TColumnTypes } from '../interfaces/TColumnTypes';
 import { parseIssueUrl } from '../utils/parseIssueUrl';
 import { parseFileUrl } from '../utils/parseFileUrl';
+import { IWrappedIssue } from '../interfaces/IWrappedIssue';
 
-type TColumnsMap = Record<TColumnTypes, TProjectColumn>;
+type TColumnsMap = Record<TColumnTypes, TProjectColumn | undefined>;
 
-const findColumnThrows = (projectName: string, columns: TProjectColumns, columnName: TColumnTypes) => {
+const findColumn = (columns: TProjectColumns, columnName: TColumnTypes) => {
   const result = columns.find((column) => {
     return column.name.toLowerCase() === columnName.toLowerCase();
   });
 
+  return result;
+};
+
+const wrapIssue = (column: TColumnTypes) => {
+  return (issue: TRepoIssue) => {
+    return {
+      column,
+      issue,
+    };
+  };
+};
+
+const findColumnThrows = (
+  projectName: string,
+  columns: TProjectColumns,
+  columnName: TColumnTypes,
+) => {
+  const result = findColumn(columns, columnName);
+
   if (!result) {
-    throw new Error(`No column "${columnName}" found in project "projectName".`);
+    throw new Error(
+      `No column "${columnName}" found in project "projectName".`,
+    );
   }
 
   return result;
-}
+};
 
 export class ProjectsOctoKit extends OctoKitBase {
   public getRepoProjects = async (repo: IRepoSourceConfig) => {
@@ -29,61 +51,68 @@ export class ProjectsOctoKit extends OctoKitBase {
       accept: 'application/vnd.github.inertia-preview+json',
       owner: repo.owner,
       repo: repo.repo,
-      per_page: 100
-    })
+      per_page: 100,
+    });
 
-    const result = projectsResponse.filter(project => {
+    const result = projectsResponse.filter((project) => {
       if (!repo.projects) {
-        return true
+        return true;
       }
 
-      return repo.projects.includes(project.number)
-    })
+      return repo.projects.includes(project.number);
+    });
 
-    return result
-  }
+    return result;
+  };
 
   public getAllProjects = async (
-    repos: IRepoSourceConfig[]
-  ): Promise<{ repo: IRepoSourceConfig, projects: TProject[] }[]> => {
-    const result = []
+    repos: IRepoSourceConfig[],
+  ): Promise<{ repo: IRepoSourceConfig; projects: TProject[] }[]> => {
+    const result = [];
 
     for (let repo of repos) {
-      const projects = await this.getRepoProjects(repo)
+      const projects = await this.getRepoProjects(repo);
       result.push({
         repo,
-        projects
-      })
+        projects,
+      });
     }
 
     return result;
-  }
+  };
 
   public getColumns = async (project: TProject): Promise<TColumnsMap> => {
     const { data: columns } = await this.kit.projects.listColumns({
-      project_id: project.id
+      project_id: project.id,
     });
 
     const map: TColumnsMap = {
-      [TColumnTypes.Backlog]: findColumnThrows(project.name, columns, TColumnTypes.Backlog),
-      [TColumnTypes.Committed]: findColumnThrows(project.name, columns, TColumnTypes.Committed),
-      [TColumnTypes.InProgress]: findColumnThrows(project.name, columns, TColumnTypes.InProgress),
-      [TColumnTypes.Done]: findColumnThrows(project.name, columns, TColumnTypes.Done),
+      [TColumnTypes.Backlog]: findColumn(columns, TColumnTypes.Backlog),
+      [TColumnTypes.Committed]: findColumn(columns, TColumnTypes.Committed),
+      [TColumnTypes.Blocked]: findColumn(columns, TColumnTypes.Blocked),
+      [TColumnTypes.InProgress]: findColumn(columns, TColumnTypes.InProgress),
+      [TColumnTypes.InReview]: findColumn(columns, TColumnTypes.InReview),
+      [TColumnTypes.WaitingToDeploy]: findColumn(columns, TColumnTypes.WaitingToDeploy),
+      [TColumnTypes.Done]: findColumn(columns, TColumnTypes.Done),
     };
 
     return map;
-  }
+  };
 
-  public getColumnCards = async (column: TProjectColumn): Promise<TColumnCard[]> => {
+  public getColumnCards = async (
+    column: TProjectColumn,
+  ): Promise<TColumnCard[]> => {
     const { data: cards } = await this.kit.projects.listCards({
       column_id: column.id,
       per_page: 100,
     });
 
     return cards;
-  }
+  };
 
-  public getRepoIssues = async (repo: IRepoSourceConfig): Promise<TRepoIssue[]> => {
+  public getRepoIssues = async (
+    repo: IRepoSourceConfig,
+  ): Promise<TRepoIssue[]> => {
     const issues = await this.kit.paginate(this.kit.issues.listForRepo, {
       repo: repo.repo,
       owner: repo.owner,
@@ -91,9 +120,12 @@ export class ProjectsOctoKit extends OctoKitBase {
     });
 
     return issues;
-  }
+  };
 
-  public getIssuesForColumnCards = async (repo: IRepoSourceConfig, column: TProjectColumn): Promise<TRepoIssue[]> => {
+  public getIssuesForColumnCards = async (
+    repo: IRepoSourceConfig,
+    column: TProjectColumn,
+  ): Promise<TRepoIssue[]> => {
     const issues = await this.kit.paginate(this.kit.issues.listForRepo, {
       repo: repo.repo,
       owner: repo.owner,
@@ -110,9 +142,20 @@ export class ProjectsOctoKit extends OctoKitBase {
     });
 
     return cardIssues;
-  }
+  };
 
-  public filterIssuesForColumnCards = async (issues: TRepoIssue[], column: TProjectColumn): Promise<TRepoIssue[]> => {
+  public filterIssuesForColumnCards = async (
+    issues: TRepoIssue[],
+    columns: TColumnsMap,
+    columnType: TColumnTypes,
+  ): Promise<IWrappedIssue[]> => {
+    // get the column
+    const column = columns[columnType];
+    // no column - no issues
+    if (!column) {
+      return [];
+    }
+
     const cards = await this.getColumnCards(column);
 
     const cardIssues = issues.filter((issue) => {
@@ -121,10 +164,11 @@ export class ProjectsOctoKit extends OctoKitBase {
       });
 
       return !!cardIssue;
-    });
+    })
+    .map(wrapIssue(columnType));
 
     return cardIssues;
-  }
+  };
 
   public updateBoardIssue = async (issueUrl: string, body: string) => {
     const { owner, repo, issueNumber } = parseIssueUrl(issueUrl);
@@ -135,7 +179,7 @@ export class ProjectsOctoKit extends OctoKitBase {
       issue_number: issueNumber,
       body,
     });
-  }
+  };
 
   public getBoardHeaderText = async (fileUrl: string): Promise<string> => {
     const fileRef = parseFileUrl(fileUrl);
@@ -151,5 +195,5 @@ export class ProjectsOctoKit extends OctoKitBase {
     const text = buff.toString('ascii');
 
     return text;
-  }
+  };
 }

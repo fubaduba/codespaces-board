@@ -19,7 +19,11 @@ const renderIssuesList = (issues: IWrappedIssue[]) => {
     return items.join('\n');
 }
 
-export const renderIssuesBlock = (title: string, issues: IWrappedIssue[]) => {
+export const renderIssuesBlock = (title: string, issues: IWrappedIssue[], isRenderEmpty = true) => {
+    if (!isRenderEmpty && !issues.length) {
+        return undefined;
+    }
+
     return [
         renderTitle(title),
         renderIssuesList(issues),
