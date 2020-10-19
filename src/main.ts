@@ -1,5 +1,5 @@
 import * as core from '@actions/core';
-import { env } from './utils/env';
+import { Validator } from 'jsonschema';
 
 // add .env file support for dev purposes
 require('dotenv').config();
@@ -9,14 +9,79 @@ import { ProjectsOctoKit } from './octokit/ProjectsOctoKit';
 import { renderProject } from './views/renderProject';
 import { renderOverview } from './views/renderOverview';
 import { getProjectData } from './utils/getProjectData';
-import { getConfigs } from './config';
+import { env } from './utils/env';
+import { getConfigs, validateConfig } from './config';
+
 import { IConfig } from './interfaces/IConfig';
 
 const TOKEN_NAME = 'REPO_GITHUB_PAT';
 const CONFIG_PATH = 'CONFIG_PATH';
 
+
+const overwriteBoardIssue = async (issueContents: string, config: IConfig, projectKit: ProjectsOctoKit) => {
+  const { status } = await projectKit.updateBoardIssue(
+    config.boardIssue,
+    issueContents,
+  );
+
+  if (status !== 200) {
+    throw new Error(
+      `Failed to update the issue ${config.boardIssue}`,
+    );
+  }
+
+  console.log(`Successfully updated the board issue ${config.boardIssue}`);
+}
+
+const getRegex = (projectId?: number) => {
+  const regex = /<!--\s*codespaces-board:start\s*-->([\W\w]*)<!--\s*codespaces-board:end\s*-->/gim;
+  return regex;
+}
+
+const wrapIssueText = (text: string, projectId?: number) => {
+  return [
+    `<!-- codespaces-board:start -->`,
+    `<!-- ⚠️ AUTO GENERATED GITHUB ACTION, DON'T EDIT BY HAND ⚠️ -->`,
+    `<!-- updated on: ${new Date().toISOString()} -->`,
+    text,
+    `<!-- codespaces-board:end -->`,
+  ].join('\n');
+}
+
+const updateBoardIssue = async (issueContents: string, config: IConfig, projectKit: ProjectsOctoKit) => {
+  if (!config.isReplaceProjectMarkers) {
+    return await overwriteBoardIssue(
+      issueContents,
+      config,
+      projectKit,
+    );
+  }
+
+  const issue = await projectKit.getBoardIssue(
+    config.boardIssue,
+    issueContents,
+  );
+
+  const { body } = issue;
+  const newBody = body.replace(getRegex(), wrapIssueText(issueContents));
+
+  await overwriteBoardIssue(
+    newBody,
+    config,
+    projectKit,
+  );
+}
+
 const processConfigRecord = async (config: IConfig, projectKit: ProjectsOctoKit) => {
-  console.log(`Processing config for issue ${config.boardIssue}`);
+  console.log('Processing config: \n', config);
+
+  const validationErrors = validateConfig(config);
+  if (validationErrors.length) {
+    console.error(`\n\nNot valid config for the issue ${config.boardIssue}, skipping.. \n`, validationErrors, '\n\n');
+    return;
+  }
+
+  console.log(`Config schema validation passed.`);
 
   const repoProjects = await projectKit.getAllProjects(config.repos);
 
@@ -47,10 +112,6 @@ const processConfigRecord = async (config: IConfig, projectKit: ProjectsOctoKit)
       footer = await projectKit.getBoardHeaderText(config.footerFileUrl);
     }
 
-    const projectsData = projectsWithData.map((x) => {
-      return x.data;
-    });
-
     const issueContents = [
       header,
       renderOverview(config, projectsWithData),
@@ -58,18 +119,7 @@ const processConfigRecord = async (config: IConfig, projectKit: ProjectsOctoKit)
       footer
     ].join('\n');
 
-    const { status } = await projectKit.updateBoardIssue(
-      config.boardIssue,
-      issueContents,
-    );
-
-    if (status !== 200) {
-      throw new Error(
-        `Failed to update the issue ${config.boardIssue}`,
-      );
-    }
-
-    console.log(`Successfully updated the board issue ${config.boardIssue}`);
+    await updateBoardIssue(issueContents, config, projectKit);
   }
 }
 

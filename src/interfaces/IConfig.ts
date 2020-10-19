@@ -47,4 +47,17 @@ export interface IConfig {
    * Example: "https://raw.githubusercontent.com/legomushroom/codespaces-board/main/sprints/sprint%2012/footer.md"
    */
   footerFileUrl?: string;
+
+  /**
+   * If replace the <!-- codespaces-board:project_{id}:start -->
+   * markers instead of replacing entire issue body.
+   *
+   * default: false.
+   */
+  isReplaceProjectMarkers?: boolean;
+
+  /**
+   * Used by `vscode` in JSON files.
+   */
+  ['$schema']?: string,
 }

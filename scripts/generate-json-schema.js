@@ -12,7 +12,11 @@ if (!fs.existsSync(OUTPUT_SCHEMA_FOLDER_PATH)){
 }
 
 // schema generator settings
-const settings = {};
+const settings = {
+  required: true,
+  strictNullChecks: true,
+  noExtraProps: true,
+};
 
 // ts compiler options
 const compilerOptions = {

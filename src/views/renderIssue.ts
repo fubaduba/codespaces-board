@@ -1,3 +1,4 @@
+import { IIssueState } from '../interfaces/IIssueState';
 import { TColumnTypes } from '../interfaces/TColumnTypes';
 import { TRepoIssue } from '../interfaces/TRepoIssue';
 
@@ -38,22 +39,19 @@ const pluck = (propName: string) => {
   return (obj: any) => {
     return obj[propName];
   };
-}
+};
 
 const toLowerCase = (str: string) => {
   return str.toLowerCase();
-}
+};
 
 const mapIssueTypeToEmoji = (issue: TRepoIssue) => {
   const { labels } = issue;
 
-  const isBug = labels
-    .map(pluck('name'))
-    .map(toLowerCase)
-    .includes('bug');
+  const isBug = labels.map(pluck('name')).map(toLowerCase).includes('bug');
 
   if (isBug) {
-    return '🐛  '
+    return '🐛  ';
   }
 
   return '';
@@ -63,7 +61,7 @@ const renderAssignees = (issue: TRepoIssue) => {
   const { assignees } = issue;
 
   if (!assignees.length) {
-      return `❗**unassigned**`
+    return `❗**unassigned**`;
   }
 
   const users = assignees.map((user) => {
@@ -73,12 +71,24 @@ const renderAssignees = (issue: TRepoIssue) => {
   return users.join(' ');
 };
 
-export const renderIssue = (column: TColumnTypes, issue: TRepoIssue) => {
-  const { title, html_url } = issue;
-  // const issueState = mapIssueStateToListItemState(issue);
-  const assignees = renderAssignees(issue);
-  const stateEmoji = `${mapColumnToEmoji(column)}`;
-  const bugEmoji = `${mapIssueTypeToEmoji(issue)}`;
+const renderItemIssueStatus = (issue: TRepoIssue, asCheckList: boolean) => {
+  if (!asCheckList) {
+    return '';
+  }
 
-  return `- ${stateEmoji}${bugEmoji}${title} ${html_url} ${assignees}`;
+  return issue.state === IIssueState.Open ? '[ ] ' : '[x] ';
+};
+
+export const renderIssue = (
+  column: TColumnTypes,
+  issue: TRepoIssue,
+  asCheckList = false,
+) => {
+  const { title, html_url } = issue;
+  const assignees = renderAssignees(issue);
+  const stateEmoji = mapColumnToEmoji(column);
+  const bugEmoji = mapIssueTypeToEmoji(issue);
+  const issueStatus = renderItemIssueStatus(issue, asCheckList);
+
+  return `- ${issueStatus}${stateEmoji}${bugEmoji}${title} ${html_url} ${assignees}`;
 };

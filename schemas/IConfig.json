@@ -33,8 +33,21 @@
     "footerFileUrl": {
       "description": "File that will be added as the issue footer.\nExample: \"https://raw.githubusercontent.com/legomushroom/codespaces-board/main/sprints/sprint%2012/footer.md\"",
       "type": "string"
+    },
+    "isReplaceProjectMarkers": {
+      "description": "If replace the <!-- codespaces-board:project_{id}:start -->\nmarkers instead of replacing entire issue body.\n\ndefault: false.",
+      "type": "boolean"
+    },
+    "$schema": {
+      "description": "Used by `vscode` in JSON files.",
+      "type": "string"
     }
   },
+  "additionalProperties": false,
+  "required": [
+    "boardIssue",
+    "repos"
+  ],
   "definitions": {
     "IRepoSourceConfig": {
       "type": "object",
@@ -61,7 +74,12 @@
             ]
           }
         }
-      }
+      },
+      "additionalProperties": false,
+      "required": [
+        "owner",
+        "repo"
+      ]
     },
     "IProject": {
       "type": "object",
@@ -76,8 +94,16 @@
           "items": {
             "type": "string"
           }
+        },
+        "isCheckListItems": {
+          "description": "If to render issues as check list using the [x] markers.\n\ndefault: false",
+          "type": "boolean"
         }
-      }
+      },
+      "additionalProperties": false,
+      "required": [
+        "id"
+      ]
     }
   },
   "$schema": "http://json-schema.org/draft-07/schema#"

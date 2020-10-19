@@ -6,7 +6,7 @@ import { IConfig } from '../interfaces/IConfig';
 import { IProjectStats } from '../interfaces/IProjectStats';
 import { IProjectData } from '../interfaces/IProjectData';
 import { TProject } from '../interfaces/TProject';
-import { IProjectWithTrackedLabels } from '../interfaces/IProjectWithTrackedLabels';
+import { IProjectWithConfig } from '../interfaces/IProjectWithConfig';
 
 const sum = (a: number, b: number): number => {
   return a + b;
@@ -37,7 +37,7 @@ const getTotalPercent = (
 };
 
 interface IProjectWithStats {
-  projectWithLabels: IProjectWithTrackedLabels;
+  projectWithLabels: IProjectWithConfig;
   stats: IProjectStats;
 }
 
@@ -71,7 +71,7 @@ const renderPowerEngines = (
 };
 
 interface IProjectsWithData {
-  project: IProjectWithTrackedLabels;
+  project: IProjectWithConfig;
   data: IProjectData;
 }
 

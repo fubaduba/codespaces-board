@@ -1,4 +1,4 @@
-import { IProject } from './IProject';
+import { TProjectConfig } from './TProjetConfig';
 
 export interface IRepoSourceConfig {
   /**
@@ -14,5 +14,5 @@ export interface IRepoSourceConfig {
   /**
    * Project to track, if not set assuming all projects on the repo.
    */
-  projects?: (IProject | number)[];
+  projects?: TProjectConfig[];
 }

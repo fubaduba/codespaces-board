@@ -12,7 +12,7 @@ import { TRepoIssue } from '../interfaces/TRepoIssue';
 import { TColumnTypes } from '../interfaces/TColumnTypes';
 import { IWrappedIssue } from '../interfaces/IWrappedIssue';
 import { IProject } from '../interfaces/IProject';
-import { IProjectWithTrackedLabels } from '../interfaces/IProjectWithTrackedLabels';
+import { IProjectWithConfig } from '../interfaces/IProjectWithConfig';
 
 type TColumnsMap = Record<TColumnTypes, TProjectColumn | undefined>;
 
@@ -56,7 +56,7 @@ const getProjectId = (project: IProject | number) => {
 export class ProjectsOctoKit extends OctoKitBase {
   public getRepoProjects = async (
     repo: IRepoSourceConfig,
-  ): Promise<IProjectWithTrackedLabels[]> => {
+  ): Promise<IProjectWithConfig[]> => {
     const { data: projectsResponse } = await this.kit.projects.listForRepo({
       accept: 'application/vnd.github.inertia-preview+json',
       owner: repo.owner,
@@ -65,7 +65,7 @@ export class ProjectsOctoKit extends OctoKitBase {
     });
 
     const fetchedProjects = projectsResponse.map((project):
-      | IProjectWithTrackedLabels
+      | IProjectWithConfig
       | undefined => {
       const { projects } = repo;
 
@@ -81,13 +81,9 @@ export class ProjectsOctoKit extends OctoKitBase {
         return;
       }
 
-      const labels = (typeof proj === 'number')
-        ? []
-        : proj.trackLabels ?? [];
-
       return {
         project,
-        labels,
+        projectConfig: proj,
       };
     })
     .filter(notEmpty);
@@ -97,7 +93,7 @@ export class ProjectsOctoKit extends OctoKitBase {
 
   public getAllProjects = async (
     repos: IRepoSourceConfig[],
-  ): Promise<{ repo: IRepoSourceConfig; projects: IProjectWithTrackedLabels[] }[]> => {
+  ): Promise<{ repo: IRepoSourceConfig; projects: IProjectWithConfig[] }[]> => {
     const result = [];
 
     for (let repo of repos) {
@@ -111,7 +107,7 @@ export class ProjectsOctoKit extends OctoKitBase {
     return result;
   };
 
-  public getColumns = async (projectWithLabels: IProjectWithTrackedLabels): Promise<TColumnsMap> => {
+  public getColumns = async (projectWithLabels: IProjectWithConfig): Promise<TColumnsMap> => {
     const { project } = projectWithLabels;
 
     const { data: columns } = await this.kit.projects.listColumns({
@@ -217,6 +213,26 @@ export class ProjectsOctoKit extends OctoKitBase {
       body,
     });
   };
+
+  public getBoardIssue = async (issueUrl: string, body: string) => {
+    const { owner, repo, issueNumber } = parseIssueUrl(issueUrl);
+
+    const { status, data } = await this.kit.issues.get({
+      owner,
+      repo,
+      issue_number: issueNumber,
+      body,
+    });
+
+    if (status !== 200) {
+      throw new Error(
+        `Failed to get the issue ${issueUrl}`,
+      );
+    }
+
+    return data;
+  };
+
 
   public getBoardHeaderText = async (fileUrl: string): Promise<string> => {
     const fileRef = parseFileUrl(fileUrl);

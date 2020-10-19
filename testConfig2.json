@@ -4,9 +4,7 @@
     "sprintDuration": 21,
     "sprintNumberHolidays": 2,
     "sprintStartDate": "2020-10-15",
-    "boardIssue": "https://github.com/legomushroom/codespaces-board/issues/26",
-    "headerFileUrl": "https://raw.githubusercontent.com/legomushroom/codespaces-board/main/sprints/sprint%2012/header.md",
-    "footerFileUrl": "https://raw.githubusercontent.com/legomushroom/codespaces-board/main/sprints/sprint%2012/footer.md",
+    "boardIssue": "https://github.com/legomushroom/codespaces-board/issues/29",
     "repos": [
       {
         "owner": "legomushroom",
@@ -14,11 +12,12 @@
         "projects": [
           {
             "id": 1,
-            "trackLabels": ["port-forwarding", "workbench", "serverless"]
-          },
-          2
+            "trackLabels": ["port-forwarding", "workbench", "serverless"],
+            "isCheckListItems": true
+          }
         ]
       }
-    ]
+    ],
+    "isReplaceProjectMarkers": true
   }
 ]
