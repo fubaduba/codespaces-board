@@ -1,18 +1,50 @@
 import { IRepoSourceConfig } from './IRepoSourceConfig';
 
 export interface IConfig {
-  // issue that is used as board
+  /**
+   * The issue that is used as aggregated board.
+   */
   boardIssue: string;
-  // yyyy/mm/dd => 2020/10/15
-  sprintStartDate?: string;
-  // number in days with weekends, e.g. 3 weeks => 21
-  sprintDuration?: number;
-  // number of holidays, default: 0
-  sprintNumberHolidays?: number;
-  // file that will be added as the issue header
-  headerFileUrl?: string;
-  // file that will be added as the issue footer
-  footerFileUrl?: string;
-  // list of the repos to track
+
+  /**
+   * List of the repositories/projects to track.
+   */
   repos: IRepoSourceConfig[];
+
+  /**
+   * The sprint start date in the `yyyy/mm/dd` format.
+   * Example: "2020/10/15"
+   */
+  sprintStartDate?: string;
+
+  /**
+   * Sprint duration in days including weekends.
+   * Must be specified if the `sprintStartDate` set.
+   * Example: "21" (3 weeks)
+   *
+   * @minimum 7
+   * @TJS-type integer
+   */
+  sprintDuration?: number;
+
+  /**
+   * Number of holidays during the sprint.
+   * Example: "2"
+   *
+   * @minimum 0
+   * @TJS-type integer
+   */
+  sprintNumberHolidays?: number;
+
+  /**
+   * File that will be added as the issue header.
+   * Example: "https://raw.githubusercontent.com/legomushroom/codespaces-board/main/sprints/sprint%2012/header.md"
+   */
+  headerFileUrl?: string;
+
+  /**
+   * File that will be added as the issue footer.
+   * Example: "https://raw.githubusercontent.com/legomushroom/codespaces-board/main/sprints/sprint%2012/footer.md"
+   */
+  footerFileUrl?: string;
 }

@@ -1,12 +1,13 @@
-import { renderIssuesBlock } from './renderIssuesBlock';
-import { TProject } from '../interfaces/TProject';
-import { IProjectData } from '../interfaces/IProjectData';
 import { rateToPercent } from '../utils/rateToPercent';
 import { getProjectStats } from '../utils/getProjectStats';
 
+import { renderIssuesBlock } from './renderIssuesBlock';
+import { IProjectData } from '../interfaces/IProjectData';
+import { IProjectWithTrackedLabels } from '../interfaces/IProjectWithTrackedLabels';
+
 export const renderProject = (
   data: IProjectData,
-  project: TProject,
+  projectWithLabels: IProjectWithTrackedLabels,
 ): string => {
   const {
     // combined
@@ -19,29 +20,42 @@ export const renderProject = (
     blockedIssues,
   } = data;
 
-  const { doneRate, inWorkRate, committedRate } = getProjectStats(data);
+  const {
+    doneRate,
+    inWorkRate,
+    committedRate,
+  } = getProjectStats(data);
+
+  const {
+    project,
+    labels,
+  } = projectWithLabels;
 
   const blockedIssuesString = renderIssuesBlock(
     `⚠️  ${blockedIssues.length} Blocked`,
     blockedIssues,
+    labels,
     false,
   );
 
   const inWorkCount = `${inWorkIssues.length}/${allPlannedIssues.length}`;
   const inWorkIssuesString = renderIssuesBlock(
     `🏃  ${inWorkCount} In work (${rateToPercent(inWorkRate)})`,
-    inWorkIssues
+    inWorkIssues,
+    labels,
   );
 
   const committedIssuesString = renderIssuesBlock(
     `💪 ${committedIssues.length} Committed (${rateToPercent(committedRate)})`,
-    committedIssues
+    committedIssues,
+    labels,
   );
 
   const doneCount = `${doneOrDeployIssues.length}/${allPlannedIssues.length}`;
   const doneIssuesString = renderIssuesBlock(
     `🙌 ${doneCount} Done (${rateToPercent(doneRate)})`,
-    doneOrDeployIssues
+    doneOrDeployIssues,
+    labels,
   );
 
   const projectTitle = `## ${project.name} - ${rateToPercent(doneRate)} done`;

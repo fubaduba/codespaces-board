@@ -7,13 +7,14 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
-    "localy": "node ./lib/main.js",
+    "locally": "node ./lib/main.js",
     "format": "prettier --write **/*.ts",
     "format-check": "prettier --check **/*.ts",
     "lint": "eslint src/**/*.ts",
     "package": "ncc build --source-map --license licenses.txt",
     "test": "jest",
-    "all": "npm run build && npm run format && npm run lint && npm run package && npm test"
+    "all": "yarn run build && yarn run format && yarn run lint && yarn run package && yarn test",
+    "generate-json-schema": "node ./scripts/generate-json-schema.js"
   },
   "repository": {
     "type": "git",
@@ -44,6 +45,7 @@
     "js-yaml": "^3.14.0",
     "prettier": "2.1.1",
     "ts-jest": "^24.3.0",
-    "typescript": "^4.0.2"
+    "typescript": "^4.0.2",
+    "typescript-json-schema": "^0.43.0"
   }
 }

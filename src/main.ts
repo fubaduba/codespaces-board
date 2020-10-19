@@ -6,17 +6,72 @@ require('dotenv').config();
 
 import { AuthorizationError } from './errors/AuthorizationError';
 import { ProjectsOctoKit } from './octokit/ProjectsOctoKit';
-import { TEST_CONFIG } from './testConfig';
-import { IWrappedIssue } from './interfaces/IWrappedIssue';
-import { TRepoIssue } from './interfaces/TRepoIssue';
 import { renderProject } from './views/renderProject';
-import { renderDaysLeft } from './views/renderDaysLeft';
 import { renderOverview } from './views/renderOverview';
 import { getProjectData } from './utils/getProjectData';
+import { getConfigs } from './config';
+import { IConfig } from './interfaces/IConfig';
 
-export const OWNER = 'legomushroom';
-export const REPO = 'codespaces-board';
 const TOKEN_NAME = 'REPO_GITHUB_PAT';
+const CONFIG_PATH = 'CONFIG_PATH';
+
+const processConfigRecord = async (config: IConfig, projectKit: ProjectsOctoKit) => {
+  console.log(`Processing config for issue ${config.boardIssue}`);
+
+  const repoProjects = await projectKit.getAllProjects(config.repos);
+
+  for (let { repo, projects } of repoProjects) {
+    const projectsWithData = await Promise.all(
+      projects.map(async (project) => {
+        const data = await getProjectData(projectKit, repo, project);
+        return {
+          project,
+          data
+        };
+      }),
+    );
+
+    const result =
+      projectsWithData.map(({ project, data }) => {
+        return renderProject(data, project);
+      });
+
+    const issueBody = result.join('\n') + '\n';
+    let header;
+    if (config.headerFileUrl) {
+      header = await projectKit.getBoardHeaderText(config.headerFileUrl);
+    }
+
+    let footer;
+    if (config.footerFileUrl) {
+      footer = await projectKit.getBoardHeaderText(config.footerFileUrl);
+    }
+
+    const projectsData = projectsWithData.map((x) => {
+      return x.data;
+    });
+
+    const issueContents = [
+      header,
+      renderOverview(config, projectsWithData),
+      issueBody,
+      footer
+    ].join('\n');
+
+    const { status } = await projectKit.updateBoardIssue(
+      config.boardIssue,
+      issueContents,
+    );
+
+    if (status !== 200) {
+      throw new Error(
+        `Failed to update the issue ${config.boardIssue}`,
+      );
+    }
+
+    console.log(`Successfully updated the board issue ${config.boardIssue}`);
+  }
+}
 
 async function run(): Promise<void> {
   try {
@@ -27,58 +82,9 @@ async function run(): Promise<void> {
     }
 
     const projectKit = new ProjectsOctoKit(token);
-    const repoProjects = await projectKit.getAllProjects(TEST_CONFIG.repos);
-
-    for (let { repo, projects } of repoProjects) {
-      const projectsWithData = await Promise.all(
-        projects.map(async (project) => {
-          const data = await getProjectData(projectKit, repo, project);
-          return {
-            project,
-            data
-          };
-        }),
-      );
-
-      const result =
-        projectsWithData.map(({ project, data }) => {
-          return renderProject(data, project);
-        });
-
-      const issueBody = result.join('\n') + '\n';
-      let header;
-      if (TEST_CONFIG.headerFileUrl) {
-        header = await projectKit.getBoardHeaderText(TEST_CONFIG.headerFileUrl);
-      }
-
-      let footer;
-      if (TEST_CONFIG.footerFileUrl) {
-        footer = await projectKit.getBoardHeaderText(TEST_CONFIG.footerFileUrl);
-      }
-
-      const projectsData = projectsWithData.map((x) => {
-        return x.data;
-      });
-
-      const issueContents = [
-        header,
-        renderOverview(TEST_CONFIG, projectsWithData),
-        issueBody,
-        footer
-      ].join('\n');
-
-      const { status } = await projectKit.updateBoardIssue(
-        TEST_CONFIG.boardIssue,
-        issueContents,
-      );
-
-      if (status !== 200) {
-        throw new Error(
-          `Failed to update the issue ${TEST_CONFIG.boardIssue}`,
-        );
-      }
-
-      console.log(`Successfully updated the board issue ${TEST_CONFIG.boardIssue}`);
+    const configsFilePath = env(CONFIG_PATH) ?? core.getInput('config');
+    for (let config of getConfigs(configsFilePath)) {
+      await processConfigRecord(config, projectKit);
     }
   } catch (error) {
     console.error(error);

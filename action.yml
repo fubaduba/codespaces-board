@@ -5,6 +5,9 @@ inputs:
   token:
     required: true
     description: 'GitHub token for API requests'
+  config:
+    required: true
+    description: 'Path to the config'
 runs:
   using: 'node12'
   main: 'dist/index.js'

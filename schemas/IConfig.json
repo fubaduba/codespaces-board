@@ -1,0 +1,84 @@
+{
+  "type": "object",
+  "properties": {
+    "boardIssue": {
+      "description": "The issue that is used as aggregated board.",
+      "type": "string"
+    },
+    "repos": {
+      "description": "List of the repositories/projects to track.",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/IRepoSourceConfig"
+      }
+    },
+    "sprintStartDate": {
+      "description": "The sprint start date in the `yyyy/mm/dd` format.\nExample: \"2020/10/15\"",
+      "type": "string"
+    },
+    "sprintDuration": {
+      "description": "Sprint duration in days including weekends.\nMust be specified if the `sprintStartDate` set.\nExample: \"21\" (3 weeks)",
+      "minimum": 7,
+      "type": "integer"
+    },
+    "sprintNumberHolidays": {
+      "description": "Number of holidays during the sprint.\nExample: \"2\"",
+      "minimum": 0,
+      "type": "integer"
+    },
+    "headerFileUrl": {
+      "description": "File that will be added as the issue header.\nExample: \"https://raw.githubusercontent.com/legomushroom/codespaces-board/main/sprints/sprint%2012/header.md\"",
+      "type": "string"
+    },
+    "footerFileUrl": {
+      "description": "File that will be added as the issue footer.\nExample: \"https://raw.githubusercontent.com/legomushroom/codespaces-board/main/sprints/sprint%2012/footer.md\"",
+      "type": "string"
+    }
+  },
+  "definitions": {
+    "IRepoSourceConfig": {
+      "type": "object",
+      "properties": {
+        "owner": {
+          "description": "Repo owner username.",
+          "type": "string"
+        },
+        "repo": {
+          "description": "Repo name.",
+          "type": "string"
+        },
+        "projects": {
+          "description": "Project to track, if not set assuming all projects on the repo.",
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/definitions/IProject"
+              },
+              {
+                "type": "number"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "IProject": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "Project id.",
+          "type": "integer"
+        },
+        "trackLabels": {
+          "description": "Issue labels that will be rendered as sections\non the aggregated issue.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

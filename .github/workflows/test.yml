@@ -22,3 +22,4 @@ jobs:
       - uses: ./
         with:
           token: ${{secret.REPO_GITHUB_PAT}}
+          config: "./testConfig.json"

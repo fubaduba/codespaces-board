@@ -1,14 +1,18 @@
+import { OctoKitBase } from './OctoKitBase';
+import { parseIssueUrl } from '../utils/parseIssueUrl';
+import { parseFileUrl } from '../utils/parseFileUrl';
+import { notEmpty } from '../utils/notEmpty';
+
 import { IRepoSourceConfig } from '../interfaces/IRepoSourceConfig';
 import { TColumnCard } from '../interfaces/TColumnCard';
 import { TProject } from '../interfaces/TProject';
 import { TProjectColumn } from '../interfaces/TProjectColumn';
 import { TProjectColumns } from '../interfaces/TProjectColumns';
 import { TRepoIssue } from '../interfaces/TRepoIssue';
-import { OctoKitBase } from './OctoKitBase';
 import { TColumnTypes } from '../interfaces/TColumnTypes';
-import { parseIssueUrl } from '../utils/parseIssueUrl';
-import { parseFileUrl } from '../utils/parseFileUrl';
 import { IWrappedIssue } from '../interfaces/IWrappedIssue';
+import { IProject } from '../interfaces/IProject';
+import { IProjectWithTrackedLabels } from '../interfaces/IProjectWithTrackedLabels';
 
 type TColumnsMap = Record<TColumnTypes, TProjectColumn | undefined>;
 
@@ -45,8 +49,14 @@ const findColumnThrows = (
   return result;
 };
 
+const getProjectId = (project: IProject | number) => {
+  return typeof project === 'number' ? project : project.id;
+};
+
 export class ProjectsOctoKit extends OctoKitBase {
-  public getRepoProjects = async (repo: IRepoSourceConfig) => {
+  public getRepoProjects = async (
+    repo: IRepoSourceConfig,
+  ): Promise<IProjectWithTrackedLabels[]> => {
     const { data: projectsResponse } = await this.kit.projects.listForRepo({
       accept: 'application/vnd.github.inertia-preview+json',
       owner: repo.owner,
@@ -54,20 +64,40 @@ export class ProjectsOctoKit extends OctoKitBase {
       per_page: 100,
     });
 
-    const result = projectsResponse.filter((project) => {
-      if (!repo.projects) {
-        return true;
+    const fetchedProjects = projectsResponse.map((project):
+      | IProjectWithTrackedLabels
+      | undefined => {
+      const { projects } = repo;
+
+      if (!projects) {
+        return;
       }
 
-      return repo.projects.includes(project.number);
-    });
+      const proj = projects.find((p) => {
+        return project.number === getProjectId(p);
+      });
 
-    return result;
+      if (!proj) {
+        return;
+      }
+
+      const labels = (typeof proj === 'number')
+        ? []
+        : proj.trackLabels ?? [];
+
+      return {
+        project,
+        labels,
+      };
+    })
+    .filter(notEmpty);
+
+    return fetchedProjects;
   };
 
   public getAllProjects = async (
     repos: IRepoSourceConfig[],
-  ): Promise<{ repo: IRepoSourceConfig; projects: TProject[] }[]> => {
+  ): Promise<{ repo: IRepoSourceConfig; projects: IProjectWithTrackedLabels[] }[]> => {
     const result = [];
 
     for (let repo of repos) {
@@ -81,7 +111,9 @@ export class ProjectsOctoKit extends OctoKitBase {
     return result;
   };
 
-  public getColumns = async (project: TProject): Promise<TColumnsMap> => {
+  public getColumns = async (projectWithLabels: IProjectWithTrackedLabels): Promise<TColumnsMap> => {
+    const { project } = projectWithLabels;
+
     const { data: columns } = await this.kit.projects.listColumns({
       project_id: project.id,
     });
@@ -92,7 +124,10 @@ export class ProjectsOctoKit extends OctoKitBase {
       [TColumnTypes.Blocked]: findColumn(columns, TColumnTypes.Blocked),
       [TColumnTypes.InProgress]: findColumn(columns, TColumnTypes.InProgress),
       [TColumnTypes.InReview]: findColumn(columns, TColumnTypes.InReview),
-      [TColumnTypes.WaitingToDeploy]: findColumn(columns, TColumnTypes.WaitingToDeploy),
+      [TColumnTypes.WaitingToDeploy]: findColumn(
+        columns,
+        TColumnTypes.WaitingToDeploy,
+      ),
       [TColumnTypes.Done]: findColumn(columns, TColumnTypes.Done),
     };
 
@@ -105,6 +140,7 @@ export class ProjectsOctoKit extends OctoKitBase {
     const { data: cards } = await this.kit.projects.listCards({
       column_id: column.id,
       per_page: 100,
+      archived_state: 'not_archived',
     });
 
     return cards;
@@ -158,14 +194,15 @@ export class ProjectsOctoKit extends OctoKitBase {
 
     const cards = await this.getColumnCards(column);
 
-    const cardIssues = issues.filter((issue) => {
-      const cardIssue = cards.find((card) => {
-        return card.content_url === issue.url;
-      });
+    const cardIssues = issues
+      .filter((issue) => {
+        const cardIssue = cards.find((card) => {
+          return card.content_url === issue.url;
+        });
 
-      return !!cardIssue;
-    })
-    .map(wrapIssue(columnType));
+        return !!cardIssue;
+      })
+      .map(wrapIssue(columnType));
 
     return cardIssues;
   };

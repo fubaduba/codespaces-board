@@ -3,11 +3,12 @@ import { TColumnTypes } from '../interfaces/TColumnTypes';
 import { TProject } from '../interfaces/TProject';
 import { IRepoSourceConfig } from '../interfaces/IRepoSourceConfig';
 import { IProjectData } from '../interfaces/IProjectData';
+import { IProjectWithTrackedLabels } from '../interfaces/IProjectWithTrackedLabels';
 
 export const getProjectData = async (
   projectKit: ProjectsOctoKit,
   repo: IRepoSourceConfig,
-  project: TProject
+  project: IProjectWithTrackedLabels,
 ): Promise<IProjectData> => {
   const columns = await projectKit.getColumns(project);
   const issues = await projectKit.getRepoIssues(repo);

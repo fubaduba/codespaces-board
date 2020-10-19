@@ -1,6 +1,18 @@
+import { IProject } from './IProject';
 
 export interface IRepoSourceConfig {
+  /**
+   * Repo owner username.
+   */
   owner: string;
+
+  /**
+   * Repo name.
+   */
   repo: string;
-  projects?: number[]; // if not set, assume all projects
+
+  /**
+   * Project to track, if not set assuming all projects on the repo.
+   */
+  projects?: (IProject | number)[];
 }

@@ -1,0 +1,24 @@
+[
+  {
+    "$schema": "https://gist.githubusercontent.com/legomushroom/e997b3c9f15e647a2c62e5414c68deba/raw/33e5d1f9fbf3b4a68ac0a1b78abed1007d6a7fbe/botspaces-config-schema.json",
+    "sprintDuration": 21,
+    "sprintNumberHolidays": 2,
+    "sprintStartDate": "2020-10-15",
+    "boardIssue": "https://github.com/legomushroom/codespaces-board/issues/26",
+    "headerFileUrl": "https://raw.githubusercontent.com/legomushroom/codespaces-board/main/sprints/sprint%2012/header.md",
+    "footerFileUrl": "https://raw.githubusercontent.com/legomushroom/codespaces-board/main/sprints/sprint%2012/footer.md",
+    "repos": [
+      {
+        "owner": "legomushroom",
+        "repo": "codespaces-board",
+        "projects": [
+          {
+            "id": 1,
+            "trackLabels": ["port-forwarding", "workbench", "serverless"]
+          },
+          2
+        ]
+      }
+    ]
+  }
+]

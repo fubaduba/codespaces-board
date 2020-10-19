@@ -6,6 +6,7 @@ import { IConfig } from '../interfaces/IConfig';
 import { IProjectStats } from '../interfaces/IProjectStats';
 import { IProjectData } from '../interfaces/IProjectData';
 import { TProject } from '../interfaces/TProject';
+import { IProjectWithTrackedLabels } from '../interfaces/IProjectWithTrackedLabels';
 
 const sum = (a: number, b: number): number => {
   return a + b;
@@ -36,7 +37,7 @@ const getTotalPercent = (
 };
 
 interface IProjectWithStats {
-  project: TProject;
+  projectWithLabels: IProjectWithTrackedLabels;
   stats: IProjectStats;
 }
 
@@ -55,12 +56,13 @@ const renderPowerEngines = (
     return undefined;
   }
 
-  const projects = projectsWithStats.filter(({ project, stats }) => {
+  const projects = projectsWithStats.filter(({ projectWithLabels, stats }) => {
     return maxProject.stats.doneRate === stats.doneRate;
   });
 
   const projectsString = projects
-    .map(({ project }) => {
+    .map(({ projectWithLabels }) => {
+      const { project } = projectWithLabels;
       return `**[${project.name}](${project.html_url})**`;
     })
     .join(', ');
@@ -69,14 +71,22 @@ const renderPowerEngines = (
 };
 
 interface IProjectsWithData {
-  project: TProject;
+  project: IProjectWithTrackedLabels;
   data: IProjectData;
 }
 
+/**
+ * Render the `🔭 Overview` section with all projects stats.
+ */
 export const renderOverview = (
   config: IConfig,
   projectsWithData: IProjectsWithData[],
 ): string => {
+  // don't render overview for a single project
+  if (projectsWithData.length < 2) {
+    return '';
+  }
+
   const projectsData = projectsWithData.map(({ data }) => {
     return data;
   });
@@ -85,7 +95,7 @@ export const renderOverview = (
     const stats = getProjectStats(data);
 
     return {
-      project,
+      projectWithLabels: project,
       stats,
     };
   });
