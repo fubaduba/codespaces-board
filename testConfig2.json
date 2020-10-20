@@ -7,12 +7,12 @@
     "boardIssue": "https://github.com/legomushroom/codespaces-board/issues/29",
     "repos": [
       {
-        "owner": "legomushroom",
-        "repo": "codespaces-board",
+        "owner": "microsoft",
+        "repo": "vssaas-planning",
         "projects": [
           {
-            "id": 1,
-            "trackLabels": ["port-forwarding", "workbench", "serverless"],
+            "id": 6,
+            "trackLabels": ["port-forwarding", "workbench", "serverless", "performance"],
             "isCheckListItems": true
           }
         ]

@@ -17,7 +17,6 @@ import { IConfig } from './interfaces/IConfig';
 const TOKEN_NAME = 'REPO_GITHUB_PAT';
 const CONFIG_PATH = 'CONFIG_PATH';
 
-
 const overwriteBoardIssue = async (issueContents: string, config: IConfig, projectKit: ProjectsOctoKit) => {
   const { status } = await projectKit.updateBoardIssue(
     config.boardIssue,
@@ -73,7 +72,7 @@ const updateBoardIssue = async (issueContents: string, config: IConfig, projectK
 }
 
 const processConfigRecord = async (config: IConfig, projectKit: ProjectsOctoKit) => {
-  console.log('Processing config: \n', config);
+  console.log('Processing config: \n', JSON.stringify(config, null, 2));
 
   const validationErrors = validateConfig(config);
   if (validationErrors.length) {

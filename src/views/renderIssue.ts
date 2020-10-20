@@ -61,7 +61,7 @@ const renderAssignees = (issue: TRepoIssue) => {
   const { assignees } = issue;
 
   if (!assignees.length) {
-    return `❗**unassigned**`;
+    return `🙋**free issue**`;
   }
 
   const users = assignees.map((user) => {

@@ -8,7 +8,35 @@ import { TProjectConfig } from '../interfaces/TProjetConfig';
 
 type TLabeledIssues = Record<string, IWrappedIssue[]>;
 
-const getIssuesForLabel = (label: string, wrappedIssues: IWrappedIssue[]) => {
+const NONE_LABEL = 'codespaces-board-undefined-label';
+
+const sortIssuesListByUsername = (issues: IWrappedIssue[]) => {
+  const result = issues.sort((issue1, issue2) => {
+    if (!issue1.issue.assignees.length) {
+      return 1;
+    }
+
+    if (!issue2.issue.assignees.length) {
+      return -1;
+    }
+
+    if (issue1.issue.assignees[0].login < issue2.issue.assignees[0].login) {
+      return -1;
+    }
+    if (issue1.issue.assignees[0].login > issue2.issue.assignees[0].login) {
+      return 1;
+    }
+
+    return 0;
+  });
+
+  return result;
+};
+
+const getIssuesForLabel = (
+  label: string,
+  wrappedIssues: IWrappedIssue[],
+): IWrappedIssue[] => {
   const result = wrappedIssues.filter(({ issue }) => {
     const foundLabel = issue.labels.find((issueLabel) => {
       return issueLabel.name === label;
@@ -20,21 +48,21 @@ const getIssuesForLabel = (label: string, wrappedIssues: IWrappedIssue[]) => {
   return result;
 };
 
-const NONE_LABEL = 'codespaces-board-undefined-label';
-
 const groupIssuesByLabels = (
   issues: IWrappedIssue[],
   projectConfig: TProjectConfig,
 ): TLabeledIssues => {
   const result: TLabeledIssues = {};
 
-  const labels = (typeof projectConfig === 'number')
-    ? []
-    : projectConfig.trackLabels ?? [];
+  const labels =
+    typeof projectConfig === 'number' ? [] : projectConfig.trackLabels ?? [];
 
   const includedIssues = new Set<IWrappedIssue>();
   for (let label of labels) {
-    const issuesForLabel = getIssuesForLabel(label, issues);
+    const issuesForLabel = sortIssuesListByUsername(
+      getIssuesForLabel(label, issues),
+    );
+
     result[label] = issuesForLabel;
 
     for (let issueForLabel of issuesForLabel) {
@@ -63,9 +91,10 @@ const renderIssuesSection = (
 ) => {
   const issueItems = [title];
 
-  const isCheckList = (typeof projectConfig === 'number')
-    ? undefined
-    : projectConfig.isCheckListItems;
+  const isCheckList =
+    typeof projectConfig === 'number'
+      ? undefined
+      : projectConfig.isCheckListItems;
 
   for (let wrappedIssue of issues) {
     const { column, issue } = wrappedIssue;
@@ -125,8 +154,7 @@ export const renderIssuesBlock = (
     return undefined;
   }
 
-  return [
-    renderTitle(title),
-    renderIssuesList(issues, projectConfig),
-  ].join('\n');
+  return [renderTitle(title), renderIssuesList(issues, projectConfig)].join(
+    '\n',
+  );
 };
