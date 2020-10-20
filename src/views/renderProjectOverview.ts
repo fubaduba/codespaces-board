@@ -29,10 +29,10 @@ const renderDeveloper = (
 
   const daysLeft = getWorkDays(config);
   const suffix = (daysLeft)
-    ? ` / ${(issuesCount / Math.max(1, daysLeft.businessDaysLeft)).toFixed(1)} per day left`
+    ? ` / **${(issuesCount / Math.max(1, daysLeft.businessDaysLeft)).toFixed(1)} per day left**`
     : '';
 
-  return `${ident(identation)}- 🥵 @${login}: **${issuesCount}** issues${suffix}`;
+  return `${ident(identation)}- 🥵 @${login}: **${issuesCount} issues**${suffix}`;
 };
 
 /**
@@ -57,6 +57,7 @@ export const renderProjectOverview = (
   return [
     `- 📅 ${renderDaysLeft(config)}`,
     `- 🧑‍💻 **${developers.length}** developers`,
+    renderDeveloper(devWithMostAssignedIssues, config, 1),
     `- 🌡️ Issues load per:`,
     renderPerLine('day', issuesDayLeftRatio, issuesDayRatio, 1),
     renderPerLine(
@@ -71,6 +72,5 @@ export const renderProjectOverview = (
       issuesDeveloperDayRatio,
       1,
     ),
-    renderDeveloper(devWithMostAssignedIssues, config),
   ].join('\n');
 };
