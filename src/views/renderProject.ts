@@ -2,14 +2,16 @@ import { rateToPercent } from '../utils/rateToPercent';
 import { getProjectStats } from '../utils/getProjectStats';
 import { renderIssuesBlock } from './renderIssuesBlock';
 
+import { renderProjectOverview } from './renderProjectOverview';
+
 import { IProjectData } from '../interfaces/IProjectData';
 import { IProjectWithConfig } from '../interfaces/IProjectWithConfig';
 import { IConfig } from '../interfaces/IConfig';
-import { IProject } from '../interfaces/IProject';
 
 export const renderProject = (
   data: IProjectData,
   projectWithConfig: IProjectWithConfig,
+  config: IConfig,
 ): string => {
   const {
     // combined
@@ -26,16 +28,12 @@ export const renderProject = (
     doneRate,
     inWorkRate,
     committedRate,
-  } = getProjectStats(data);
+  } = getProjectStats(data, config);
 
   const {
     project,
     projectConfig,
   } = projectWithConfig;
-
-  const labels = (typeof projectConfig === 'number')
-    ? []
-    : projectConfig.trackLabels ?? [];
 
   const blockedIssuesString = renderIssuesBlock(
     `⚠️  ${blockedIssues.length} Blocked`,
@@ -72,6 +70,7 @@ export const renderProject = (
     '',
     projectTitle,
     projectLink,
+    renderProjectOverview(config, { data, project: projectWithConfig }),
     blockedIssuesString,
     committedIssuesString,
     inWorkIssuesString,

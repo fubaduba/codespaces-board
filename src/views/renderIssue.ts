@@ -1,6 +1,7 @@
 import { IIssueState } from '../interfaces/IIssueState';
 import { TColumnTypes } from '../interfaces/TColumnTypes';
 import { TRepoIssue } from '../interfaces/TRepoIssue';
+import { pluck } from '../utils/pluck';
 
 const mapColumnToEmoji = (column: TColumnTypes) => {
   switch (column) {
@@ -33,12 +34,6 @@ const mapColumnToEmoji = (column: TColumnTypes) => {
       throw new Error("Don't render the Backlog items.");
     }
   }
-};
-
-const pluck = (propName: string) => {
-  return (obj: any) => {
-    return obj[propName];
-  };
 };
 
 const toLowerCase = (str: string) => {

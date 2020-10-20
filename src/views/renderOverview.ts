@@ -5,7 +5,6 @@ import { renderDaysLeft } from './renderDaysLeft';
 import { IConfig } from '../interfaces/IConfig';
 import { IProjectStats } from '../interfaces/IProjectStats';
 import { IProjectData } from '../interfaces/IProjectData';
-import { TProject } from '../interfaces/TProject';
 import { IProjectWithConfig } from '../interfaces/IProjectWithConfig';
 
 const sum = (a: number, b: number): number => {
@@ -13,10 +12,13 @@ const sum = (a: number, b: number): number => {
 };
 
 const getTotalRate = (
+  config: IConfig,
   projectsData: IProjectData[],
-  statName: keyof IProjectStats,
+  statName: 'doneRate' | 'inWorkRate',
 ): number => {
-  const allStats = projectsData.map(getProjectStats);
+  const allStats = projectsData.map((data) => {
+    return getProjectStats(data, config);
+  });
 
   const stats = allStats.map((stat) => {
     return stat[statName];
@@ -29,10 +31,11 @@ const getTotalRate = (
 };
 
 const getTotalPercent = (
+  config: IConfig,
   projectsData: IProjectData[],
-  statName: keyof IProjectStats,
+  statName: 'doneRate' | 'inWorkRate',
 ): string => {
-  const rate = getTotalRate(projectsData, statName);
+  const rate = getTotalRate(config, projectsData, statName);
   return rateToPercent(rate);
 };
 
@@ -70,7 +73,7 @@ const renderPowerEngines = (
   return `- 🚂 ${projectsString} **${rateToPercent(projects[0].stats.doneRate)}**`;
 };
 
-interface IProjectsWithData {
+export interface IProjectsWithData {
   project: IProjectWithConfig;
   data: IProjectData;
 }
@@ -92,7 +95,7 @@ export const renderOverview = (
   });
 
   const projectsWithStats = projectsWithData.map(({ project, data }) => {
-    const stats = getProjectStats(data);
+    const stats = getProjectStats(data, config);
 
     return {
       projectWithLabels: project,
@@ -102,9 +105,9 @@ export const renderOverview = (
 
   return [
     `## 🔭 Overview - ${projectsData.length} projects`,
-    renderDaysLeft(config),
-    `- **${getTotalPercent(projectsData, 'doneRate')}** done across projects`,
-    `- **${getTotalPercent(projectsData, 'inWorkRate')}** in work`,
+    `- ${renderDaysLeft(config)}`,
+    `- **${getTotalPercent(config, projectsData, 'doneRate')}** done across projects`,
+    `- **${getTotalPercent(config, projectsData, 'inWorkRate')}** in work`,
     renderPowerEngines(projectsWithStats),
   ].join('\n');
 };

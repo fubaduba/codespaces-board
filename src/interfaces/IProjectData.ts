@@ -4,6 +4,7 @@ export interface IProjectData {
   inWorkIssues: IWrappedIssue[];
   doneOrDeployIssues: IWrappedIssue[];
   allPlannedIssues: IWrappedIssue[];
+  toSolveIssues: IWrappedIssue[];
   // raw:
   backlogIssues: IWrappedIssue[];
   committedIssues: IWrappedIssue[];

@@ -31,7 +31,7 @@ const daysLeftToEmoj = (daysLeft: number, totalDays: number) => {
   return '';
 };
 
-export const renderDaysLeft = (config: IConfig) => {
+export const getWorkDays = (config: IConfig) => {
   const {
     sprintStartDate: sprintStartDateString,
     sprintDuration,
@@ -39,7 +39,7 @@ export const renderDaysLeft = (config: IConfig) => {
   } = config;
 
   if (!sprintStartDateString || !sprintDuration) {
-    return undefined;
+    return;
   }
 
   const sprintStartDate = new Date(sprintStartDateString);
@@ -51,13 +51,26 @@ export const renderDaysLeft = (config: IConfig) => {
     getBusinessDatesCount(sprintStartDate, sprintEndDate) -
     sprintNumberHolidays;
 
-  const businessDaysLeftRaw =
+  const businessDaysLeft =
     getBusinessDatesCount(new Date(), sprintEndDate) - 1 - sprintNumberHolidays;
 
-  const businessDaysLeft = Math.max(businessDaysLeftRaw, 0);
-
-  return `- ${daysLeftToEmoj(
+  return {
     businessDaysLeft,
     totalBusinessDays,
-  )} **${businessDaysLeft}** work days left`;
+  };
+}
+
+export const renderDaysLeft = (config: IConfig) => {
+  const days = getWorkDays(config);
+  if (!days) {
+    return;
+  }
+
+  const { businessDaysLeft, totalBusinessDays } = days;
+  const daysLeft = Math.max(businessDaysLeft, 0);
+
+  return `${daysLeftToEmoj(
+    daysLeft,
+    totalBusinessDays,
+  )} **${daysLeft}** work days left`;
 };

@@ -17,25 +17,27 @@ import { IConfig } from './interfaces/IConfig';
 const TOKEN_NAME = 'REPO_GITHUB_PAT';
 const CONFIG_PATH = 'CONFIG_PATH';
 
-const overwriteBoardIssue = async (issueContents: string, config: IConfig, projectKit: ProjectsOctoKit) => {
+const overwriteBoardIssue = async (
+  issueContents: string,
+  config: IConfig,
+  projectKit: ProjectsOctoKit,
+) => {
   const { status } = await projectKit.updateBoardIssue(
     config.boardIssue,
     issueContents,
   );
 
   if (status !== 200) {
-    throw new Error(
-      `Failed to update the issue ${config.boardIssue}`,
-    );
+    throw new Error(`Failed to update the issue ${config.boardIssue}`);
   }
 
   console.log(`Successfully updated the board issue ${config.boardIssue}`);
-}
+};
 
 const getRegex = (projectId?: number) => {
   const regex = /<!--\s*codespaces-board:start\s*-->([\W\w]*)<!--\s*codespaces-board:end\s*-->/gim;
   return regex;
-}
+};
 
 const wrapIssueText = (text: string, projectId?: number) => {
   return [
@@ -45,15 +47,15 @@ const wrapIssueText = (text: string, projectId?: number) => {
     text,
     `<!-- codespaces-board:end -->`,
   ].join('\n');
-}
+};
 
-const updateBoardIssue = async (issueContents: string, config: IConfig, projectKit: ProjectsOctoKit) => {
+const updateBoardIssue = async (
+  issueContents: string,
+  config: IConfig,
+  projectKit: ProjectsOctoKit,
+) => {
   if (!config.isReplaceProjectMarkers) {
-    return await overwriteBoardIssue(
-      issueContents,
-      config,
-      projectKit,
-    );
+    return await overwriteBoardIssue(issueContents, config, projectKit);
   }
 
   const issue = await projectKit.getBoardIssue(
@@ -64,19 +66,22 @@ const updateBoardIssue = async (issueContents: string, config: IConfig, projectK
   const { body } = issue;
   const newBody = body.replace(getRegex(), wrapIssueText(issueContents));
 
-  await overwriteBoardIssue(
-    newBody,
-    config,
-    projectKit,
-  );
-}
+  await overwriteBoardIssue(newBody, config, projectKit);
+};
 
-const processConfigRecord = async (config: IConfig, projectKit: ProjectsOctoKit) => {
+const processConfigRecord = async (
+  config: IConfig,
+  projectKit: ProjectsOctoKit,
+) => {
   console.log('Processing config: \n', JSON.stringify(config, null, 2));
 
   const validationErrors = validateConfig(config);
   if (validationErrors.length) {
-    console.error(`\n\nNot valid config for the issue ${config.boardIssue}, skipping.. \n`, validationErrors, '\n\n');
+    console.error(
+      `\n\nNot valid config for the issue ${config.boardIssue}, skipping.. \n`,
+      validationErrors,
+      '\n\n',
+    );
     return;
   }
 
@@ -90,15 +95,14 @@ const processConfigRecord = async (config: IConfig, projectKit: ProjectsOctoKit)
         const data = await getProjectData(projectKit, repo, project);
         return {
           project,
-          data
+          data,
         };
       }),
     );
 
-    const result =
-      projectsWithData.map(({ project, data }) => {
-        return renderProject(data, project);
-      });
+    const result = projectsWithData.map(({ project, data }) => {
+      return renderProject(data, project, config);
+    });
 
     const issueBody = result.join('\n') + '\n';
     let header;
@@ -115,12 +119,12 @@ const processConfigRecord = async (config: IConfig, projectKit: ProjectsOctoKit)
       header,
       renderOverview(config, projectsWithData),
       issueBody,
-      footer
+      footer,
     ].join('\n');
 
     await updateBoardIssue(issueContents, config, projectKit);
   }
-}
+};
 
 async function run(): Promise<void> {
   try {

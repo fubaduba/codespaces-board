@@ -58,12 +58,14 @@ export const getProjectData = async (
   const inWorkIssues = [...progressIssues, ...inReviewIssues];
   const doneOrDeployIssues = [...waitingToDeployIssues, ...doneIssues];
   const allPlannedIssues = [...blockedIssues, ...committedIssues, ...inWorkIssues, ...doneOrDeployIssues];
+  const toSolveIssues = [...inWorkIssues, ...blockedIssues, ...committedIssues];
 
   return {
     // combined
     inWorkIssues,
     doneOrDeployIssues,
     allPlannedIssues,
+    toSolveIssues,
     // plain
     backlogIssues,
     committedIssues,
