@@ -67,7 +67,7 @@ export const getProjectStats = (data: IProjectData, config: IConfig): IProjectSt
     inWorkIssues,
     doneOrDeployIssues,
     allPlannedIssues,
-    toSolveIssues,
+    issuesToSolve: toSolveIssues,
     // plain
     committedIssues,
   } = data;

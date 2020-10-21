@@ -214,14 +214,13 @@ export class ProjectsOctoKit extends OctoKitBase {
     });
   };
 
-  public getBoardIssue = async (issueUrl: string, body: string) => {
+  public getBoardIssue = async (issueUrl: string) => {
     const { owner, repo, issueNumber } = parseIssueUrl(issueUrl);
 
     const { status, data } = await this.kit.issues.get({
       owner,
       repo,
-      issue_number: issueNumber,
-      body,
+      issue_number: issueNumber
     });
 
     if (status !== 200) {

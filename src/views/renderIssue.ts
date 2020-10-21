@@ -2,6 +2,16 @@ import { IIssueState } from '../interfaces/IIssueState';
 import { TColumnTypes } from '../interfaces/TColumnTypes';
 import { TRepoIssue } from '../interfaces/TRepoIssue';
 import { pluck } from '../utils/pluck';
+import { ident } from './ident';
+
+const emojiIcon = (icon: string, title?: string) => {
+  const iconString = `${icon}${ident(1)}`;
+  if (!title) {
+    return iconString;
+  }
+
+  return `<i title="${title}">${iconString}</i>`;
+};
 
 const mapColumnToEmoji = (column: TColumnTypes) => {
   switch (column) {
@@ -14,11 +24,11 @@ const mapColumnToEmoji = (column: TColumnTypes) => {
     }
 
     case TColumnTypes.InReview: {
-      return '👀  ';
+      return emojiIcon('👀', column);
     }
 
     case TColumnTypes.WaitingToDeploy: {
-      return '🏗️  ';
+      return emojiIcon('🏗️', column);
     }
 
     case TColumnTypes.Blocked: {
@@ -26,7 +36,7 @@ const mapColumnToEmoji = (column: TColumnTypes) => {
     }
 
     case TColumnTypes.Done: {
-      return '✅  ';
+      return emojiIcon('✅', column);
     }
 
     default:
@@ -46,7 +56,7 @@ const mapIssueTypeToEmoji = (issue: TRepoIssue) => {
   const isBug = labels.map(pluck('name')).map(toLowerCase).includes('bug');
 
   if (isBug) {
-    return '🐛  ';
+    return emojiIcon('🐛', 'Bug');
   }
 
   return '';

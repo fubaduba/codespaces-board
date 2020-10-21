@@ -65,7 +65,7 @@ export const getProjectData = async (
     inWorkIssues,
     doneOrDeployIssues,
     allPlannedIssues,
-    toSolveIssues,
+    issuesToSolve: toSolveIssues,
     // plain
     backlogIssues,
     committedIssues,

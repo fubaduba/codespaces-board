@@ -99,7 +99,7 @@ const renderIssuesSection = (
   for (let wrappedIssue of issues) {
     const { column, issue } = wrappedIssue;
     const item = renderIssue(column, issue, isCheckList);
-    issueItems.push(`${ident(1)}${item}`);
+    issueItems.push(`${ident(0)}${item}`);
   }
 
   return issueItems.filter(notEmpty).join('\n');
@@ -129,8 +129,9 @@ const renderIssuesList = (
         return;
       }
 
-      const title =
-        labelName === NONE_LABEL ? undefined : `- **${capitalize(labelName)}**`;
+      const title = (labelName === NONE_LABEL)
+        ? undefined
+        : `\n**${capitalize(labelName)}**`;
 
       return renderIssuesSection(issues, projectConfig, title);
     });

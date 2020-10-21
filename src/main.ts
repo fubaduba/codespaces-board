@@ -58,10 +58,7 @@ const updateBoardIssue = async (
     return await overwriteBoardIssue(issueContents, config, projectKit);
   }
 
-  const issue = await projectKit.getBoardIssue(
-    config.boardIssue,
-    issueContents,
-  );
+  const issue = await projectKit.getBoardIssue(config.boardIssue);
 
   const { body } = issue;
   const newBody = body.replace(getRegex(), wrapIssueText(issueContents));
