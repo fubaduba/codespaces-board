@@ -64,7 +64,7 @@ export const renderProject = (
 
   const projectTitle = `## ${project.name} - ${rateToPercent(doneRate)} done`;
   const projectLink = `Link: [${project.name}](${project.html_url})`;
-  const backlogIssuesCountString = `\n*Backlog: ${backlogIssues.length} issues*`;
+  const backlogIssuesCountString = `\nBacklog: [${backlogIssues.length} issues](${project.html_url})`;
 
   return [
     '',
