@@ -1,6 +1,6 @@
 import { ProjectsOctoKit } from '../octokit/ProjectsOctoKit';
 import { TColumnTypes } from '../interfaces/TColumnTypes';
-import { TProject } from '../interfaces/TProject';
+// import { TProject } from '../interfaces/TProject';
 import { IRepoSourceConfig } from '../interfaces/IRepoSourceConfig';
 import { IProjectData } from '../interfaces/IProjectData';
 import { IProjectWithConfig } from '../interfaces/IProjectWithConfig';
@@ -11,7 +11,23 @@ export const getProjectData = async (
   project: IProjectWithConfig,
 ): Promise<IProjectData> => {
   const columns = await projectKit.getColumns(project);
-  const issues = await projectKit.getRepoIssues(repo);
+  const cards = await projectKit.getCards(columns);
+  const repos = await projectKit.getCardRepos(cards);
+
+  console.log('>>> repos:');
+  console.log(repos);
+  console.log('>>>');
+
+  const issues = await projectKit.getReposIssues(repos);
+  const issues2 = await projectKit.getRepoIssues(repo);
+
+  console.log('>>> issues.length:');
+  console.log(issues.length);
+  console.log('>>>');
+
+  console.log('>>> issues2.length:');
+  console.log(issues2.length);
+  console.log('>>>');
 
   const backlogIssues = await projectKit.filterIssuesForColumnCards(
     issues,

@@ -1,22 +1,38 @@
 import { OctoKitBase } from './OctoKitBase';
-import { parseIssueUrl } from '../utils/parseIssueUrl';
+import { parseIssueApiUrl, parseIssueUrl } from '../utils/parseIssueUrl';
 import { parseFileUrl } from '../utils/parseFileUrl';
 import { notEmpty } from '../utils/notEmpty';
 
 import { IRepoSourceConfig } from '../interfaces/IRepoSourceConfig';
 import { TColumnCard } from '../interfaces/TColumnCard';
-import { TProject } from '../interfaces/TProject';
-import { TProjectColumn } from '../interfaces/TProjectColumn';
-import { TProjectColumns } from '../interfaces/TProjectColumns';
+// import { TProject } from '../interfaces/TProject';
 import { TRepoIssue } from '../interfaces/TRepoIssue';
 import { TColumnTypes } from '../interfaces/TColumnTypes';
 import { IWrappedIssue } from '../interfaces/IWrappedIssue';
 import { IProject } from '../interfaces/IProject';
 import { IProjectWithConfig } from '../interfaces/IProjectWithConfig';
+import { IParsedIssue } from '../interfaces/IParsedIssue';
+import { TProjectColumn } from '../interfaces/TProjectColumn';
+import { flattenArray } from '../utils/flatternArray';
+import { IParsedRepo } from '../interfaces/IParsedRepo';
+// import { IParsedIssue } from '../interfaces/IParsedIssue';
+// import { serializeIssuePath } from '../utils/serializeIssuePath';
+// import { serializeIssuePath } from '../utils/serializeIssuePath';
+
+interface IColumnWithCards {
+  column: TProjectColumn;
+  cards: TColumnCard[];
+}
 
 type TColumnsMap = Record<TColumnTypes, TProjectColumn | undefined>;
+type TColumnsWithCardsMap = Record<TColumnTypes, IColumnWithCards | undefined>
 
-const findColumn = (columns: TProjectColumns, columnName: TColumnTypes) => {
+type TRepoIssuesMap = Record<string, TRepoIssue[]>
+
+const findColumn = (
+  columns: TProjectColumn[],
+  columnName: TColumnTypes,
+): TProjectColumn | undefined => {
   const result = columns.find((column) => {
     return column.name.toLowerCase() === columnName.toLowerCase();
   });
@@ -33,21 +49,21 @@ const wrapIssue = (column: TColumnTypes) => {
   };
 };
 
-const findColumnThrows = (
-  projectName: string,
-  columns: TProjectColumns,
-  columnName: TColumnTypes,
-) => {
-  const result = findColumn(columns, columnName);
+// const findColumnThrows = (
+//   projectName: string,
+//   columns: TProjectColumn[],
+//   columnName: TColumnTypes,
+// ) => {
+//   const result = findColumn(columns, columnName);
 
-  if (!result) {
-    throw new Error(
-      `No column "${columnName}" found in project "projectName".`,
-    );
-  }
+//   if (!result) {
+//     throw new Error(
+//       `No column "${columnName}" found in project "projectName".`,
+//     );
+//   }
 
-  return result;
-};
+//   return result;
+// };
 
 const getProjectId = (project: IProject | number) => {
   return typeof project === 'number' ? project : project.id;
@@ -64,29 +80,28 @@ export class ProjectsOctoKit extends OctoKitBase {
       per_page: 100,
     });
 
-    const fetchedProjects = projectsResponse.map((project):
-      | IProjectWithConfig
-      | undefined => {
-      const { projects } = repo;
+    const fetchedProjects = projectsResponse
+      .map((project): IProjectWithConfig | undefined => {
+        const { projects } = repo;
 
-      if (!projects) {
-        return;
-      }
+        if (!projects) {
+          return;
+        }
 
-      const proj = projects.find((p) => {
-        return project.number === getProjectId(p);
-      });
+        const proj = projects.find((p) => {
+          return project.number === getProjectId(p);
+        });
 
-      if (!proj) {
-        return;
-      }
+        if (!proj) {
+          return;
+        }
 
-      return {
-        project,
-        projectConfig: proj,
-      };
-    })
-    .filter(notEmpty);
+        return {
+          project,
+          projectConfig: proj,
+        };
+      })
+      .filter(notEmpty);
 
     return fetchedProjects;
   };
@@ -107,7 +122,9 @@ export class ProjectsOctoKit extends OctoKitBase {
     return result;
   };
 
-  public getColumns = async (projectWithLabels: IProjectWithConfig): Promise<TColumnsMap> => {
+  public getColumns = async (
+    projectWithLabels: IProjectWithConfig,
+  ): Promise<TColumnsMap> => {
     const { project } = projectWithLabels;
 
     const { data: columns } = await this.kit.projects.listColumns({
@@ -133,13 +150,43 @@ export class ProjectsOctoKit extends OctoKitBase {
   public getColumnCards = async (
     column: TProjectColumn,
   ): Promise<TColumnCard[]> => {
-    const { data: cards } = await this.kit.projects.listCards({
+    const cards = await this.kit.paginate(this.kit.projects.listCards, {
       column_id: column.id,
-      per_page: 100,
       archived_state: 'not_archived',
     });
 
     return cards;
+  };
+
+  public getCards = async (
+    columns: TColumnsMap,
+  ): Promise<TColumnsWithCardsMap> => {
+    const cardPromises = Object.entries(columns).map(async ([ type, column ]) => {
+      if (!column) {
+        return;
+      }
+
+      return {
+        type,
+        column,
+        cards: await this.getColumnCards(column),
+      };
+    });
+
+    const columnCardsWithEmpty = await Promise.all(cardPromises);
+    const columnCards = columnCardsWithEmpty.filter(notEmpty);
+
+    const result: any = {};
+    for (let columnCard of columnCards) {
+      const { type } = columnCard;
+
+      result[type] = {
+        cards: columnCard.cards,
+        column: columnCard.column,
+      };
+    }
+
+    return result as TColumnsWithCardsMap;
   };
 
   public getRepoIssues = async (
@@ -154,26 +201,68 @@ export class ProjectsOctoKit extends OctoKitBase {
     return issues;
   };
 
-  public getIssuesForColumnCards = async (
-    repo: IRepoSourceConfig,
-    column: TProjectColumn,
+  public getReposIssues = async (
+    repos: IParsedRepo[],
   ): Promise<TRepoIssue[]> => {
-    const issues = await this.kit.paginate(this.kit.issues.listForRepo, {
-      repo: repo.repo,
-      owner: repo.owner,
+
+    const resultPromises: Promise<TRepoIssue[]>[] = repos.map(async (repo) => {
+      return await this.getRepoIssues(repo);
     });
 
-    const cards = await this.getColumnCards(column);
+    return flattenArray(await Promise.all(resultPromises));
+  };
 
-    const cardIssues = issues.filter((issue) => {
-      const cardIssue = cards.find((card) => {
-        return card.content_url === issue.url;
-      });
+  private getCardIssueFromNote = (card: TColumnCard): IParsedIssue | null => {
+    try {
+      const issue = parseIssueUrl(card.note);
+      return issue;
+    } catch {
+      return null;
+    }
+  };
 
-      return !!cardIssue;
+  private getCardIssueFromContentUrl = (
+    card: TColumnCard,
+  ): IParsedIssue | null => {
+    try {
+      const issue = parseIssueApiUrl(card.content_url);
+      return issue;
+    } catch {
+      return null;
+    }
+  };
+
+  private getAllCards = (columns: TColumnsWithCardsMap): TColumnCard[] => {
+    const cards = Object.entries(columns).map(([type, columnWithCards]) => {
+      if (!columnWithCards) {
+        return [];
+      }
+      const { cards } = columnWithCards;
+      return cards ?? [];
     });
 
-    return cardIssues;
+    return flattenArray(cards);
+  };
+
+  public getCardRepos = (columns: TColumnsWithCardsMap): IParsedRepo[] => {
+    const cards = this.getAllCards(columns);
+
+    const repos: Record<string, IParsedRepo> = {};
+
+    for (let card of cards) {
+      const issueFromNote = this.getCardIssueFromNote(card);
+      const issueFromContent = this.getCardIssueFromContentUrl(card);
+      const issue = issueFromNote ?? issueFromContent;
+
+      if (issue && issue.owner && issue.repo) {
+        repos[`/${issue.owner}/${issue.repo}`] = {
+          owner: issue.owner,
+          repo: issue.repo,
+        };
+      }
+    }
+
+    return Object.values(repos);
   };
 
   public filterIssuesForColumnCards = async (
@@ -220,18 +309,15 @@ export class ProjectsOctoKit extends OctoKitBase {
     const { status, data } = await this.kit.issues.get({
       owner,
       repo,
-      issue_number: issueNumber
+      issue_number: issueNumber,
     });
 
     if (status !== 200) {
-      throw new Error(
-        `Failed to get the issue ${issueUrl}`,
-      );
+      throw new Error(`Failed to get the issue ${issueUrl}`);
     }
 
     return data;
   };
-
 
   public getBoardHeaderText = async (fileUrl: string): Promise<string> => {
     const fileRef = parseFileUrl(fileUrl);

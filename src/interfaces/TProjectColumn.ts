@@ -1,3 +1,3 @@
-import { TProjectColumns } from './TProjectColumns';
+import { TProjectColumnsResponse } from './TProjectColumnsResponse';
 
-export type TProjectColumn = TProjectColumns[0];
+export type TProjectColumn = TProjectColumnsResponse['data'][0];

@@ -1,5 +1,5 @@
-export interface IParsedIssue {
-  owner: string;
-  repo: string;
+import { IParsedRepo } from './IParsedRepo';
+
+export interface IParsedIssue extends IParsedRepo {
   issueNumber: number;
 }
