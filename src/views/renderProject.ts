@@ -32,13 +32,12 @@ export const renderProject = (
 
   const {
     project,
-    projectConfig,
   } = projectWithConfig;
 
   const blockedIssuesString = renderIssuesBlock(
     `⚠️  ${blockedIssues.length} Blocked`,
     blockedIssues,
-    projectConfig,
+    projectWithConfig,
     false,
   );
 
@@ -46,20 +45,20 @@ export const renderProject = (
   const inWorkIssuesString = renderIssuesBlock(
     `🏃  ${inWorkCount} In work (${rateToPercent(inWorkRate)})`,
     inWorkIssues,
-    projectConfig,
+    projectWithConfig,
   );
 
   const committedIssuesString = renderIssuesBlock(
     `💪 ${committedIssues.length} Committed (${rateToPercent(committedRate)})`,
     committedIssues,
-    projectConfig,
+    projectWithConfig,
   );
 
   const doneCount = `${doneOrDeployIssues.length}/${allPlannedIssues.length}`;
   const doneIssuesString = renderIssuesBlock(
     `🙌 ${doneCount} Done (${rateToPercent(doneRate)})`,
     doneOrDeployIssues,
-    projectConfig,
+    projectWithConfig,
   );
 
   const projectTitle = `## ${project.name} - ${rateToPercent(doneRate)} done`;

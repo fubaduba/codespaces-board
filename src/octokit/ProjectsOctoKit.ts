@@ -69,6 +69,7 @@ export class ProjectsOctoKit extends OctoKitBase {
         return {
           project,
           projectConfig: proj,
+          repo,
         };
       })
       .filter(notEmpty);

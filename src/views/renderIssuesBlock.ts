@@ -6,6 +6,7 @@ import { notEmpty } from '../utils/notEmpty';
 import { capitalize } from '../utils/capitalize';
 import { TProjectConfig } from '../interfaces/TProjetConfig';
 import { ICardWithIssue } from '../interfaces/ICardWithIssue';
+import { IProjectWithConfig } from '../interfaces/IProjectWithConfig';
 
 type TLabeledIssues = Record<string, ICardWithIssue[]>;
 
@@ -39,6 +40,7 @@ const sortIssuesListByUsername = (cardsWithIssue: ICardWithIssue[]) => {
 
 const getIssuesForLabel = (
   label: string,
+  labels: string[],
   cardsWithIssue: ICardWithIssue[],
 ): ICardWithIssue[] => {
   const result = cardsWithIssue.filter(({ issue }) => {
@@ -46,9 +48,21 @@ const getIssuesForLabel = (
       return false;
     }
 
+    const firstLabelFromTheList = issue.labels.find((issueLabel) => {
+      return labels.includes(issueLabel.name);
+    });
+
     const foundLabel = issue.labels.find((issueLabel) => {
       return issueLabel.name === label;
     });
+
+    /**
+     * The `labels` array has the descending priority for the defined labels,
+     * hence if the found label is not the first in the list, dont use it
+     */
+    if (firstLabelFromTheList !== foundLabel) {
+      return false;
+    }
 
     return !!foundLabel;
   });
@@ -58,17 +72,19 @@ const getIssuesForLabel = (
 
 const groupIssuesByLabels = (
   issues: ICardWithIssue[],
-  projectConfig: TProjectConfig,
+  projectWithConfig: IProjectWithConfig,
 ): TLabeledIssues => {
   const result: TLabeledIssues = {};
+  const { projectConfig } = projectWithConfig;
 
-  const labels =
-    typeof projectConfig === 'number' ? [] : projectConfig.trackLabels ?? [];
+  const labels = typeof projectConfig === 'number'
+    ? []
+    : projectConfig.trackLabels ?? [];
 
   const includedIssues = new Set<ICardWithIssue>();
   for (let label of labels) {
     const issuesForLabel = sortIssuesListByUsername(
-      getIssuesForLabel(label, issues),
+      getIssuesForLabel(label, labels, issues),
     );
 
     result[label] = issuesForLabel;
@@ -94,9 +110,10 @@ const renderTitle = (title: string) => {
 
 const renderIssuesSection = (
   cardsWithIssues: ICardWithIssue[],
-  projectConfig: TProjectConfig,
+  projectWithConfig: IProjectWithConfig,
   title?: string,
 ) => {
+  const { projectConfig } = projectWithConfig;
   const issueItems = [title];
 
   const isCheckList =
@@ -105,8 +122,7 @@ const renderIssuesSection = (
       : projectConfig.isCheckListItems;
 
   for (let cardWithIssue of cardsWithIssues) {
-    const { column } = cardWithIssue;
-    const item = renderIssue(column, cardWithIssue, isCheckList);
+    const item = renderIssue(cardWithIssue, projectWithConfig, isCheckList);
     issueItems.push(`${ident(0)}${item}`);
   }
 
@@ -115,9 +131,10 @@ const renderIssuesSection = (
 
 const renderIssuesList = (
   issues: ICardWithIssue[],
-  projectConfig: TProjectConfig,
+  projectWithConfig: IProjectWithConfig,
 ) => {
-  const issueGroups = groupIssuesByLabels(issues, projectConfig);
+  const { projectConfig } = projectWithConfig;
+  const issueGroups = groupIssuesByLabels(issues, projectWithConfig);
 
   const items = Object.entries(issueGroups)
     // make the general section to be first in the lsit
@@ -141,7 +158,7 @@ const renderIssuesList = (
         ? undefined
         : `\n**${capitalize(labelName)}**`;
 
-      return renderIssuesSection(issues, projectConfig, title);
+      return renderIssuesSection(issues, projectWithConfig, title);
     });
 
   return items.filter(notEmpty).join('\n');
@@ -150,7 +167,7 @@ const renderIssuesList = (
 export const renderIssuesBlock = (
   title: string,
   issues: ICardWithIssue[],
-  projectConfig: TProjectConfig,
+  projectConfig: IProjectWithConfig,
   /**
    * if there is no issues in the list, should we render the title?
    * For some of the blocks, for instance the `In work`, it makes

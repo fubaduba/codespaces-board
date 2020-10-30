@@ -1,8 +1,25 @@
 import { ICardWithIssue } from '../interfaces/ICardWithIssue';
 import { IIssueState } from '../interfaces/IIssueState';
+import { IProjectWithConfig } from '../interfaces/IProjectWithConfig';
 import { TColumnTypes } from '../interfaces/TColumnTypes';
+import { TProjectConfig } from '../interfaces/TProjetConfig';
 import { pluck } from '../utils/pluck';
 import { ident } from './ident';
+import { cardLink } from '../utils/cardLink';
+
+
+const isDoneColumn = (column: TColumnTypes) => {
+  switch (column) {
+    case TColumnTypes.WaitingToDeploy:
+    case TColumnTypes.Done: {
+      return true;
+    }
+
+    default: {
+      return false;
+    }
+  }
+}
 
 const emojiIcon = (icon: string, title?: string) => {
   const iconString = `${icon}${ident(1)}`;
@@ -89,41 +106,41 @@ const renderAssignees = (cardWithIssue: ICardWithIssue) => {
 
 const renderItemIssueStatus = (
   cardWithIssue: ICardWithIssue,
+  column: TColumnTypes,
   asCheckList: boolean,
 ) => {
   if (!asCheckList) {
     return '';
   }
 
-  const { issue, card } = cardWithIssue;
+  const { issue } = cardWithIssue;
 
   if (!issue) {
-    return !card.archived ? '[ ] ' : '[x] ';
+    return !isDoneColumn(column) ? '[ ] ' : '[x] ';
   }
 
   return issue.state === IIssueState.Open ? '[ ] ' : '[x] ';
 };
 
 export const renderIssue = (
-  column: TColumnTypes,
   cardWithIssue: ICardWithIssue,
+  projectWithConfig: IProjectWithConfig,
   asCheckList = false,
 ) => {
-
-  const { issue, card } = cardWithIssue;
+  const { column, issue, card } = cardWithIssue;
 
   const title = (!issue)
     ? card.note
     : issue.title;
 
-    const url = (!issue)
-    ? card.content_url
+  const url = (!issue)
+    ? `[#card-${card.id}](${cardLink(card, projectWithConfig)})`
     : issue.html_url;
 
   const assignees = renderAssignees(cardWithIssue);
   const stateEmoji = mapColumnToEmoji(column);
   const bugEmoji = mapIssueTypeToEmoji(cardWithIssue);
-  const issueStatus = renderItemIssueStatus(cardWithIssue, asCheckList);
+  const issueStatus = renderItemIssueStatus(cardWithIssue, column, asCheckList);
 
   return `- ${issueStatus}${stateEmoji}${bugEmoji}${title} ${url} ${assignees}`;
 };
