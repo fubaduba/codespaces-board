@@ -6,62 +6,87 @@ import { TRepoIssue } from '../interfaces/TRepoIssue';
 import { getWorkDays } from '../views/renderDaysLeft';
 import { arrayUnique } from './arrayUnique';
 import { flattenArray } from './flatternArray';
-import { IDeveloperWithIssuesCount } from '../interfaces/IDeveloperWithIssuesCount';
 import { notEmpty } from './notEmpty';
 import { pluck } from './pluck';
+import { ICardWithIssue } from '../interfaces/ICardWithIssue';
+import { IProjectWithConfig } from '../interfaces/IProjectWithConfig';
 
-const getDevelopers = (issues: IWrappedIssue[]): string[] => {
-  const developersWithDuplicates = issues
+const getDevelopers = (
+  cardsWithIssue: ICardWithIssue[],
+  projectWithConfig: IProjectWithConfig,
+): string[] => {
+  /**
+   * If `developers` list set on the Project config, use the list,
+   * otherwise infer the developers list from the assigned issues.
+   */
+  const { projectConfig } = projectWithConfig;
+  if (typeof projectConfig !== 'number' && projectConfig.developers) {
+    return projectConfig.developers;
+  }
+
+  const developersWithDuplicates = cardsWithIssue
     .map(({ issue }) => {
+      if (!issue) {
+        return;
+      }
+
       return issue.assignees.map(pluck('login'));
     })
     .filter(notEmpty);
 
-  const developers = arrayUnique(flattenArray(developersWithDuplicates));
+  const developers: string[] = arrayUnique(flattenArray(developersWithDuplicates));
 
-  return developers as string[];
+  return developers;
 };
 
-const asigneesToDevelopers = (assignees: TRepoIssue['assignees']) => {
-  return assignees.map((as) => {
-    return as.login;
-  });
-}
+// const asigneesToDevelopers = (assignees: TRepoIssue['assignees']) => {
+//   return assignees.map((as) => {
+//     return as.login;
+//   });
+// };
 
-const countAssignedIssues = (developer: string, issues: IWrappedIssue[]) => {
-  const result = issues.reduce((current, { issue }) => {
-    const { assignees } = issue;
+// const countAssignedIssues = (
+//   developer: string,
+//   cardsWithIssue: ICardWithIssue[],
+// ) => {
+//   const result = cardsWithIssue.reduce((current, { issue }) => {
+//     if (!issue) {
+//       return current;
+//     }
 
-    if (!assignees || !assignees.length) {
-      return current;
-    }
+//     const { assignees } = issue;
 
-    const developers = asigneesToDevelopers(assignees);
-    return (developers.includes(developer))
-      ? current + 1
-      : current;
-  }, 0);
+//     if (!assignees || !assignees.length) {
+//       return current;
+//     }
 
-  return result;
-}
+//     const developers = asigneesToDevelopers(assignees);
+//     return developers.includes(developer) ? current + 1 : current;
+//   }, 0);
 
-const getBusiestDeveloper = (issues: IWrappedIssue[]): IDeveloperWithIssuesCount => {
-  const developers = getDevelopers(issues)
-    .map<IDeveloperWithIssuesCount>((developer) => {
-      return {
-        login: developer,
-        issuesCount: countAssignedIssues(developer, issues),
-        issueType: 'assigned',
-      }
-    })
-    .sort((dev1, dev2) => {
-      return dev2.issuesCount - dev1.issuesCount;
-    });
+//   return result;
+// };
 
-  return developers[0];
-};
+// const getBusiestDeveloper = (cardsWithIssue: ICardWithIssue[]): IDeveloperWithIssuesCount => {
+//   const developers = getDevelopers(cardsWithIssue)
+//     .map<IDeveloperWithIssuesCount>((developer) => {
+//       return {
+//         login: developer,
+//         issuesCount: countAssignedIssues(developer, cardsWithIssue),
+//         issueType: 'assigned',
+//       }
+//     })
+//     .sort((dev1, dev2) => {
+//       return dev2.issuesCount - dev1.issuesCount;
+//     });
 
-export const getProjectStats = (data: IProjectData, config: IConfig): IProjectStats => {
+//   return developers[0];
+// };
+
+export const getProjectStats = (
+  data: IProjectData,
+  config: IConfig,
+): IProjectStats => {
   const {
     // combined
     inWorkIssues,
@@ -78,24 +103,24 @@ export const getProjectStats = (data: IProjectData, config: IConfig): IProjectSt
   const inWorkRate = inWorkIssues.length / allPlannedIssues.length;
   const committedRate = committedIssues.length / allPlannedIssues.length;
 
-  const developers = getDevelopers(allPlannedIssues);
+  const developers = getDevelopers(allPlannedIssues, data.project);
 
   const issuesDeveloperLeftRatio = toSolveIssues.length / developers.length;
   const issuesDeveloperRatio = allPlannedIssues.length / developers.length;
 
-  const issuesDayLeftRatio = (daysLeft)
+  const issuesDayLeftRatio = daysLeft
     ? toSolveIssues.length / Math.max(daysLeft.businessDaysLeft, 1)
     : undefined;
 
-  const issuesDayRatio = (daysLeft)
+  const issuesDayRatio = daysLeft
     ? allPlannedIssues.length / daysLeft.totalBusinessDays
     : undefined;
 
-  const issuesDeveloperDayLeftRatio = (issuesDayLeftRatio)
+  const issuesDeveloperDayLeftRatio = issuesDayLeftRatio
     ? issuesDayLeftRatio / developers.length
     : undefined;
 
-  const issuesDeveloperDayRatio = (issuesDayRatio)
+  const issuesDeveloperDayRatio = issuesDayRatio
     ? issuesDayRatio / developers.length
     : undefined;
 
@@ -118,6 +143,6 @@ export const getProjectStats = (data: IProjectData, config: IConfig): IProjectSt
     // how many issues per day per developer left to solve
     issuesDeveloperDayLeftRatio,
     // developer with most assigned issues
-    devWithMostAssignedIssues: getBusiestDeveloper(toSolveIssues),
+    // devWithMostAssignedIssues: getBusiestDeveloper(toSolveIssues),
   };
 };

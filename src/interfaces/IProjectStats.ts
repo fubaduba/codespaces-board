@@ -14,7 +14,7 @@ export interface IProjectStats {
   issuesDeveloperDayRatio?: number;
   issuesDeveloperDayLeftRatio?: number;
 
-  devWithMostAssignedIssues: IDeveloperWithIssuesCount;
+  // devWithMostAssignedIssues: IDeveloperWithIssuesCount;
 
   developers: string[];
 }

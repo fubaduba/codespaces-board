@@ -5,7 +5,6 @@ import { notEmpty } from '../utils/notEmpty';
 
 import { IRepoSourceConfig } from '../interfaces/IRepoSourceConfig';
 import { TColumnCard } from '../interfaces/TColumnCard';
-// import { TProject } from '../interfaces/TProject';
 import { TRepoIssue } from '../interfaces/TRepoIssue';
 import { TColumnTypes } from '../interfaces/TColumnTypes';
 import { IWrappedIssue } from '../interfaces/IWrappedIssue';
@@ -15,9 +14,7 @@ import { IParsedIssue } from '../interfaces/IParsedIssue';
 import { TProjectColumn } from '../interfaces/TProjectColumn';
 import { flattenArray } from '../utils/flatternArray';
 import { IParsedRepo } from '../interfaces/IParsedRepo';
-// import { IParsedIssue } from '../interfaces/IParsedIssue';
-// import { serializeIssuePath } from '../utils/serializeIssuePath';
-// import { serializeIssuePath } from '../utils/serializeIssuePath';
+import { ICardWithIssue } from '../interfaces/ICardWithIssue';
 
 interface IColumnWithCards {
   column: TProjectColumn;
@@ -26,8 +23,6 @@ interface IColumnWithCards {
 
 type TColumnsMap = Record<TColumnTypes, TProjectColumn | undefined>;
 type TColumnsWithCardsMap = Record<TColumnTypes, IColumnWithCards | undefined>
-
-type TRepoIssuesMap = Record<string, TRepoIssue[]>
 
 const findColumn = (
   columns: TProjectColumn[],
@@ -39,31 +34,6 @@ const findColumn = (
 
   return result;
 };
-
-const wrapIssue = (column: TColumnTypes) => {
-  return (issue: TRepoIssue) => {
-    return {
-      column,
-      issue,
-    };
-  };
-};
-
-// const findColumnThrows = (
-//   projectName: string,
-//   columns: TProjectColumn[],
-//   columnName: TColumnTypes,
-// ) => {
-//   const result = findColumn(columns, columnName);
-
-//   if (!result) {
-//     throw new Error(
-//       `No column "${columnName}" found in project "projectName".`,
-//     );
-//   }
-
-//   return result;
-// };
 
 const getProjectId = (project: IProject | number) => {
   return typeof project === 'number' ? project : project.id;
@@ -171,7 +141,7 @@ export class ProjectsOctoKit extends OctoKitBase {
         column,
         cards: await this.getColumnCards(column),
       };
-    });
+    }).filter(notEmpty);
 
     const columnCardsWithEmpty = await Promise.all(cardPromises);
     const columnCards = columnCardsWithEmpty.filter(notEmpty);
@@ -210,6 +180,10 @@ export class ProjectsOctoKit extends OctoKitBase {
     });
 
     return flattenArray(await Promise.all(resultPromises));
+  };
+
+  private isCardIssue = (card: TColumnCard, issue: TRepoIssue): boolean => {
+    return (card.content_url === issue.url) || (card.note === issue.html_url);
   };
 
   private getCardIssueFromNote = (card: TColumnCard): IParsedIssue | null => {
@@ -265,29 +239,31 @@ export class ProjectsOctoKit extends OctoKitBase {
     return Object.values(repos);
   };
 
-  public filterIssuesForColumnCards = async (
+  public mergeCardsWithIssuesForColumn = (
     issues: TRepoIssue[],
-    columns: TColumnsMap,
+    columns: TColumnsWithCardsMap,
     columnType: TColumnTypes,
-  ): Promise<IWrappedIssue[]> => {
+  ): ICardWithIssue[] => {
     // get the column
     const column = columns[columnType];
-    // no column - no issues
+    // no column - no issue
     if (!column) {
       return [];
     }
 
-    const cards = await this.getColumnCards(column);
-
-    const cardIssues = issues
-      .filter((issue) => {
-        const cardIssue = cards.find((card) => {
-          return card.content_url === issue.url;
+    const { cards } = column;
+    const cardIssues: ICardWithIssue[] = cards
+      .map((card) => {
+        const cardIssue = issues.find((issue) => {
+          return this.isCardIssue(card, issue);
         });
 
-        return !!cardIssue;
-      })
-      .map(wrapIssue(columnType));
+        return {
+          card,
+          issue: cardIssue,
+          column: columnType,
+        }
+      });
 
     return cardIssues;
   };

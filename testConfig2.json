@@ -1,6 +1,6 @@
 [
   {
-    "$schema": "https://gist.githubusercontent.com/legomushroom/e997b3c9f15e647a2c62e5414c68deba/raw/1032960ca348ea3aa1399f17d304570720f27a49/botspaces-config-schema.json",
+    "$schema": "https://gist.githubusercontent.com/legomushroom/e997b3c9f15e647a2c62e5414c68deba/raw/0cdb77f4d6304636605bb5ee68fc1b244d487e0a/botspaces-config-schema.json",
     "sprintDuration": 21,
     "sprintNumberHolidays": 0,
     "sprintStartDate": "2020-10-19",

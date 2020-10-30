@@ -1,18 +1,20 @@
-import { IWrappedIssue } from './IWrappedIssue';
+import { ICardWithIssue } from './ICardWithIssue';
+import { IProjectWithConfig } from './IProjectWithConfig';
 
 export interface IProjectData {
-  inWorkIssues: IWrappedIssue[];
-  doneOrDeployIssues: IWrappedIssue[];
-  allPlannedIssues: IWrappedIssue[];
-  issuesToSolve: IWrappedIssue[];
+  project: IProjectWithConfig;
+  inWorkIssues: ICardWithIssue[];
+  doneOrDeployIssues: ICardWithIssue[];
+  allPlannedIssues: ICardWithIssue[];
+  issuesToSolve: ICardWithIssue[];
   // raw:
-  backlogIssues: IWrappedIssue[];
-  committedIssues: IWrappedIssue[];
-  progressIssues: IWrappedIssue[];
-  inReviewIssues: IWrappedIssue[];
-  blockedIssues: IWrappedIssue[];
-  waitingToDeployIssues: IWrappedIssue[];
-  doneIssues: IWrappedIssue[];
+  backlogIssues: ICardWithIssue[];
+  committedIssues: ICardWithIssue[];
+  progressIssues: ICardWithIssue[];
+  inReviewIssues: ICardWithIssue[];
+  blockedIssues: ICardWithIssue[];
+  waitingToDeployIssues: ICardWithIssue[];
+  doneIssues: ICardWithIssue[];
 }
 
 

@@ -98,6 +98,13 @@
         "isCheckListItems": {
           "description": "If to render issues as check list using the [x] markers.\n\ndefault: false",
           "type": "boolean"
+        },
+        "developers": {
+          "description": "Team developers list, if not set, inferred from\nthe assigned GitHub issues.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       },
       "additionalProperties": false,

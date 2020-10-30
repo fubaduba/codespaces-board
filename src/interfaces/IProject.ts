@@ -18,4 +18,10 @@ export interface IProject {
    * default: false
    */
   isCheckListItems?: boolean;
+
+  /**
+   * Team developers list, if not set, inferred from
+   * the assigned GitHub issues.
+   */
+  developers?: string[];
 }

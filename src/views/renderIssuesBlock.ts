@@ -5,25 +5,29 @@ import { IWrappedIssue } from '../interfaces/IWrappedIssue';
 import { notEmpty } from '../utils/notEmpty';
 import { capitalize } from '../utils/capitalize';
 import { TProjectConfig } from '../interfaces/TProjetConfig';
+import { ICardWithIssue } from '../interfaces/ICardWithIssue';
 
-type TLabeledIssues = Record<string, IWrappedIssue[]>;
+type TLabeledIssues = Record<string, ICardWithIssue[]>;
 
 const NONE_LABEL = 'codespaces-board-undefined-label';
 
-const sortIssuesListByUsername = (issues: IWrappedIssue[]) => {
-  const result = issues.sort((issue1, issue2) => {
-    if (!issue1.issue.assignees.length) {
+const sortIssuesListByUsername = (cardsWithIssue: ICardWithIssue[]) => {
+  const result = cardsWithIssue.sort((cardWithIssue1, cardWithIssue2) => {
+    const { issue: issue1 } = cardWithIssue1;
+    const { issue: issue2 } = cardWithIssue2;
+
+    if (!issue1 || !issue1.assignees.length) {
       return 1;
     }
 
-    if (!issue2.issue.assignees.length) {
+    if (!issue2 || !issue2.assignees.length) {
       return -1;
     }
 
-    if (issue1.issue.assignees[0].login < issue2.issue.assignees[0].login) {
+    if (issue1.assignees[0].login < issue2.assignees[0].login) {
       return -1;
     }
-    if (issue1.issue.assignees[0].login > issue2.issue.assignees[0].login) {
+    if (issue1.assignees[0].login > issue2.assignees[0].login) {
       return 1;
     }
 
@@ -35,9 +39,13 @@ const sortIssuesListByUsername = (issues: IWrappedIssue[]) => {
 
 const getIssuesForLabel = (
   label: string,
-  wrappedIssues: IWrappedIssue[],
-): IWrappedIssue[] => {
-  const result = wrappedIssues.filter(({ issue }) => {
+  cardsWithIssue: ICardWithIssue[],
+): ICardWithIssue[] => {
+  const result = cardsWithIssue.filter(({ issue }) => {
+    if (!issue) {
+      return false;
+    }
+
     const foundLabel = issue.labels.find((issueLabel) => {
       return issueLabel.name === label;
     });
@@ -49,7 +57,7 @@ const getIssuesForLabel = (
 };
 
 const groupIssuesByLabels = (
-  issues: IWrappedIssue[],
+  issues: ICardWithIssue[],
   projectConfig: TProjectConfig,
 ): TLabeledIssues => {
   const result: TLabeledIssues = {};
@@ -57,7 +65,7 @@ const groupIssuesByLabels = (
   const labels =
     typeof projectConfig === 'number' ? [] : projectConfig.trackLabels ?? [];
 
-  const includedIssues = new Set<IWrappedIssue>();
+  const includedIssues = new Set<ICardWithIssue>();
   for (let label of labels) {
     const issuesForLabel = sortIssuesListByUsername(
       getIssuesForLabel(label, issues),
@@ -85,7 +93,7 @@ const renderTitle = (title: string) => {
 };
 
 const renderIssuesSection = (
-  issues: IWrappedIssue[],
+  cardsWithIssues: ICardWithIssue[],
   projectConfig: TProjectConfig,
   title?: string,
 ) => {
@@ -96,9 +104,9 @@ const renderIssuesSection = (
       ? undefined
       : projectConfig.isCheckListItems;
 
-  for (let wrappedIssue of issues) {
-    const { column, issue } = wrappedIssue;
-    const item = renderIssue(column, issue, isCheckList);
+  for (let cardWithIssue of cardsWithIssues) {
+    const { column } = cardWithIssue;
+    const item = renderIssue(column, cardWithIssue, isCheckList);
     issueItems.push(`${ident(0)}${item}`);
   }
 
@@ -106,7 +114,7 @@ const renderIssuesSection = (
 };
 
 const renderIssuesList = (
-  issues: IWrappedIssue[],
+  issues: ICardWithIssue[],
   projectConfig: TProjectConfig,
 ) => {
   const issueGroups = groupIssuesByLabels(issues, projectConfig);
@@ -141,7 +149,7 @@ const renderIssuesList = (
 
 export const renderIssuesBlock = (
   title: string,
-  issues: IWrappedIssue[],
+  issues: ICardWithIssue[],
   projectConfig: TProjectConfig,
   /**
    * if there is no issues in the list, should we render the title?

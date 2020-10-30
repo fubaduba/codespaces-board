@@ -1,6 +1,7 @@
 import { ProjectsOctoKit } from '../octokit/ProjectsOctoKit';
+import { measure } from './measure';
+
 import { TColumnTypes } from '../interfaces/TColumnTypes';
-// import { TProject } from '../interfaces/TProject';
 import { IRepoSourceConfig } from '../interfaces/IRepoSourceConfig';
 import { IProjectData } from '../interfaces/IProjectData';
 import { IProjectWithConfig } from '../interfaces/IProjectWithConfig';
@@ -10,85 +11,93 @@ export const getProjectData = async (
   repo: IRepoSourceConfig,
   project: IProjectWithConfig,
 ): Promise<IProjectData> => {
-  const columns = await projectKit.getColumns(project);
-  const cards = await projectKit.getCards(columns);
-  const repos = await projectKit.getCardRepos(cards);
+  return await measure(`Get data for the "${project.project.name}" project`, async () => {
+    const columns = await measure('Fetching columns', async () => {
+      return await projectKit.getColumns(project);
+    });
 
-  console.log('>>> repos:');
-  console.log(repos);
-  console.log('>>>');
+    const cards = await measure('Fetching cards', async () => {
+      return await projectKit.getCards(columns);
+    });
 
-  const issues = await projectKit.getReposIssues(repos);
-  const issues2 = await projectKit.getRepoIssues(repo);
+    const repos = await measure('Fetching Repos', async () => {
+      return await projectKit.getCardRepos(cards);
+    });
+    console.log('Repos: ', repos);
 
-  console.log('>>> issues.length:');
-  console.log(issues.length);
-  console.log('>>>');
+    const issues = await measure('Fetching Issues', async () => {
+      return await projectKit.getReposIssues(repos);
+    });
 
-  console.log('>>> issues2.length:');
-  console.log(issues2.length);
-  console.log('>>>');
+    const backlogIssues = await projectKit.mergeCardsWithIssuesForColumn(
+      issues,
+      cards,
+      TColumnTypes.Backlog,
+    );
+    console.log(`BacklogIssues: ${backlogIssues.length} items`);
 
-  const backlogIssues = await projectKit.filterIssuesForColumnCards(
-    issues,
-    columns,
-    TColumnTypes.Backlog
-  );
+    const committedIssues = await projectKit.mergeCardsWithIssuesForColumn(
+      issues,
+      cards,
+      TColumnTypes.Committed,
+    );
+    console.log(`CommittedIssues: ${committedIssues.length} items`);
 
-  const committedIssues = await projectKit.filterIssuesForColumnCards(
-    issues,
-    columns,
-    TColumnTypes.Committed
-  );
+    const blockedIssues = await projectKit.mergeCardsWithIssuesForColumn(
+      issues,
+      cards,
+      TColumnTypes.Blocked
+    );
+    console.log(`BlockedIssues: ${blockedIssues.length} items`);
 
-  const blockedIssues = await projectKit.filterIssuesForColumnCards(
-    issues,
-    columns,
-    TColumnTypes.Blocked
-  );
+    const progressIssues = await projectKit.mergeCardsWithIssuesForColumn(
+      issues,
+      cards,
+      TColumnTypes.InProgress
+    );
+    console.log(`ProgressIssues: ${progressIssues.length} items`);
 
-  const progressIssues = await projectKit.filterIssuesForColumnCards(
-    issues,
-    columns,
-    TColumnTypes.InProgress
-  );
+    const inReviewIssues = await projectKit.mergeCardsWithIssuesForColumn(
+      issues,
+      cards,
+      TColumnTypes.InReview
+    );
+    console.log(`InReviewIssues: ${inReviewIssues.length} items`);
 
-  const inReviewIssues = await projectKit.filterIssuesForColumnCards(
-    issues,
-    columns,
-    TColumnTypes.InReview
-  );
+    const waitingToDeployIssues = await projectKit.mergeCardsWithIssuesForColumn(
+      issues,
+      cards,
+      TColumnTypes.WaitingToDeploy
+    );
+    console.log(`WaitingToDeployIssues: ${waitingToDeployIssues.length} items`);
 
-  const waitingToDeployIssues = await projectKit.filterIssuesForColumnCards(
-    issues,
-    columns,
-    TColumnTypes.WaitingToDeploy
-  );
+    const doneIssues = await projectKit.mergeCardsWithIssuesForColumn(
+      issues,
+      cards,
+      TColumnTypes.Done
+    );
+    console.log(`doneIssues: ${doneIssues.length} items`);
 
-  const doneIssues = await projectKit.filterIssuesForColumnCards(
-    issues,
-    columns,
-    TColumnTypes.Done
-  );
+    const inWorkIssues = [...progressIssues, ...inReviewIssues];
+    const doneOrDeployIssues = [...waitingToDeployIssues, ...doneIssues];
+    const allPlannedIssues = [...blockedIssues, ...committedIssues, ...inWorkIssues, ...doneOrDeployIssues];
+    const toSolveIssues = [...inWorkIssues, ...blockedIssues, ...committedIssues];
 
-  const inWorkIssues = [...progressIssues, ...inReviewIssues];
-  const doneOrDeployIssues = [...waitingToDeployIssues, ...doneIssues];
-  const allPlannedIssues = [...blockedIssues, ...committedIssues, ...inWorkIssues, ...doneOrDeployIssues];
-  const toSolveIssues = [...inWorkIssues, ...blockedIssues, ...committedIssues];
-
-  return {
-    // combined
-    inWorkIssues,
-    doneOrDeployIssues,
-    allPlannedIssues,
-    issuesToSolve: toSolveIssues,
-    // plain
-    backlogIssues,
-    committedIssues,
-    progressIssues,
-    inReviewIssues,
-    blockedIssues,
-    waitingToDeployIssues,
-    doneIssues,
-  };
+    return {
+      project,
+      // combined
+      inWorkIssues,
+      doneOrDeployIssues,
+      allPlannedIssues,
+      issuesToSolve: toSolveIssues,
+      // plain
+      backlogIssues,
+      committedIssues,
+      progressIssues,
+      inReviewIssues,
+      blockedIssues,
+      waitingToDeployIssues,
+      doneIssues,
+    };
+  });
 };

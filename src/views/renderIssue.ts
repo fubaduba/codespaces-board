@@ -1,6 +1,6 @@
+import { ICardWithIssue } from '../interfaces/ICardWithIssue';
 import { IIssueState } from '../interfaces/IIssueState';
 import { TColumnTypes } from '../interfaces/TColumnTypes';
-import { TRepoIssue } from '../interfaces/TRepoIssue';
 import { pluck } from '../utils/pluck';
 import { ident } from './ident';
 
@@ -50,7 +50,12 @@ const toLowerCase = (str: string) => {
   return str.toLowerCase();
 };
 
-const mapIssueTypeToEmoji = (issue: TRepoIssue) => {
+const mapIssueTypeToEmoji = (cardWithIssue: ICardWithIssue) => {
+  const { issue } = cardWithIssue;
+  if (!issue) {
+    return emojiIcon('🃏', 'Card');;
+  }
+
   const { labels } = issue;
 
   const isBug = labels.map(pluck('name')).map(toLowerCase).includes('bug');
@@ -62,9 +67,15 @@ const mapIssueTypeToEmoji = (issue: TRepoIssue) => {
   return '';
 };
 
-const renderAssignees = (issue: TRepoIssue) => {
-  const { assignees } = issue;
+const renderAssignees = (cardWithIssue: ICardWithIssue) => {
+  const { issue, card } = cardWithIssue;
 
+  // if no issue linked - use creator of the card instead
+  if (!issue) {
+    return `@${card.creator.login}`;
+  }
+
+  const { assignees } = issue;
   if (!assignees.length) {
     return `🙋**free issue**`;
   }
@@ -76,9 +87,18 @@ const renderAssignees = (issue: TRepoIssue) => {
   return users.join(' ');
 };
 
-const renderItemIssueStatus = (issue: TRepoIssue, asCheckList: boolean) => {
+const renderItemIssueStatus = (
+  cardWithIssue: ICardWithIssue,
+  asCheckList: boolean,
+) => {
   if (!asCheckList) {
     return '';
+  }
+
+  const { issue, card } = cardWithIssue;
+
+  if (!issue) {
+    return !card.archived ? '[ ] ' : '[x] ';
   }
 
   return issue.state === IIssueState.Open ? '[ ] ' : '[x] ';
@@ -86,14 +106,24 @@ const renderItemIssueStatus = (issue: TRepoIssue, asCheckList: boolean) => {
 
 export const renderIssue = (
   column: TColumnTypes,
-  issue: TRepoIssue,
+  cardWithIssue: ICardWithIssue,
   asCheckList = false,
 ) => {
-  const { title, html_url } = issue;
-  const assignees = renderAssignees(issue);
-  const stateEmoji = mapColumnToEmoji(column);
-  const bugEmoji = mapIssueTypeToEmoji(issue);
-  const issueStatus = renderItemIssueStatus(issue, asCheckList);
 
-  return `- ${issueStatus}${stateEmoji}${bugEmoji}${title} ${html_url} ${assignees}`;
+  const { issue, card } = cardWithIssue;
+
+  const title = (!issue)
+    ? card.note
+    : issue.title;
+
+    const url = (!issue)
+    ? card.content_url
+    : issue.html_url;
+
+  const assignees = renderAssignees(cardWithIssue);
+  const stateEmoji = mapColumnToEmoji(column);
+  const bugEmoji = mapIssueTypeToEmoji(cardWithIssue);
+  const issueStatus = renderItemIssueStatus(cardWithIssue, asCheckList);
+
+  return `- ${issueStatus}${stateEmoji}${bugEmoji}${title} ${url} ${assignees}`;
 };
