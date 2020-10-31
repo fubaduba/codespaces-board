@@ -9,13 +9,14 @@
 - stats on when moved from one column to another ?
 
 - Badges:
-    - 🎭 Performer - most items in review (N items in review)
-    - 🤝 Team player(Mate) - most items with multiple assignees
-    - 🏋️ All in - most items in work
-    - Riddle solver - most solved issues
     - 💯 Done - more issues solved then the sprint had on average per developer (> 1x rate)
     - 🚂 Steam powered - more issues solved then the sprint had on average per developer (> 1.5x rate)
     - 🚀 Unstoppable - more issues solved then the sprint had on average per developer (> 2x rate)
+
+    - 🎭 Performer - most items in review (N items in review)
+    - 🤝 Team player(Mate) - most items with multiple assignees
+    - 🏋️ All in - 75% of planned items most items in work
+    - Riddle solver - most solved issues
     - 🧴 Sanitizer - most security bugs fixed
     - 🔭 Focused - one item assigned
     - 🧭 Explorer - most backlog items solved

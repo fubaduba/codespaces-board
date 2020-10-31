@@ -38,40 +38,39 @@ const sortIssuesListByUsername = (cardsWithIssue: ICardWithIssue[]) => {
   return result;
 };
 
-const getIssuesForLabel = (
-  label: string,
-  labels: string[],
-  cardsWithIssue: ICardWithIssue[],
-): ICardWithIssue[] => {
-  const result = cardsWithIssue.filter(({ issue }) => {
+const findLabel = (labelName: string, found = true) => {
+  return ({ issue }: ICardWithIssue) => {
     if (!issue) {
       return false;
     }
 
-    const firstLabelFromTheList = issue.labels.find((issueLabel) => {
-      return labels.includes(issueLabel.name);
-    });
-
     const foundLabel = issue.labels.find((issueLabel) => {
-      return issueLabel.name === label;
+      return issueLabel.name === labelName;
     });
 
-    /**
-     * The `labels` array has the descending priority for the defined labels,
-     * hence if the found label is not the first in the list, dont use it
-     */
-    if (firstLabelFromTheList !== foundLabel) {
-      return false;
-    }
+    return !!foundLabel === found;
+  }
+}
 
-    return !!foundLabel;
-  });
+const getIssuesForLabel = (
+  label: string,
+  cardsWithIssue: ICardWithIssue[],
+): [ICardWithIssue[], ICardWithIssue[]] => {
+  const originalCards = [...cardsWithIssue];
 
-  return result;
+  const result = originalCards.filter(
+    findLabel(label),
+  );
+
+  const rest = originalCards.filter(
+    findLabel(label, false),
+  );
+
+  return [result, rest];
 };
 
 const groupIssuesByLabels = (
-  issues: ICardWithIssue[],
+  cardsWithIssues: ICardWithIssue[],
   projectWithConfig: IProjectWithConfig,
 ): TLabeledIssues => {
   const result: TLabeledIssues = {};
@@ -83,19 +82,29 @@ const groupIssuesByLabels = (
 
   const includedIssues = new Set<ICardWithIssue>();
   for (let label of labels) {
-    const issuesForLabel = sortIssuesListByUsername(
-      getIssuesForLabel(label, labels, issues),
-    );
+    const [cardsForLabel, restCards] = getIssuesForLabel(label, cardsWithIssues);
+    /**
+     * !! We return the `restCards` above - the list of cards that does not hold
+     * the label, and reassign the "rest" list to the original one, so we don't
+     * match the same card against other labels. This enforces descending priority
+     * of the `trackLabels` labels list defined in the project config.
+     * e.g. with the ["port-forwarding", "workbench", "performance", "serverless"]
+     * list in the config, the issues with both "port-forwarding" and "performance"
+     * labels, will show up only in the` Port-forwarding` section since it has the
+     * highe precedence over the "performance" label.
+     */
+    cardsWithIssues = restCards;
 
-    result[label] = issuesForLabel;
+    const sortedIssuesForLabel = sortIssuesListByUsername(cardsForLabel);
+    result[label] = sortedIssuesForLabel;
 
-    for (let issueForLabel of issuesForLabel) {
+    for (let issueForLabel of sortedIssuesForLabel) {
       includedIssues.add(issueForLabel);
     }
   }
 
   // get all issues that have no label
-  const notIncludedIssues = issues.filter((issue) => {
+  const notIncludedIssues = cardsWithIssues.filter((issue) => {
     return !includedIssues.has(issue);
   });
 
