@@ -1,7 +1,7 @@
 import { OctoKitBase } from './OctoKitBase';
 import { parseIssueApiUrl, parseIssueUrl } from '../utils/parseIssueUrl';
 import { parseFileUrl } from '../utils/parseFileUrl';
-import { notEmpty } from '../utils/notEmpty';
+import { notEmpty } from '../utils/functional/notEmpty';
 
 import { IRepoSourceConfig } from '../interfaces/IRepoSourceConfig';
 import { TColumnCard } from '../interfaces/TColumnCard';

@@ -1,6 +1,6 @@
 [
   {
-    "$schema": "https://gist.githubusercontent.com/legomushroom/e997b3c9f15e647a2c62e5414c68deba/raw/0cdb77f4d6304636605bb5ee68fc1b244d487e0a/botspaces-config-schema.json",
+    "$schema": "https://gist.githubusercontent.com/legomushroom/e997b3c9f15e647a2c62e5414c68deba/raw/2b87b907f926cbe74281b87a26367ea47bf11818/botspaces-config-schema.json",
     "sprintDuration": 21,
     "sprintNumberHolidays": 0,
     "sprintStartDate": "2020-10-19",
@@ -13,6 +13,7 @@
           {
             "id": 6,
             "trackLabels": ["port-forwarding", "workbench", "serverless", "performance"],
+            "priorityLabels": ["p0", "p1"],
             "isCheckListItems": true
           }
         ]

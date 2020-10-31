@@ -6,8 +6,8 @@ import { TRepoIssue } from '../interfaces/TRepoIssue';
 import { getWorkDays } from '../views/renderDaysLeft';
 import { arrayUnique } from './arrayUnique';
 import { flattenArray } from './flatternArray';
-import { notEmpty } from './notEmpty';
-import { pluck } from './pluck';
+import { notEmpty } from './functional/notEmpty';
+import { pluck } from './functional/pluck';
 import { ICardWithIssue } from '../interfaces/ICardWithIssue';
 import { IProjectWithConfig } from '../interfaces/IProjectWithConfig';
 

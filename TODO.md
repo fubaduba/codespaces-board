@@ -1,11 +1,14 @@
 
-- Add support for issues from external repos
-- Add the developer stats and badges/achievements
+
+- show original planned percent for complete
 - Pass the config JSON file refrence thru the yml file
+- Cache repo issues
 - docs!
+- Add the developer stats and badges/achievements
 - Add the PR parsing logic on teh card/issue and render it for the "In review" items
 
-- project pulse - graph on how many items fixed on particular day ?
+- project pulse - graph on how many items fixed on particular week ?
+- burn-down chart - graph on how many items fixed on particular day ?
 - stats on when moved from one column to another ?
 
 - Badges:

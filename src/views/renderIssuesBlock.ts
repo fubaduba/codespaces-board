@@ -1,42 +1,16 @@
 import { ident } from './ident';
-import { renderIssue } from './renderIssue';
+import { renderCard } from './renderCard';
 
-import { IWrappedIssue } from '../interfaces/IWrappedIssue';
-import { notEmpty } from '../utils/notEmpty';
-import { capitalize } from '../utils/capitalize';
-import { TProjectConfig } from '../interfaces/TProjetConfig';
+import { notEmpty } from '../utils/functional/notEmpty';
+import { capitalize } from '../utils/functional/capitalize';
 import { ICardWithIssue } from '../interfaces/ICardWithIssue';
 import { IProjectWithConfig } from '../interfaces/IProjectWithConfig';
+import { sortCardsInPlace } from '../utils/sortCards/sortCardsInPlace';
+import { TArraySortResult } from '../interfaces/TArraySortResult';
 
 type TLabeledIssues = Record<string, ICardWithIssue[]>;
 
 const NONE_LABEL = 'codespaces-board-undefined-label';
-
-const sortIssuesListByUsername = (cardsWithIssue: ICardWithIssue[]) => {
-  const result = cardsWithIssue.sort((cardWithIssue1, cardWithIssue2) => {
-    const { issue: issue1 } = cardWithIssue1;
-    const { issue: issue2 } = cardWithIssue2;
-
-    if (!issue1 || !issue1.assignees.length) {
-      return 1;
-    }
-
-    if (!issue2 || !issue2.assignees.length) {
-      return -1;
-    }
-
-    if (issue1.assignees[0].login < issue2.assignees[0].login) {
-      return -1;
-    }
-    if (issue1.assignees[0].login > issue2.assignees[0].login) {
-      return 1;
-    }
-
-    return 0;
-  });
-
-  return result;
-};
 
 const findLabel = (labelName: string, found = true) => {
   return ({ issue }: ICardWithIssue) => {
@@ -49,22 +23,16 @@ const findLabel = (labelName: string, found = true) => {
     });
 
     return !!foundLabel === found;
-  }
-}
+  };
+};
 
 const getIssuesForLabel = (
   label: string,
   cardsWithIssue: ICardWithIssue[],
 ): [ICardWithIssue[], ICardWithIssue[]] => {
   const originalCards = [...cardsWithIssue];
-
-  const result = originalCards.filter(
-    findLabel(label),
-  );
-
-  const rest = originalCards.filter(
-    findLabel(label, false),
-  );
+  const result = originalCards.filter(findLabel(label));
+  const rest = originalCards.filter(findLabel(label, false));
 
   return [result, rest];
 };
@@ -76,13 +44,15 @@ const groupIssuesByLabels = (
   const result: TLabeledIssues = {};
   const { projectConfig } = projectWithConfig;
 
-  const labels = typeof projectConfig === 'number'
-    ? []
-    : projectConfig.trackLabels ?? [];
+  const labels =
+    typeof projectConfig === 'number' ? [] : projectConfig.trackLabels ?? [];
 
   const includedIssues = new Set<ICardWithIssue>();
   for (let label of labels) {
-    const [cardsForLabel, restCards] = getIssuesForLabel(label, cardsWithIssues);
+    const [cardsForLabel, restCards] = getIssuesForLabel(
+      label,
+      cardsWithIssues,
+    );
     /**
      * !! We return the `restCards` above - the list of cards that does not hold
      * the label, and reassign the "rest" list to the original one, so we don't
@@ -91,11 +61,11 @@ const groupIssuesByLabels = (
      * e.g. with the ["port-forwarding", "workbench", "performance", "serverless"]
      * list in the config, the issues with both "port-forwarding" and "performance"
      * labels, will show up only in the` Port-forwarding` section since it has the
-     * highe precedence over the "performance" label.
+     * higher precedence over the "performance" label.
      */
     cardsWithIssues = restCards;
 
-    const sortedIssuesForLabel = sortIssuesListByUsername(cardsForLabel);
+    const sortedIssuesForLabel = sortCardsInPlace(cardsForLabel, projectWithConfig);
     result[label] = sortedIssuesForLabel;
 
     for (let issueForLabel of sortedIssuesForLabel) {
@@ -131,7 +101,7 @@ const renderIssuesSection = (
       : projectConfig.isCheckListItems;
 
   for (let cardWithIssue of cardsWithIssues) {
-    const item = renderIssue(cardWithIssue, projectWithConfig, isCheckList);
+    const item = renderCard(cardWithIssue, projectWithConfig, isCheckList);
     issueItems.push(`${ident(0)}${item}`);
   }
 
@@ -142,30 +112,32 @@ const renderIssuesList = (
   issues: ICardWithIssue[],
   projectWithConfig: IProjectWithConfig,
 ) => {
-  const { projectConfig } = projectWithConfig;
   const issueGroups = groupIssuesByLabels(issues, projectWithConfig);
 
   const items = Object.entries(issueGroups)
-    // make the general section to be first in the lsit
+    // make the general section to be first in the list
     .sort(([labelName1], [labelName2]) => {
+      if (labelName1 === labelName2) {
+        return TArraySortResult.Equal;
+      }
+
       if (labelName1 === NONE_LABEL) {
-        return -1;
+        return TArraySortResult.FirstEarlier;
       }
 
       if (labelName2 === NONE_LABEL) {
-        return 1;
+        return TArraySortResult.SecondEarlier;
       }
 
-      return 0;
+      return TArraySortResult.Equal;
     })
-    .map(([labelName, issues]) => {
-      if (!issues.length) {
+    .map(([labelName, issues], i) => {
+      if (!issues.length || labelName === NONE_LABEL) {
         return;
       }
 
-      const title = (labelName === NONE_LABEL)
-        ? undefined
-        : `\n**${capitalize(labelName)}**`;
+      const title =
+        labelName === NONE_LABEL ? undefined : `\n**${capitalize(labelName)}**`;
 
       return renderIssuesSection(issues, projectWithConfig, title);
     });
