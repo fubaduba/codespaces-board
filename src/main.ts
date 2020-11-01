@@ -89,7 +89,7 @@ const processConfigRecord = async (
   for (let { repo, projects } of repoProjects) {
     const projectsWithData = await Promise.all(
       projects.map(async (project) => {
-        const data = await getProjectData(projectKit, repo, project);
+        const data = await getProjectData(projectKit, config, project);
         return {
           project,
           data,

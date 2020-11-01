@@ -113,7 +113,7 @@ export const getProjectStats = (
     : undefined;
 
   const issuesDayRatio = daysLeft
-    ? allPlannedIssues.length / daysLeft.totalBusinessDays
+    ? allPlannedIssues.length / daysLeft.totalBusinessDaysInSprint
     : undefined;
 
   const issuesDeveloperDayLeftRatio = issuesDayLeftRatio

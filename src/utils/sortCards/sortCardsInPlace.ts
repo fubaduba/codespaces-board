@@ -13,7 +13,7 @@ export const sortCardsInPlace = (
     sortCardsByLabelPriorityInPlace(
         cards,
         projectWithConfig,
-        // sortByAssigneesPredicate,
+        sortByAssigneesPredicate,
     );
 
     return cards;

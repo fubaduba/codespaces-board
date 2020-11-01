@@ -1,9 +1,9 @@
 [
   {
     "$schema": "https://gist.githubusercontent.com/legomushroom/e997b3c9f15e647a2c62e5414c68deba/raw/1032960ca348ea3aa1399f17d304570720f27a49/botspaces-config-schema.json",
+    "sprintStartDate": "2020-10-19",
     "sprintDuration": 21,
     "sprintNumberHolidays": 0,
-    "sprintStartDate": "2020-10-19",
     "boardIssue": "https://github.com/microsoft/vssaas-planning/issues/1109",
     "repos": [
       {
@@ -18,6 +18,7 @@
               "serverless",
               "performance"
             ],
+            "priorityLabels": ["p0", "p1"],
             "isCheckListItems": true
           }
         ]

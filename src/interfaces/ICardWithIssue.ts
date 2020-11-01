@@ -6,4 +6,5 @@ export interface ICardWithIssue {
     column: TColumnTypes;
     issue?: TRepoIssue;
     card: TColumnCard;
+    isNew: boolean;
 }

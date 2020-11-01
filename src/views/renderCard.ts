@@ -8,6 +8,7 @@ import { notEmpty } from '../utils/functional/notEmpty';
 import { isBugCard } from '../utils/isBugCard';
 import { isDoneColumn } from '../utils/isDoneColumn';
 import { emojiIcon } from '../utils/emojiIcon';
+import { IConfig } from '../interfaces/IConfig';
 
 const mapColumnToEmoji = (
   column: TColumnTypes,
@@ -63,6 +64,16 @@ const mapIssueTypeToEmoji = (cardWithIssue: ICardWithIssue) => {
 
   if (isBugCard(cardWithIssue)) {
     return emojiIcon('🐛', 'Bug');
+  }
+
+  return '';
+};
+
+const newToEmpoji = (
+  { isNew }: ICardWithIssue,
+) => {
+  if (isNew) {
+    return emojiIcon('🆕', 'New');
   }
 
   return '';
@@ -185,8 +196,9 @@ export const renderCard = (
   const assignees = renderAssignees(cardWithIssue);
   const labels = renderPriorityLabels(cardWithIssue, projectWithConfig);
   const stateEmoji = mapColumnToEmoji(column, projectWithConfig);
-  const bugEmoji = mapIssueTypeToEmoji(cardWithIssue);
+  const typeEmoji = mapIssueTypeToEmoji(cardWithIssue);
+  const newEmoji = newToEmpoji(cardWithIssue);
   const issueStatus = renderItemIssueStatus(cardWithIssue, column, asCheckList);
 
-  return `- ${issueStatus}${labels}${stateEmoji}${bugEmoji}${title} ${url} ${assignees}`;
+  return `- ${issueStatus}${labels}${newEmoji}${stateEmoji}${typeEmoji}${title} ${url} ${assignees}`;
 };

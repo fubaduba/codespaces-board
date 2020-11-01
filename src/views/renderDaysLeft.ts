@@ -1,4 +1,7 @@
 import { IConfig } from '../interfaces/IConfig';
+import { parseDate } from '../utils/parseDate';
+
+import moment from 'moment';
 
 const getBusinessDatesCount = (startDate: Date, endDate: Date) => {
   var count = 0;
@@ -42,21 +45,21 @@ export const getWorkDays = (config: IConfig) => {
     return;
   }
 
-  const sprintStartDate = new Date(sprintStartDateString);
-  const sprintEndDate = new Date(
-    new Date().setDate(sprintStartDate.getDate() + sprintDuration),
-  );
+  const sprintStartDate = moment(sprintStartDateString).toDate();
+  const sprintEndDate = moment(sprintStartDateString)
+    .add('days', sprintDuration)
+    .toDate();
 
-  const totalBusinessDays =
+  const totalBusinessDaysInSprint =
     getBusinessDatesCount(sprintStartDate, sprintEndDate) -
     sprintNumberHolidays;
 
   const businessDaysLeft =
-    getBusinessDatesCount(new Date(), sprintEndDate) - 1 - sprintNumberHolidays;
+    getBusinessDatesCount(new Date(), sprintEndDate) - sprintNumberHolidays;
 
   return {
     businessDaysLeft,
-    totalBusinessDays,
+    totalBusinessDaysInSprint: totalBusinessDaysInSprint,
   };
 }
 
@@ -66,11 +69,11 @@ export const renderDaysLeft = (config: IConfig) => {
     return;
   }
 
-  const { businessDaysLeft, totalBusinessDays } = days;
+  const { businessDaysLeft, totalBusinessDaysInSprint } = days;
   const daysLeft = Math.max(businessDaysLeft, 0);
 
   return `${daysLeftToEmoj(
     daysLeft,
-    totalBusinessDays,
+    totalBusinessDaysInSprint,
   )} **${daysLeft}** work days left`;
 };

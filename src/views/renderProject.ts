@@ -7,9 +7,13 @@ import { renderProjectOverview } from './renderProjectOverview';
 import { IProjectData } from '../interfaces/IProjectData';
 import { IProjectWithConfig } from '../interfaces/IProjectWithConfig';
 import { IConfig } from '../interfaces/IConfig';
+import { filterPlannedProjectData } from '../utils/filterPlannedProjectData';
+import { renderProjectTitle } from './renderProjectTitle';
+import { renderNewItemsSuffix } from './renderNewItemsSuffix';
+import { addTitle } from './addTitle';
 
 export const renderProject = (
-  data: IProjectData,
+  allData: IProjectData,
   projectWithConfig: IProjectWithConfig,
   config: IConfig,
 ): string => {
@@ -22,13 +26,20 @@ export const renderProject = (
     backlogIssues,
     committedIssues,
     blockedIssues,
-  } = data;
+  } = allData;
+
+  const plannedData = filterPlannedProjectData(allData);
+
+  const {
+    allPlannedIssues: plannedAllPlannedIssues,
+    doneOrDeployIssues: plannedDoneOrDeployIssues,
+  } = plannedData;
 
   const {
     doneRate,
     inWorkRate,
     committedRate,
-  } = getProjectStats(data, config);
+  } = getProjectStats(plannedData, config);
 
   const {
     project,
@@ -41,7 +52,7 @@ export const renderProject = (
     false,
   );
 
-  const inWorkCount = `${inWorkIssues.length}/${allPlannedIssues.length}`;
+  const inWorkCount = `${inWorkIssues.length}`;
   const inWorkIssuesString = renderIssuesBlock(
     `🏃  ${inWorkCount} In work (${rateToPercent(inWorkRate)})`,
     inWorkIssues,
@@ -54,22 +65,23 @@ export const renderProject = (
     projectWithConfig,
   );
 
-  const doneCount = `${doneOrDeployIssues.length}/${allPlannedIssues.length}`;
+  const doneCount = `${plannedDoneOrDeployIssues.length}/${plannedAllPlannedIssues.length}`;
+  const newItemsDone = renderNewItemsSuffix(plannedAllPlannedIssues, allPlannedIssues);
   const doneIssuesString = renderIssuesBlock(
-    `🙌 ${doneCount} Done (${rateToPercent(doneRate)})`,
+    `🙌 ${doneCount} Done (${rateToPercent(doneRate)})${addTitle('Items added after sprint start date', newItemsDone)}`,
     doneOrDeployIssues,
     projectWithConfig,
   );
 
-  const projectTitle = `## ${project.name} - ${rateToPercent(doneRate)} done`;
   const projectLink = `Link: [${project.name}](${project.html_url})`;
   const backlogIssuesCountString = `\nBacklog: [${backlogIssues.length} issues](${project.html_url})`;
 
+  const projectWithData = { data: allData, project: projectWithConfig };
   return [
     '',
-    projectTitle,
+    renderProjectTitle(project, allData, config),
     projectLink,
-    renderProjectOverview(config, { data, project: projectWithConfig }),
+    renderProjectOverview(config, projectWithData),
     blockedIssuesString,
     committedIssuesString,
     inWorkIssuesString,

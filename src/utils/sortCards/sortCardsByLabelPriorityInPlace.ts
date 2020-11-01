@@ -24,32 +24,23 @@ export const sortCardsByLabelPriorityInPlace = (
       return baseSort;
     }
 
-    // const { issue: issue1 } = cardWithIssue1;
-    // const { issue: issue2 } = cardWithIssue1;
+    const defaultPriority = (predicate)
+      ? null
+      : undefined;
 
-    // if (issue1 && issue2) {
-    //   if (issue1.number === )
-    // }
+    const cardPriority1 = getCardPriority(cardWithIssue1, projectWithConfig, defaultPriority);
+    const cardPriority2 = getCardPriority(cardWithIssue2, projectWithConfig, defaultPriority);
+    if (cardPriority1 === null && cardPriority2 === null && predicate) {
+      return predicate(cardWithIssue1, cardWithIssue2) ?? TArraySortResult.Equal;
+    }
 
+    if (cardPriority1 === null) {
+      return TArraySortResult.SecondEarlier;
+    }
 
-
-    // const defaultPriority = (predicate)
-    //   ? null
-    //   : undefined;
-
-    const cardPriority1 = getCardPriority(cardWithIssue1, projectWithConfig);
-    const cardPriority2 = getCardPriority(cardWithIssue2, projectWithConfig);
-    // if (cardPriority1 === null && cardPriority2 === null && predicate) {
-    //   return predicate(cardWithIssue1, cardWithIssue2) ?? TArraySortResult.Equal;
-    // }
-
-    // if (cardPriority1 === null) {
-    //   return TArraySortResult.SecondEarlier;
-    // }
-
-    // if (cardPriority2 === null) {
-    //   return TArraySortResult.FirstEarlier;
-    // }
+    if (cardPriority2 === null) {
+      return TArraySortResult.FirstEarlier;
+    }
 
     if (cardPriority1 > cardPriority2) {
       return TArraySortResult.FirstEarlier;

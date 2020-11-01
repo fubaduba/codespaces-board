@@ -9,7 +9,7 @@ export const getCardPriority = (
   cardWithIssue: ICardWithIssue,
   { projectConfig }: IProjectWithConfig,
   // if actual priority not set, use this value (0 is the least priority)
-  notDefinedValue: number = 0,
+  notDefinedValue: number | null = 0,
 ) => {
   const { issue } = cardWithIssue;
 

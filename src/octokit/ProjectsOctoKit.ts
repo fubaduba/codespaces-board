@@ -15,6 +15,8 @@ import { TProjectColumn } from '../interfaces/TProjectColumn';
 import { flattenArray } from '../utils/flatternArray';
 import { IParsedRepo } from '../interfaces/IParsedRepo';
 import { ICardWithIssue } from '../interfaces/ICardWithIssue';
+import { IConfig } from '../interfaces/IConfig';
+import { isNewCard } from '../utils/isNewCard';
 
 interface IColumnWithCards {
   column: TProjectColumn;
@@ -244,6 +246,7 @@ export class ProjectsOctoKit extends OctoKitBase {
     issues: TRepoIssue[],
     columns: TColumnsWithCardsMap,
     columnType: TColumnTypes,
+    config: IConfig,
   ): ICardWithIssue[] => {
     // get the column
     const column = columns[columnType];
@@ -263,6 +266,7 @@ export class ProjectsOctoKit extends OctoKitBase {
           card,
           issue: cardIssue,
           column: columnType,
+          isNew: isNewCard(card, config),
         }
       });
 
