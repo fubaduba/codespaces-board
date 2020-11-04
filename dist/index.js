@@ -1712,10 +1712,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.validateConfig = exports.getConfigSchema = exports.getConfigs = void 0;
 const jsonschema_1 = __webpack_require__(978);
 const path = __importStar(__webpack_require__(622));
-const core = __importStar(__webpack_require__(186));
+const env_1 = __webpack_require__(1);
 const constants_1 = __webpack_require__(105);
 const getWorkspacePath = (configFilePath) => {
-    const rootPath = core.getInput('workspace');
+    const rootPath = env_1.env('GITHUB_WORKSPACE');
     console.log(`rootPath variable: ${rootPath}`);
     if (!rootPath) {
         return;

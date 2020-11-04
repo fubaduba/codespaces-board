@@ -1,14 +1,14 @@
 import { Schema, Validator } from 'jsonschema';
 import * as path from 'path';
 
-import * as core from '@actions/core';
+import { env } from './utils/env';
 
 import { PROJECT_ROOT } from './constants';
 
 import { IConfig } from './interfaces/IConfig';
 
 const getWorkspacePath = (configFilePath: string) => {
-  const rootPath = core.getInput('workspace');
+  const rootPath = env('GITHUB_WORKSPACE');
   console.log(`rootPath variable: ${rootPath}`);
   if (!rootPath) {
     return;
