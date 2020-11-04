@@ -114,7 +114,8 @@ const processConfigRecord = async (
 
     const issueContents = [
       header,
-      renderOverview(config, projectsWithData),
+      // render projects overview
+      // renderOverview(config, projectsWithData),
       issueBody,
       footer,
     ].join('\n');

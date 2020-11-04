@@ -114,8 +114,6 @@ const renderIssuesList = (
 ) => {
   const issueGroups = groupIssuesByLabels(issues, projectWithConfig);
 
-  console.log(``)
-
   const items = Object.entries(issueGroups)
     // make the general section to be first in the list
     .sort(([labelName1], [labelName2]) => {

@@ -20,6 +20,24 @@
             ],
             "priorityLabels": ["p0", "p1"],
             "isCheckListItems": true
+          },
+          {
+            "id": 3,
+            "priorityLabels": ["p0", "p1"],
+            "developers": [
+              "rajkumar42",
+              "eljog",
+              "khkh-ms",
+              "bratsche",
+              "edgonmsft",
+              "dmgardiner25",
+              "anpaskin",
+              "kumarz",
+              "fara-nak",
+              "osortega",
+              "jkeech"
+            ],
+            "isCheckListItems": true
           }
         ]
       }
