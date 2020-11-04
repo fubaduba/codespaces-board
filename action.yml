@@ -8,6 +8,9 @@ inputs:
   config:
     required: true
     description: 'Path to the config'
+  workspace:
+    required: false
+    description: 'Path to the root of the workspace'
 runs:
   using: 'node12'
   main: 'dist/index.js'

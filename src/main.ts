@@ -1,5 +1,4 @@
 import * as core from '@actions/core';
-import { Validator } from 'jsonschema';
 
 // add .env file support for dev purposes
 require('dotenv').config();
@@ -7,7 +6,6 @@ require('dotenv').config();
 import { AuthorizationError } from './errors/AuthorizationError';
 import { ProjectsOctoKit } from './octokit/ProjectsOctoKit';
 import { renderProject } from './views/renderProject';
-import { renderOverview } from './views/renderOverview';
 import { getProjectData } from './utils/getProjectData';
 import { env } from './utils/env';
 import { getConfigs, validateConfig } from './config';
