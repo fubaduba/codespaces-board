@@ -1712,9 +1712,22 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.validateConfig = exports.getConfigSchema = exports.getConfigs = void 0;
 const jsonschema_1 = __webpack_require__(978);
 const path = __importStar(__webpack_require__(622));
+const core = __importStar(__webpack_require__(186));
 const constants_1 = __webpack_require__(105);
+const getWorkspacePath = (configFilePath) => {
+    const rootPath = core.getInput('workspace');
+    console.log(`rootPath variable: ${rootPath}`);
+    if (!rootPath) {
+        return;
+    }
+    console.log(`join the workspace path`);
+    return path.join(rootPath, configFilePath);
+};
 exports.getConfigs = (configFilePath) => {
-    const configs = require(path.join(constants_1.PROJECT_ROOT, configFilePath));
+    var _a;
+    const configPath = (_a = getWorkspacePath(configFilePath)) !== null && _a !== void 0 ? _a : path.join(constants_1.PROJECT_ROOT, configFilePath);
+    console.log(`config path: "${configPath}"`);
+    const configs = require(configPath);
     return configs;
 };
 exports.getConfigSchema = () => {

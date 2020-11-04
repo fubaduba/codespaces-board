@@ -9,16 +9,22 @@ import { IConfig } from './interfaces/IConfig';
 
 const getWorkspacePath = (configFilePath: string) => {
   const rootPath = core.getInput('workspace');
+  console.log(`rootPath variable: ${rootPath}`);
   if (!rootPath) {
     return;
   }
+
+  console.log(`join the workspace path`);
 
   return path.join(rootPath, configFilePath);
 }
 
 export const getConfigs = (configFilePath: string): IConfig[] => {
-  const rootPath = getWorkspacePath(configFilePath) ?? path.join(PROJECT_ROOT, configFilePath);
-  const configs = require(rootPath);
+  const configPath = getWorkspacePath(configFilePath) ?? path.join(PROJECT_ROOT, configFilePath);
+
+  console.log(`config path: "${configPath}"`);
+
+  const configs = require(configPath);
 
   return configs;
 };
