@@ -179,6 +179,7 @@ const notEmpty_1 = __webpack_require__(624);
 const TColumnTypes_1 = __webpack_require__(187);
 const flatternArray_1 = __webpack_require__(65);
 const isNewCard_1 = __webpack_require__(363);
+const measure_1 = __webpack_require__(715);
 const findColumn = (columns, columnName) => {
     const result = columns.find((column) => {
         return column.name.toLowerCase() === columnName.toLowerCase();
@@ -284,9 +285,19 @@ class ProjectsOctoKit extends OctoKitBase_1.OctoKitBase {
             });
             return issues;
         });
+        this.reposCache = {};
         this.getReposIssues = (repos) => __awaiter(this, void 0, void 0, function* () {
             const resultPromises = repos.map((repo) => __awaiter(this, void 0, void 0, function* () {
-                return yield this.getRepoIssues(repo);
+                const repoKey = `${repo.owner}/${repo.repo}`;
+                return yield measure_1.measure(`Getting new isues for "${repoKey}"`, () => __awaiter(this, void 0, void 0, function* () {
+                    const cachedIssues = this.reposCache[repoKey];
+                    if (cachedIssues) {
+                        return cachedIssues;
+                    }
+                    const result = yield this.getRepoIssues(repo);
+                    this.reposCache[repoKey] = result;
+                    return result;
+                }));
             }));
             return flatternArray_1.flattenArray(yield Promise.all(resultPromises));
         });
@@ -1857,16 +1868,17 @@ const processConfigRecord = (config, projectKit) => __awaiter(void 0, void 0, vo
         console.error(`\n\nNot valid config for the issue ${config.boardIssue}, skipping.. \n`, validationErrors, '\n\n');
         return;
     }
-    console.log(`Config schema validation passed.`);
+    console.log(`- Config schema validation passed.`);
     const repoProjects = yield projectKit.getAllProjects(config.repos);
+    const projectsWithData = [];
     for (let { repo, projects } of repoProjects) {
-        const projectsWithData = yield Promise.all(projects.map((project) => __awaiter(void 0, void 0, void 0, function* () {
-            const data = yield getProjectData_1.getProjectData(projectKit, config, project);
-            return {
+        for (let project of projects) {
+            console.log(`- Getting Project data for ${project.project.name}.`);
+            projectsWithData.push({
                 project,
-                data,
-            };
-        })));
+                data: yield getProjectData_1.getProjectData(projectKit, config, project),
+            });
+        }
         const result = projectsWithData.map(({ project, data }) => {
             return renderProject_1.renderProject(data, project, config);
         });
@@ -3036,7 +3048,7 @@ exports.getProjectData = (projectKit, config, project) => __awaiter(void 0, void
         const repos = yield measure_1.measure('Fetching Repos', () => __awaiter(void 0, void 0, void 0, function* () {
             return yield projectKit.getCardRepos(cards);
         }));
-        console.log('Repos: ', repos);
+        console.log('- Repos: ', repos);
         const issues = yield measure_1.measure('Fetching Issues', () => __awaiter(void 0, void 0, void 0, function* () {
             return yield projectKit.getReposIssues(repos);
         }));

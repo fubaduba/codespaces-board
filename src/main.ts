@@ -80,20 +80,19 @@ const processConfigRecord = async (
     return;
   }
 
-  console.log(`Config schema validation passed.`);
+  console.log(`- Config schema validation passed.`);
 
   const repoProjects = await projectKit.getAllProjects(config.repos);
 
+  const projectsWithData = [];
   for (let { repo, projects } of repoProjects) {
-    const projectsWithData = await Promise.all(
-      projects.map(async (project) => {
-        const data = await getProjectData(projectKit, config, project);
-        return {
+    for (let project of projects) {
+        console.log(`- Getting Project data for ${project.project.name}.`);
+        projectsWithData.push({
           project,
-          data,
-        };
-      }),
-    );
+          data: await getProjectData(projectKit, config, project),
+        });
+    }
 
     const result = projectsWithData.map(({ project, data }) => {
       return renderProject(data, project, config);

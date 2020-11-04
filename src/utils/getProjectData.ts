@@ -23,7 +23,8 @@ export const getProjectData = async (
     const repos = await measure('Fetching Repos', async () => {
       return await projectKit.getCardRepos(cards);
     });
-    console.log('Repos: ', repos);
+
+    console.log('- Repos: ', repos);
 
     const issues = await measure('Fetching Issues', async () => {
       return await projectKit.getReposIssues(repos);
