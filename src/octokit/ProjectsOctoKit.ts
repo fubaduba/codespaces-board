@@ -17,6 +17,7 @@ import { IParsedRepo } from '../interfaces/IParsedRepo';
 import { ICardWithIssue } from '../interfaces/ICardWithIssue';
 import { IConfig } from '../interfaces/IConfig';
 import { isNewCard } from '../utils/isNewCard';
+import { measure } from '../utils/measure';
 
 interface IColumnWithCards {
   column: TProjectColumn;
@@ -174,12 +175,28 @@ export class ProjectsOctoKit extends OctoKitBase {
     return issues;
   };
 
+  private reposCache: Record<string, TRepoIssue[] | undefined> = {};
+
   public getReposIssues = async (
     repos: IParsedRepo[],
   ): Promise<TRepoIssue[]> => {
 
     const resultPromises: Promise<TRepoIssue[]>[] = repos.map(async (repo) => {
-      return await this.getRepoIssues(repo);
+      const repoKey = `${repo.owner}/${repo.repo}`;
+
+      return await measure(
+        `Getting new isues for "${repoKey}"`,
+        async () => {
+          const cachedIssues = this.reposCache[repoKey];
+          if (cachedIssues) {
+            return cachedIssues;
+          }
+
+          const result = await this.getRepoIssues(repo);
+          this.reposCache[repoKey] = result;
+
+          return result;
+        });
     });
 
     return flattenArray(await Promise.all(resultPromises));

@@ -1,8 +1,6 @@
 import { IConfig } from '../interfaces/IConfig';
 import { IProjectData } from '../interfaces/IProjectData';
 import { IProjectStats } from '../interfaces/IProjectStats';
-import { IWrappedIssue } from '../interfaces/IWrappedIssue';
-import { TRepoIssue } from '../interfaces/TRepoIssue';
 import { getWorkDays } from '../views/renderDaysLeft';
 import { arrayUnique } from './arrayUnique';
 import { flattenArray } from './flatternArray';
@@ -10,6 +8,7 @@ import { notEmpty } from './functional/notEmpty';
 import { pluck } from './functional/pluck';
 import { ICardWithIssue } from '../interfaces/ICardWithIssue';
 import { IProjectWithConfig } from '../interfaces/IProjectWithConfig';
+import { filterUnassignedIssues } from './filterPlannedProjectData';
 
 const getDevelopers = (
   cardsWithIssue: ICardWithIssue[],
@@ -98,15 +97,17 @@ export const getProjectStats = (
   } = data;
 
   const daysLeft = getWorkDays(config);
+  const plannedIssuesWithoutUnasigned = filterUnassignedIssues(allPlannedIssues);
+  const plannedIssuesToSolve = filterUnassignedIssues(toSolveIssues);
 
-  const doneRate = doneOrDeployIssues.length / allPlannedIssues.length;
-  const inWorkRate = inWorkIssues.length / allPlannedIssues.length;
-  const committedRate = committedIssues.length / allPlannedIssues.length;
+  const doneRate = doneOrDeployIssues.length / plannedIssuesWithoutUnasigned.length;
+  const inWorkRate = inWorkIssues.length / plannedIssuesWithoutUnasigned.length;
+  const committedRate = filterUnassignedIssues(committedIssues).length / plannedIssuesWithoutUnasigned.length;
 
   const developers = getDevelopers(allPlannedIssues, data.project);
 
   const issuesDeveloperLeftRatio = toSolveIssues.length / developers.length;
-  const issuesDeveloperRatio = allPlannedIssues.length / developers.length;
+  const issuesDeveloperRatio = toSolveIssues.length / developers.length;
 
   const issuesDayLeftRatio = daysLeft
     ? toSolveIssues.length / Math.max(daysLeft.businessDaysLeft, 1)

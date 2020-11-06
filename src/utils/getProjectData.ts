@@ -5,6 +5,7 @@ import { TColumnTypes } from '../interfaces/TColumnTypes';
 import { IProjectData } from '../interfaces/IProjectData';
 import { IProjectWithConfig } from '../interfaces/IProjectWithConfig';
 import { IConfig } from '../interfaces/IConfig';
+import { filterUnassignedIssues } from './filterPlannedProjectData';
 
 export const getProjectData = async (
   projectKit: ProjectsOctoKit,
@@ -23,7 +24,8 @@ export const getProjectData = async (
     const repos = await measure('Fetching Repos', async () => {
       return await projectKit.getCardRepos(cards);
     });
-    console.log('Repos: ', repos);
+
+    console.log('- Repos: ', repos);
 
     const issues = await measure('Fetching Issues', async () => {
       return await projectKit.getReposIssues(repos);
@@ -88,6 +90,7 @@ export const getProjectData = async (
     const inWorkIssues = [...progressIssues, ...inReviewIssues];
     const doneOrDeployIssues = [...waitingToDeployIssues, ...doneIssues];
     const allPlannedIssues = [...blockedIssues, ...committedIssues, ...inWorkIssues, ...doneOrDeployIssues];
+    const backlogUnassignedIssues = filterUnassignedIssues([...blockedIssues, ...committedIssues]);
     const toSolveIssues = [...inWorkIssues, ...blockedIssues, ...committedIssues];
 
     return {
@@ -97,6 +100,7 @@ export const getProjectData = async (
       doneOrDeployIssues,
       allPlannedIssues,
       issuesToSolve: toSolveIssues,
+      backlogUnassignedIssues,
       // plain
       backlogIssues,
       committedIssues,
