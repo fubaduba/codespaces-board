@@ -7,6 +7,7 @@ export interface IProjectData {
   doneOrDeployIssues: ICardWithIssue[];
   allPlannedIssues: ICardWithIssue[];
   issuesToSolve: ICardWithIssue[];
+  backlogUnassignedIssues: ICardWithIssue[];
   // raw:
   backlogIssues: ICardWithIssue[];
   committedIssues: ICardWithIssue[];

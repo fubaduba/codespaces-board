@@ -4,7 +4,7 @@
     "sprintDuration": 21,
     "sprintNumberHolidays": 0,
     "sprintStartDate": "2020-10-19",
-    "boardIssue": "https://github.com/legomushroom/codespaces-board/issues/29",
+    "boardIssue": "https://github.com/legomushroom/codespaces-board-action-runner/issues/1",
     "repos": [
       {
         "owner": "microsoft",
@@ -12,8 +12,21 @@
         "projects": [
           {
             "id": 6,
-            "trackLabels": ["port-forwarding", "workbench", "serverless", "performance"],
+            "trackLabels": [
+              "port-forwarding",
+              "workbench",
+              "serverless",
+              "performance"
+            ],
             "priorityLabels": ["p0", "p1"],
+            "developers": [
+              "legomushroom",
+              "plisy",
+              "GideonCheruiyot",
+              "VincentDondain",
+              "wachaudh",
+              "klvnraju"
+            ],
             "isCheckListItems": true
           }
         ]

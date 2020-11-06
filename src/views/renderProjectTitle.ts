@@ -20,7 +20,7 @@ export const renderProjectTitle = (
   const { allPlannedIssues: plannedAllPlannedIssues } = plannedData;
 
   const surgeRate = (allPlannedIssues.length - plannedAllPlannedIssues.length) / plannedAllPlannedIssues.length;
-  const surgeEmoji = (surgeRate >= .075)
+  const surgeEmoji = (surgeRate >= .1)
     ? '💥'
     : '';
 
@@ -30,6 +30,6 @@ export const renderProjectTitle = (
 
   const suffix = addTitle('Items added after sprint start date', surgeString);
 
-  const projectTitle = `## 🎃 ${project.name} - ${rateToPercent(doneRate)} done${suffix}`;
+  const projectTitle = `## ${project.name} - ${rateToPercent(doneRate)} done${suffix}`;
   return projectTitle;
 };
