@@ -3037,6 +3037,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getProjectData = void 0;
 const measure_1 = __webpack_require__(715);
 const TColumnTypes_1 = __webpack_require__(187);
+const filterPlannedProjectData_1 = __webpack_require__(738);
 exports.getProjectData = (projectKit, config, project) => __awaiter(void 0, void 0, void 0, function* () {
     return yield measure_1.measure(`Get data for the "${project.project.name}" project`, () => __awaiter(void 0, void 0, void 0, function* () {
         const columns = yield measure_1.measure('Fetching columns', () => __awaiter(void 0, void 0, void 0, function* () {
@@ -3069,6 +3070,7 @@ exports.getProjectData = (projectKit, config, project) => __awaiter(void 0, void
         const inWorkIssues = [...progressIssues, ...inReviewIssues];
         const doneOrDeployIssues = [...waitingToDeployIssues, ...doneIssues];
         const allPlannedIssues = [...blockedIssues, ...committedIssues, ...inWorkIssues, ...doneOrDeployIssues];
+        const backlogUnassignedIssues = filterPlannedProjectData_1.filterUnassignedIssues([...blockedIssues, ...committedIssues]);
         const toSolveIssues = [...inWorkIssues, ...blockedIssues, ...committedIssues];
         return {
             project,
@@ -3077,6 +3079,7 @@ exports.getProjectData = (projectKit, config, project) => __awaiter(void 0, void
             doneOrDeployIssues,
             allPlannedIssues,
             issuesToSolve: toSolveIssues,
+            backlogUnassignedIssues,
             // plain
             backlogIssues,
             committedIssues,
@@ -13696,6 +13699,7 @@ const arrayUnique_1 = __webpack_require__(406);
 const flatternArray_1 = __webpack_require__(65);
 const notEmpty_1 = __webpack_require__(624);
 const pluck_1 = __webpack_require__(881);
+const filterPlannedProjectData_1 = __webpack_require__(738);
 const getDevelopers = (cardsWithIssue, projectWithConfig) => {
     /**
      * If `developers` list set on the Project config, use the list,
@@ -13759,12 +13763,14 @@ exports.getProjectStats = (data, config) => {
     // plain
     committedIssues, } = data;
     const daysLeft = renderDaysLeft_1.getWorkDays(config);
-    const doneRate = doneOrDeployIssues.length / allPlannedIssues.length;
-    const inWorkRate = inWorkIssues.length / allPlannedIssues.length;
-    const committedRate = committedIssues.length / allPlannedIssues.length;
+    const plannedIssuesWithoutUnasigned = filterPlannedProjectData_1.filterUnassignedIssues(allPlannedIssues);
+    const plannedIssuesToSolve = filterPlannedProjectData_1.filterUnassignedIssues(toSolveIssues);
+    const doneRate = doneOrDeployIssues.length / plannedIssuesWithoutUnasigned.length;
+    const inWorkRate = inWorkIssues.length / plannedIssuesWithoutUnasigned.length;
+    const committedRate = filterPlannedProjectData_1.filterUnassignedIssues(committedIssues).length / plannedIssuesWithoutUnasigned.length;
     const developers = getDevelopers(allPlannedIssues, data.project);
     const issuesDeveloperLeftRatio = toSolveIssues.length / developers.length;
-    const issuesDeveloperRatio = allPlannedIssues.length / developers.length;
+    const issuesDeveloperRatio = toSolveIssues.length / developers.length;
     const issuesDayLeftRatio = daysLeft
         ? toSolveIssues.length / Math.max(daysLeft.businessDaysLeft, 1)
         : undefined;
@@ -13942,11 +13948,25 @@ exports.sortCardsByAssigneesInPlace = (cardsWithIssue) => {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.filterPlannedProjectData = void 0;
+exports.filterPlannedProjectData = exports.filterUnassignedIssues = void 0;
+// const filterUnplannedCards = (cardsWithIssue: ICardWithIssue[]): ICardWithIssue[] => {
+//   const cards = filterNewCards(cardsWithIssue);
+//   return filterUnassignedIssues(cards);
+// };
+exports.filterUnassignedIssues = (cardsWithIssue) => {
+    const cards = cardsWithIssue.filter(({ issue }) => {
+        if (!issue) {
+            return true;
+        }
+        return (issue.assignees.length > 0);
+    });
+    return cards;
+};
 const filterNewCards = (cardsWithIssue) => {
-    return cardsWithIssue.filter((card) => {
+    const cards = cardsWithIssue.filter((card) => {
         return !card.isNew;
     });
+    return cards;
 };
 exports.filterPlannedProjectData = (data) => {
     return Object.assign(Object.assign({}, data), { 
@@ -13983,14 +14003,14 @@ exports.renderProjectTitle = (project, allData, config) => {
     const { allPlannedIssues } = allData;
     const { allPlannedIssues: plannedAllPlannedIssues } = plannedData;
     const surgeRate = (allPlannedIssues.length - plannedAllPlannedIssues.length) / plannedAllPlannedIssues.length;
-    const surgeEmoji = (surgeRate >= .075)
+    const surgeEmoji = (surgeRate >= .1)
         ? '💥'
         : '';
     const surgeString = (surgeRate > 0)
         ? ` (**+${rateToPercent_1.rateToPercent(surgeRate)} flood**${surgeEmoji})`
         : '';
     const suffix = addTitle_1.addTitle('Items added after sprint start date', surgeString);
-    const projectTitle = `## 🎃 ${project.name} - ${rateToPercent_1.rateToPercent(doneRate)} done${suffix}`;
+    const projectTitle = `## ${project.name} - ${rateToPercent_1.rateToPercent(doneRate)} done${suffix}`;
     return projectTitle;
 };
 
