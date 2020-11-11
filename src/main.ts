@@ -9,6 +9,7 @@ import { renderProject } from './views/renderProject';
 import { getProjectData } from './utils/getProjectData';
 import { env } from './utils/env';
 import { getConfigs, validateConfig } from './config';
+import { renderOverview } from './views/renderOverview';
 
 import { IConfig } from './interfaces/IConfig';
 
@@ -111,8 +112,8 @@ const processConfigRecord = async (
 
     const issueContents = [
       header,
-      // render projects overview
-      // renderOverview(config, projectsWithData),
+      // render all projects overview
+      renderOverview(config, projectsWithData),
       issueBody,
       footer,
     ].join('\n');

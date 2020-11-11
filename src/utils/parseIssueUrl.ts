@@ -1,8 +1,12 @@
 import { IParsedIssue } from '../interfaces/IParsedIssue';
 
-export const parseIssueUrl = (issueUrl: string): IParsedIssue => {
+export const parseIssueUrl = (issueUrl: string): IParsedIssue | null => {
   const uri = new URL(issueUrl);
   const { pathname } = uri;
+
+  if (uri.hostname !== 'github.com') {
+    return null;
+  }
 
   const split = pathname.split('/');
 

@@ -291,7 +291,13 @@ export class ProjectsOctoKit extends OctoKitBase {
   };
 
   public updateBoardIssue = async (issueUrl: string, body: string) => {
-    const { owner, repo, issueNumber } = parseIssueUrl(issueUrl);
+    const issue = parseIssueUrl(issueUrl);
+
+    if (!issue) {
+      throw new Error(`cannot parse the issue ${issueUrl}`);
+    }
+
+    const { owner, repo, issueNumber } = issue;
 
     return await this.kit.issues.update({
       owner,
@@ -302,7 +308,13 @@ export class ProjectsOctoKit extends OctoKitBase {
   };
 
   public getBoardIssue = async (issueUrl: string) => {
-    const { owner, repo, issueNumber } = parseIssueUrl(issueUrl);
+    const issue = parseIssueUrl(issueUrl);
+
+    if (!issue) {
+      throw new Error(`cannot parse the issue ${issueUrl}`);
+    }
+
+    const { owner, repo, issueNumber } = issue;
 
     const { status, data } = await this.kit.issues.get({
       owner,
