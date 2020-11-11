@@ -1,6 +1,13 @@
-import { ICardWithIssue } from '../interfaces/ICardWithIssue';
 import { IConfig } from '../interfaces/IConfig';
+import { IProjectWithConfig } from '../interfaces/IProjectWithConfig';
 import { TColumnCard } from '../interfaces/TColumnCard';
+
+const dateAddDays = (startDate: Date, days: number) => {
+  const date = new Date();
+  date.setDate(startDate.getDate() + days);
+
+  return date;
+};
 
 /**
  * Check if card is a new - was created after
@@ -8,7 +15,8 @@ import { TColumnCard } from '../interfaces/TColumnCard';
  */
 export const isNewCard = (
   card: TColumnCard,
-  config: IConfig
+  config: IConfig,
+  projectWithConfig: IProjectWithConfig,
 ): boolean => {
   const { sprintStartDate: sprintStartDateString } = config;
 
@@ -19,5 +27,11 @@ export const isNewCard = (
   const cardCreationDate = new Date(card.created_at);
   const sprintStartDate = new Date(sprintStartDateString);
 
-  return cardCreationDate.getTime() >= sprintStartDate.getTime();
+  const { projectConfig } = projectWithConfig;
+
+  const newCardsCutoffDays = (typeof projectConfig === 'number' || !projectConfig.newCardsCutoffDays)
+    ? 0
+    : projectConfig.newCardsCutoffDays;
+
+  return cardCreationDate.getTime() >= dateAddDays(sprintStartDate, newCardsCutoffDays).getTime();
 };

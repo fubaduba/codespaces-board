@@ -348,7 +348,7 @@ class ProjectsOctoKit extends OctoKitBase_1.OctoKitBase {
             }
             return Object.values(repos);
         };
-        this.mergeCardsWithIssuesForColumn = (issues, columns, columnType, config) => {
+        this.mergeCardsWithIssuesForColumn = (issues, columns, columnType, config, project) => {
             // get the column
             const column = columns[columnType];
             // no column - no issue
@@ -365,7 +365,7 @@ class ProjectsOctoKit extends OctoKitBase_1.OctoKitBase {
                     card,
                     issue: cardIssue,
                     column: columnType,
-                    isNew: isNewCard_1.isNewCard(card, config),
+                    isNew: isNewCard_1.isNewCard(card, config, project),
                 };
             });
             return cardIssues;
@@ -3061,19 +3061,19 @@ exports.getProjectData = (projectKit, config, project) => __awaiter(void 0, void
         const issues = yield measure_1.measure('Fetching Issues', () => __awaiter(void 0, void 0, void 0, function* () {
             return yield projectKit.getReposIssues(repos);
         }));
-        const backlogIssues = yield projectKit.mergeCardsWithIssuesForColumn(issues, cards, TColumnTypes_1.TColumnTypes.Backlog, config);
+        const backlogIssues = yield projectKit.mergeCardsWithIssuesForColumn(issues, cards, TColumnTypes_1.TColumnTypes.Backlog, config, project);
         console.log(`BacklogIssues: ${backlogIssues.length} items`);
-        const committedIssues = yield projectKit.mergeCardsWithIssuesForColumn(issues, cards, TColumnTypes_1.TColumnTypes.Committed, config);
+        const committedIssues = yield projectKit.mergeCardsWithIssuesForColumn(issues, cards, TColumnTypes_1.TColumnTypes.Committed, config, project);
         console.log(`CommittedIssues: ${committedIssues.length} items`);
-        const blockedIssues = yield projectKit.mergeCardsWithIssuesForColumn(issues, cards, TColumnTypes_1.TColumnTypes.Blocked, config);
+        const blockedIssues = yield projectKit.mergeCardsWithIssuesForColumn(issues, cards, TColumnTypes_1.TColumnTypes.Blocked, config, project);
         console.log(`BlockedIssues: ${blockedIssues.length} items`);
-        const progressIssues = yield projectKit.mergeCardsWithIssuesForColumn(issues, cards, TColumnTypes_1.TColumnTypes.InProgress, config);
+        const progressIssues = yield projectKit.mergeCardsWithIssuesForColumn(issues, cards, TColumnTypes_1.TColumnTypes.InProgress, config, project);
         console.log(`ProgressIssues: ${progressIssues.length} items`);
-        const inReviewIssues = yield projectKit.mergeCardsWithIssuesForColumn(issues, cards, TColumnTypes_1.TColumnTypes.InReview, config);
+        const inReviewIssues = yield projectKit.mergeCardsWithIssuesForColumn(issues, cards, TColumnTypes_1.TColumnTypes.InReview, config, project);
         console.log(`InReviewIssues: ${inReviewIssues.length} items`);
-        const waitingToDeployIssues = yield projectKit.mergeCardsWithIssuesForColumn(issues, cards, TColumnTypes_1.TColumnTypes.WaitingToDeploy, config);
+        const waitingToDeployIssues = yield projectKit.mergeCardsWithIssuesForColumn(issues, cards, TColumnTypes_1.TColumnTypes.WaitingToDeploy, config, project);
         console.log(`WaitingToDeployIssues: ${waitingToDeployIssues.length} items`);
-        const doneIssues = yield projectKit.mergeCardsWithIssuesForColumn(issues, cards, TColumnTypes_1.TColumnTypes.Done, config);
+        const doneIssues = yield projectKit.mergeCardsWithIssuesForColumn(issues, cards, TColumnTypes_1.TColumnTypes.Done, config, project);
         console.log(`doneIssues: ${doneIssues.length} items`);
         const inWorkIssues = [...progressIssues, ...inReviewIssues];
         const doneOrDeployIssues = [...waitingToDeployIssues, ...doneIssues];
@@ -3429,18 +3429,27 @@ module.exports = require("assert");
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.isNewCard = void 0;
+const dateAddDays = (startDate, days) => {
+    const date = new Date();
+    date.setDate(startDate.getDate() + days);
+    return date;
+};
 /**
  * Check if card is a new - was created after
  * the sprint start date.
  */
-exports.isNewCard = (card, config) => {
+exports.isNewCard = (card, config, projectWithConfig) => {
     const { sprintStartDate: sprintStartDateString } = config;
     if (!sprintStartDateString) {
         return false;
     }
     const cardCreationDate = new Date(card.created_at);
     const sprintStartDate = new Date(sprintStartDateString);
-    return cardCreationDate.getTime() >= sprintStartDate.getTime();
+    const { projectConfig } = projectWithConfig;
+    const newCardsCutoffDays = (typeof projectConfig === 'number' || !projectConfig.newCardsCutoffDays)
+        ? 0
+        : projectConfig.newCardsCutoffDays;
+    return cardCreationDate.getTime() >= dateAddDays(sprintStartDate, newCardsCutoffDays).getTime();
 };
 
 

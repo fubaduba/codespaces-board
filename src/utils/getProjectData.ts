@@ -36,6 +36,7 @@ export const getProjectData = async (
       cards,
       TColumnTypes.Backlog,
       config,
+      project,
     );
     console.log(`BacklogIssues: ${backlogIssues.length} items`);
 
@@ -44,6 +45,7 @@ export const getProjectData = async (
       cards,
       TColumnTypes.Committed,
       config,
+      project,
     );
     console.log(`CommittedIssues: ${committedIssues.length} items`);
 
@@ -52,6 +54,7 @@ export const getProjectData = async (
       cards,
       TColumnTypes.Blocked,
       config,
+      project,
     );
     console.log(`BlockedIssues: ${blockedIssues.length} items`);
 
@@ -60,6 +63,7 @@ export const getProjectData = async (
       cards,
       TColumnTypes.InProgress,
       config,
+      project,
     );
     console.log(`ProgressIssues: ${progressIssues.length} items`);
 
@@ -68,6 +72,7 @@ export const getProjectData = async (
       cards,
       TColumnTypes.InReview,
       config,
+      project,
     );
     console.log(`InReviewIssues: ${inReviewIssues.length} items`);
 
@@ -76,6 +81,7 @@ export const getProjectData = async (
       cards,
       TColumnTypes.WaitingToDeploy,
       config,
+      project,
     );
     console.log(`WaitingToDeployIssues: ${waitingToDeployIssues.length} items`);
 
@@ -84,6 +90,7 @@ export const getProjectData = async (
       cards,
       TColumnTypes.Done,
       config,
+      project,
     );
     console.log(`doneIssues: ${doneIssues.length} items`);
 

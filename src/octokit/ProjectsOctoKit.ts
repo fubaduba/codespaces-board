@@ -264,6 +264,7 @@ export class ProjectsOctoKit extends OctoKitBase {
     columns: TColumnsWithCardsMap,
     columnType: TColumnTypes,
     config: IConfig,
+    project: IProjectWithConfig,
   ): ICardWithIssue[] => {
     // get the column
     const column = columns[columnType];
@@ -283,7 +284,7 @@ export class ProjectsOctoKit extends OctoKitBase {
           card,
           issue: cardIssue,
           column: columnType,
-          isNew: isNewCard(card, config),
+          isNew: isNewCard(card, config, project),
         }
       });
 

@@ -43,4 +43,10 @@ export interface IProject {
    * the assigned GitHub issues.
    */
   developers?: string[];
+
+  /**
+   * How many days should elapse since the beginning of
+   * the sprint for a card to be treated as `new`.
+   */
+  newCardsCutoffDays?: number;
 }

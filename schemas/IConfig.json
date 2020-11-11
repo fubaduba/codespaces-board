@@ -112,6 +112,10 @@
           "items": {
             "type": "string"
           }
+        },
+        "newCardsCutoffDays": {
+          "description": "How many days should elapse since the beginning of\nthe sprint for a card to be treated as `new`.",
+          "type": "number"
         }
       },
       "additionalProperties": false,
