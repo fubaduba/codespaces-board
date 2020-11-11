@@ -3078,7 +3078,7 @@ exports.getProjectData = (projectKit, config, project) => __awaiter(void 0, void
         const inWorkIssues = [...progressIssues, ...inReviewIssues];
         const doneOrDeployIssues = [...waitingToDeployIssues, ...doneIssues];
         const allPlannedIssues = [...blockedIssues, ...committedIssues, ...inWorkIssues, ...doneOrDeployIssues];
-        const backlogUnassignedIssues = filterPlannedProjectData_1.filterUnassignedIssues([...blockedIssues, ...committedIssues]);
+        const unassignedIssues = filterPlannedProjectData_1.filterUnassignedIssues([...blockedIssues, ...committedIssues]);
         const toSolveIssues = [...inWorkIssues, ...blockedIssues, ...committedIssues];
         return {
             project,
@@ -3087,7 +3087,7 @@ exports.getProjectData = (projectKit, config, project) => __awaiter(void 0, void
             doneOrDeployIssues,
             allPlannedIssues,
             issuesToSolve: toSolveIssues,
-            backlogUnassignedIssues,
+            unassignedIssues,
             // plain
             backlogIssues,
             committedIssues,
@@ -13716,7 +13716,6 @@ const arrayUnique_1 = __webpack_require__(406);
 const flatternArray_1 = __webpack_require__(65);
 const notEmpty_1 = __webpack_require__(624);
 const pluck_1 = __webpack_require__(881);
-const filterPlannedProjectData_1 = __webpack_require__(738);
 const getDevelopers = (cardsWithIssue, projectWithConfig) => {
     /**
      * If `developers` list set on the Project config, use the list,
@@ -13780,11 +13779,9 @@ exports.getProjectStats = (data, config) => {
     // plain
     committedIssues, } = data;
     const daysLeft = renderDaysLeft_1.getWorkDays(config);
-    const plannedIssuesWithoutUnasigned = filterPlannedProjectData_1.filterUnassignedIssues(allPlannedIssues);
-    const plannedIssuesToSolve = filterPlannedProjectData_1.filterUnassignedIssues(toSolveIssues);
-    const doneRate = doneOrDeployIssues.length / plannedIssuesWithoutUnasigned.length;
-    const inWorkRate = inWorkIssues.length / plannedIssuesWithoutUnasigned.length;
-    const committedRate = filterPlannedProjectData_1.filterUnassignedIssues(committedIssues).length / plannedIssuesWithoutUnasigned.length;
+    const doneRate = doneOrDeployIssues.length / allPlannedIssues.length;
+    const inWorkRate = inWorkIssues.length / allPlannedIssues.length;
+    const committedRate = committedIssues.length / allPlannedIssues.length;
     const developers = getDevelopers(allPlannedIssues, data.project);
     const issuesDeveloperLeftRatio = toSolveIssues.length / developers.length;
     const issuesDeveloperRatio = toSolveIssues.length / developers.length;

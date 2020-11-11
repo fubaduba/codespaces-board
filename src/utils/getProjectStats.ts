@@ -8,7 +8,6 @@ import { notEmpty } from './functional/notEmpty';
 import { pluck } from './functional/pluck';
 import { ICardWithIssue } from '../interfaces/ICardWithIssue';
 import { IProjectWithConfig } from '../interfaces/IProjectWithConfig';
-import { filterUnassignedIssues } from './filterPlannedProjectData';
 
 const getDevelopers = (
   cardsWithIssue: ICardWithIssue[],
@@ -97,12 +96,10 @@ export const getProjectStats = (
   } = data;
 
   const daysLeft = getWorkDays(config);
-  const plannedIssuesWithoutUnasigned = filterUnassignedIssues(allPlannedIssues);
-  const plannedIssuesToSolve = filterUnassignedIssues(toSolveIssues);
 
-  const doneRate = doneOrDeployIssues.length / plannedIssuesWithoutUnasigned.length;
-  const inWorkRate = inWorkIssues.length / plannedIssuesWithoutUnasigned.length;
-  const committedRate = filterUnassignedIssues(committedIssues).length / plannedIssuesWithoutUnasigned.length;
+  const doneRate = doneOrDeployIssues.length / allPlannedIssues.length;
+  const inWorkRate = inWorkIssues.length / allPlannedIssues.length;
+  const committedRate = committedIssues.length / allPlannedIssues.length;
 
   const developers = getDevelopers(allPlannedIssues, data.project);
 

@@ -97,7 +97,7 @@ export const getProjectData = async (
     const inWorkIssues = [...progressIssues, ...inReviewIssues];
     const doneOrDeployIssues = [...waitingToDeployIssues, ...doneIssues];
     const allPlannedIssues = [...blockedIssues, ...committedIssues, ...inWorkIssues, ...doneOrDeployIssues];
-    const backlogUnassignedIssues = filterUnassignedIssues([...blockedIssues, ...committedIssues]);
+    const unassignedIssues = filterUnassignedIssues([...blockedIssues, ...committedIssues]);
     const toSolveIssues = [...inWorkIssues, ...blockedIssues, ...committedIssues];
 
     return {
@@ -107,7 +107,7 @@ export const getProjectData = async (
       doneOrDeployIssues,
       allPlannedIssues,
       issuesToSolve: toSolveIssues,
-      backlogUnassignedIssues,
+      unassignedIssues,
       // plain
       backlogIssues,
       committedIssues,
