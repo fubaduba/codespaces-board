@@ -82,6 +82,7 @@ export const renderProject = (
     renderProjectTitle(project, allData, config),
     projectLink,
     renderProjectOverview(config, projectWithData),
+    '',
     blockedIssuesString,
     committedIssuesString,
     inWorkIssuesString,

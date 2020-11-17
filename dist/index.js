@@ -3169,6 +3169,7 @@ exports.renderProject = (allData, projectWithConfig, config) => {
         renderProjectTitle_1.renderProjectTitle(project, allData, config),
         projectLink,
         renderProjectOverview_1.renderProjectOverview(config, projectWithData),
+        '',
         blockedIssuesString,
         committedIssuesString,
         inWorkIssuesString,
