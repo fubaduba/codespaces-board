@@ -59,5 +59,5 @@ export interface IConfig {
   /**
    * Used by `vscode` in JSON files.
    */
-  ['$schema']?: string,
+  ['$schema']?: string;
 }

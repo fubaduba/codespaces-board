@@ -1,102 +1,9 @@
 require('./sourcemap-register.js');module.exports =
-/******/ (function(modules, runtime) { // webpackBootstrap
-/******/ 	"use strict";
-/******/ 	// The module cache
-/******/ 	var installedModules = {};
-/******/
-/******/ 	// The require function
-/******/ 	function __webpack_require__(moduleId) {
-/******/
-/******/ 		// Check if module is in cache
-/******/ 		if(installedModules[moduleId]) {
-/******/ 			return installedModules[moduleId].exports;
-/******/ 		}
-/******/ 		// Create a new module (and put it into the cache)
-/******/ 		var module = installedModules[moduleId] = {
-/******/ 			i: moduleId,
-/******/ 			l: false,
-/******/ 			exports: {}
-/******/ 		};
-/******/
-/******/ 		// Execute the module function
-/******/ 		var threw = true;
-/******/ 		try {
-/******/ 			modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
-/******/ 			threw = false;
-/******/ 		} finally {
-/******/ 			if(threw) delete installedModules[moduleId];
-/******/ 		}
-/******/
-/******/ 		// Flag the module as loaded
-/******/ 		module.l = true;
-/******/
-/******/ 		// Return the exports of the module
-/******/ 		return module.exports;
-/******/ 	}
-/******/
-/******/
-/******/ 	__webpack_require__.ab = __dirname + "/";
-/******/
-/******/ 	// the startup function
-/******/ 	function startup() {
-/******/ 		// Load entry module and return exports
-/******/ 		return __webpack_require__(109);
-/******/ 	};
-/******/ 	// initialize runtime
-/******/ 	runtime(__webpack_require__);
-/******/
-/******/ 	// run startup
-/******/ 	return startup();
-/******/ })
-/************************************************************************/
-/******/ ({
+/******/ (() => { // webpackBootstrap
+/******/ 	var __webpack_modules__ = ({
 
-/***/ 1:
-/***/ (function(__unusedmodule, exports) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.env = void 0;
-exports.env = (name) => {
-    return process.env[name];
-};
-
-
-/***/ }),
-
-/***/ 10:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.isDoneColumn = void 0;
-const TColumnTypes_1 = __webpack_require__(187);
-exports.isDoneColumn = (column) => {
-    switch (column) {
-        case TColumnTypes_1.TColumnTypes.WaitingToDeploy:
-        case TColumnTypes_1.TColumnTypes.Done: {
-            return true;
-        }
-        default: {
-            return false;
-        }
-    }
-};
-
-
-/***/ }),
-
-/***/ 16:
-/***/ (function(module) {
-
-module.exports = require("tls");
-
-/***/ }),
-
-/***/ 30:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ 88:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
 
@@ -115,49 +22,391 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
     __setModuleDefault(result, mod);
     return result;
 };
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.getOctokitOptions = exports.GitHub = exports.context = void 0;
-const Context = __importStar(__webpack_require__(53));
-const Utils = __importStar(__webpack_require__(914));
-// octokit + plugins
-const core_1 = __webpack_require__(762);
-const plugin_rest_endpoint_methods_1 = __webpack_require__(44);
-const plugin_paginate_rest_1 = __webpack_require__(193);
-exports.context = new Context.Context();
-const baseUrl = Utils.getApiBaseUrl();
-const defaults = {
-    baseUrl,
-    request: {
-        agent: Utils.getProxyAgent(baseUrl)
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.validateConfig = exports.getConfigSchema = exports.getConfigs = void 0;
+const jsonschema_1 = __webpack_require__(3978);
+const path = __importStar(__webpack_require__(5622));
+const env_1 = __webpack_require__(8001);
+const constants_1 = __webpack_require__(5105);
+const getWorkspacePath = (configFilePath) => {
+    const rootPath = env_1.env('GITHUB_WORKSPACE');
+    console.log(`rootPath variable: ${rootPath}`);
+    if (!rootPath) {
+        return;
     }
+    console.log(`join the workspace path`);
+    return path.join(rootPath, configFilePath);
 };
-exports.GitHub = core_1.Octokit.plugin(plugin_rest_endpoint_methods_1.restEndpointMethods, plugin_paginate_rest_1.paginateRest).defaults(defaults);
-/**
- * Convience function to correctly format Octokit Options to pass into the constructor.
- *
- * @param     token    the repo PAT or GITHUB_TOKEN
- * @param     options  other options to set
- */
-function getOctokitOptions(token, options) {
-    const opts = Object.assign({}, options || {}); // Shallow clone - don't mutate the object provided by the caller
-    // Auth
-    const auth = Utils.getAuthString(token, opts);
-    if (auth) {
-        opts.auth = auth;
-    }
-    return opts;
-}
-exports.getOctokitOptions = getOctokitOptions;
-//# sourceMappingURL=utils.js.map
+const getConfigs = (configFilePath) => {
+    var _a;
+    const configPath = (_a = getWorkspacePath(configFilePath)) !== null && _a !== void 0 ? _a : path.join(constants_1.PROJECT_ROOT, configFilePath);
+    console.log(`config path: "${configPath}"`);
+    const configs = require(configPath);
+    return configs;
+};
+exports.getConfigs = getConfigs;
+const getConfigSchema = () => {
+    const schema = require(path.join(constants_1.PROJECT_ROOT, `./schemas/IConfig.json`));
+    return schema;
+};
+exports.getConfigSchema = getConfigSchema;
+const validateConfig = (config) => {
+    const validator = new jsonschema_1.Validator();
+    const validationResult = validator.validate(config, exports.getConfigSchema());
+    const { errors } = validationResult;
+    return errors;
+};
+exports.validateConfig = validateConfig;
+
 
 /***/ }),
 
-/***/ 32:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ 5105:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.PROJECT_ROOT = void 0;
+const path = __importStar(__webpack_require__(5622));
+exports.PROJECT_ROOT = path.join(__dirname, '../');
+
+
+/***/ }),
+
+/***/ 3369:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AuthorizationError = void 0;
+class AuthorizationError extends Error {
+}
+exports.AuthorizationError = AuthorizationError;
+
+
+/***/ }),
+
+/***/ 3145:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.IIssueState = void 0;
+var IIssueState;
+(function (IIssueState) {
+    IIssueState["Open"] = "open";
+    IIssueState["Closed"] = "closed";
+})(IIssueState = exports.IIssueState || (exports.IIssueState = {}));
+
+
+/***/ }),
+
+/***/ 8147:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.TArraySortResult = void 0;
+var TArraySortResult;
+(function (TArraySortResult) {
+    TArraySortResult[TArraySortResult["FirstEarlier"] = -1] = "FirstEarlier";
+    TArraySortResult[TArraySortResult["SecondEarlier"] = 0] = "SecondEarlier";
+    TArraySortResult[TArraySortResult["Equal"] = 0] = "Equal";
+})(TArraySortResult = exports.TArraySortResult || (exports.TArraySortResult = {}));
+
+
+/***/ }),
+
+/***/ 187:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.TColumnTypes = void 0;
+var TColumnTypes;
+(function (TColumnTypes) {
+    TColumnTypes["Backlog"] = "Backlog";
+    TColumnTypes["Committed"] = "Committed";
+    TColumnTypes["Blocked"] = "Blocked";
+    TColumnTypes["InProgress"] = "In progress";
+    TColumnTypes["InReview"] = "In review";
+    TColumnTypes["WaitingToDeploy"] = "Waiting to deploy";
+    TColumnTypes["Done"] = "Done";
+})(TColumnTypes = exports.TColumnTypes || (exports.TColumnTypes = {}));
+
+
+/***/ }),
+
+/***/ 3109:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const core = __importStar(__webpack_require__(2186));
+// add .env file support for dev purposes
+__webpack_require__(2437).config();
+const AuthorizationError_1 = __webpack_require__(3369);
+const ProjectsOctoKit_1 = __webpack_require__(9032);
+const renderProject_1 = __webpack_require__(8282);
+const getProjectData_1 = __webpack_require__(6273);
+const env_1 = __webpack_require__(8001);
+const config_1 = __webpack_require__(88);
+const TOKEN_READ_NAME = 'REPO_GITHUB_READ_PAT';
+const TOKEN_WRITE_NAME = 'REPO_GITHUB_WRITE_PAT';
+const CONFIG_PATH = 'CONFIG_PATH';
+// const overwriteBoardIssue = async (
+//   issueContents: string,
+//   config: IConfig,
+//   projectKit: ProjectsOctoKit,
+// ) => {
+//   const { status } = await projectKit.updateBoardIssue(
+//     config.boardIssue,
+//     issueContents,
+//   );
+//   if (status !== 200) {
+//     throw new Error(`Failed to update the issue ${config.boardIssue}`);
+//   }
+//   console.log(`Successfully updated the board issue ${config.boardIssue}`);
+// };
+// const getRegex = (projectId?: number) => {
+//   const regex = /<!--\s*codespaces-board:start\s*-->([\W\w]*)<!--\s*codespaces-board:end\s*-->/gim;
+//   return regex;
+// };
+const wrapIssueText = (text, projectId) => {
+    return [
+        `<!-- codespaces-board:start -->`,
+        `<!-- ⚠️ AUTO GENERATED GITHUB ACTION, DON'T EDIT BY HAND ⚠️ -->`,
+        `<!-- updated on: ${new Date().toISOString()} -->`,
+        text,
+        `<!-- codespaces-board:end -->`,
+    ].join('\n');
+};
+// const updateBoardIssue = async (
+//   issueContents: string,
+//   config: IConfig,
+//   projectKit: ProjectsOctoKit,
+// ) => {
+//   if (!config.isReplaceProjectMarkers) {
+//     return await overwriteBoardIssue(issueContents, config, projectKit);
+//   }
+//   const issue = await projectKit.getBoardIssue(config.boardIssue);
+//   const { body } = issue;
+//   const newBody = body.replace(getRegex(), wrapIssueText(issueContents));
+//   await overwriteBoardIssue(newBody, config, projectKit);
+// };
+// const processConfigRecord = async (
+//   config: IConfig,
+//   projectKit: ProjectsOctoKit,
+// ) => {
+//   console.log('Processing config: \n', JSON.stringify(config, null, 2));
+//   const validationErrors = validateConfig(config);
+//   if (validationErrors.length) {
+//     console.error(
+//       `\n\nNot valid config for the issue ${config.boardIssue}, skipping.. \n`,
+//       validationErrors,
+//       '\n\n',
+//     );
+//     return;
+//   }
+//   console.log(`- Config schema validation passed.`);
+//   const repoProjects = await projectKit.getAllProjects(config.repos);
+//   const projectsWithData = [];
+//   for (let { repo, projects } of repoProjects) {
+//     for (let project of projects) {
+//         console.log(`- Getting Project data for ${project.project.name}.`);
+//         projectsWithData.push({
+//           project,
+//           data: await getProjectData(projectKit, config, project),
+//         });
+//     }
+//     const result = projectsWithData.map(({ project, data }) => {
+//       return renderProject(data, project, config);
+//     });
+//     const issueBody = result.join('\n') + '\n';
+//     let header;
+//     if (config.headerFileUrl) {
+//       header = await projectKit.getBoardHeaderText(config.headerFileUrl);
+//     }
+//     let footer;
+//     if (config.footerFileUrl) {
+//       footer = await projectKit.getBoardHeaderText(config.footerFileUrl);
+//     }
+//     const issueContents = [
+//       header,
+//       // render all projects overview
+//       // renderOverview(config, projectsWithData),
+//       issueBody,
+//       footer,
+//     ].join('\n');
+//     await updateBoardIssue(issueContents, config, projectKit);
+//   }
+// };
+const updateBoardComment = (commentUrl, issueContents, projectKit) => __awaiter(void 0, void 0, void 0, function* () {
+    // if (!config.isReplaceProjectMarkers) {
+    //   return await overwriteBoardIssue(issueContents, config, projectKit);
+    // }
+    console.log(`>> updating the comment ${commentUrl} with contents length: ${issueContents.length}`);
+    return yield projectKit.updateBoardComment(commentUrl, issueContents);
+});
+const processConfigRecordComment = (config, readProjectKit, writeProjectKit) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log('Processing config: \n', JSON.stringify(config, null, 2));
+    const validationErrors = config_1.validateConfig(config);
+    if (validationErrors.length) {
+        console.error(`\n\nNot valid config for the issue ${config.boardIssue}, skipping.. \n`, validationErrors, '\n\n');
+        return;
+    }
+    console.log('\n- Config schema validation passed.\n');
+    const repoProjects = yield readProjectKit.getAllProjects(config.repos);
+    const projectsWithData = [];
+    for (let { repo, projects } of repoProjects) {
+        for (let project of projects) {
+            console.log(`- Getting Project data for ${project.project.name}.`);
+            projectsWithData.push({
+                project,
+                data: yield getProjectData_1.getProjectData(readProjectKit, config, project),
+            });
+        }
+        for (let { project, data } of projectsWithData) {
+            const comment = renderProject_1.renderProject(data, project, config);
+            const { projectConfig } = project;
+            if (typeof projectConfig === 'number') {
+                continue;
+            }
+            const { boardComment } = projectConfig;
+            if (!boardComment) {
+                continue;
+            }
+            yield updateBoardComment(boardComment, comment, writeProjectKit);
+        }
+    }
+});
+function run() {
+    var _a, _b, _c, _d, _e;
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const token = core.getInput('token');
+            const readToken = (_b = (_a = env_1.env(TOKEN_READ_NAME)) !== null && _a !== void 0 ? _a : core.getInput('readToken')) !== null && _b !== void 0 ? _b : token;
+            const writeToken = (_d = (_c = env_1.env(TOKEN_WRITE_NAME)) !== null && _c !== void 0 ? _c : core.getInput('writeToken')) !== null && _d !== void 0 ? _d : token;
+            if (!readToken) {
+                throw new AuthorizationError_1.AuthorizationError('No read token found.');
+            }
+            if (!writeToken) {
+                throw new AuthorizationError_1.AuthorizationError('No write token found.');
+            }
+            const readProjectKit = new ProjectsOctoKit_1.ProjectsOctoKit(readToken);
+            const writeProjectKit = new ProjectsOctoKit_1.ProjectsOctoKit(writeToken);
+            const configsFilePath = (_e = env_1.env(CONFIG_PATH)) !== null && _e !== void 0 ? _e : core.getInput('config');
+            for (let config of config_1.getConfigs(configsFilePath)) {
+                yield processConfigRecordComment(config, readProjectKit, writeProjectKit);
+            }
+        }
+        catch (error) {
+            console.error(error);
+            core.setFailed(error.message);
+        }
+    });
+}
+run();
+
+
+/***/ }),
+
+/***/ 1463:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.OctoKitBase = void 0;
+const github = __importStar(__webpack_require__(5438));
+class OctoKitBase {
+    constructor(token) {
+        this.kit = github.getOctokit(token);
+    }
+}
+exports.OctoKitBase = OctoKitBase;
+
+
+/***/ }),
+
+/***/ 9032:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
 
@@ -170,16 +419,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-Object.defineProperty(exports, "__esModule", { value: true });
+Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ProjectsOctoKit = void 0;
-const OctoKitBase_1 = __webpack_require__(463);
-const parseIssueUrl_1 = __webpack_require__(983);
-const parseFileUrl_1 = __webpack_require__(996);
-const notEmpty_1 = __webpack_require__(624);
+const OctoKitBase_1 = __webpack_require__(1463);
+const parseIssueUrl_1 = __webpack_require__(5983);
+const parseFileUrl_1 = __webpack_require__(9996);
+const notEmpty_1 = __webpack_require__(1624);
 const TColumnTypes_1 = __webpack_require__(187);
-const flatternArray_1 = __webpack_require__(65);
-const isNewCard_1 = __webpack_require__(363);
-const measure_1 = __webpack_require__(715);
+const flatternArray_1 = __webpack_require__(1065);
+const isNewCard_1 = __webpack_require__(8363);
+const measure_1 = __webpack_require__(2715);
 const findColumn = (columns, columnName) => {
     const result = columns.find((column) => {
         return column.name.toLowerCase() === columnName.toLowerCase();
@@ -222,7 +471,7 @@ class ProjectsOctoKit extends OctoKitBase_1.OctoKitBase {
         });
         this.getAllProjects = (repos) => __awaiter(this, void 0, void 0, function* () {
             const result = [];
-            for (let repo of repos) {
+            for (const repo of repos) {
                 const projects = yield this.getRepoProjects(repo);
                 result.push({
                     repo,
@@ -255,7 +504,8 @@ class ProjectsOctoKit extends OctoKitBase_1.OctoKitBase {
             return cards;
         });
         this.getCards = (columns) => __awaiter(this, void 0, void 0, function* () {
-            const cardPromises = Object.entries(columns).map(([type, column]) => __awaiter(this, void 0, void 0, function* () {
+            const cardPromises = Object.entries(columns)
+                .map(([type, column]) => __awaiter(this, void 0, void 0, function* () {
                 if (!column) {
                     return;
                 }
@@ -264,11 +514,12 @@ class ProjectsOctoKit extends OctoKitBase_1.OctoKitBase {
                     column,
                     cards: yield this.getColumnCards(column),
                 };
-            })).filter(notEmpty_1.notEmpty);
+            }))
+                .filter(notEmpty_1.notEmpty);
             const columnCardsWithEmpty = yield Promise.all(cardPromises);
             const columnCards = columnCardsWithEmpty.filter(notEmpty_1.notEmpty);
             const result = {};
-            for (let columnCard of columnCards) {
+            for (const columnCard of columnCards) {
                 const { type } = columnCard;
                 result[type] = {
                     cards: columnCard.cards,
@@ -302,7 +553,7 @@ class ProjectsOctoKit extends OctoKitBase_1.OctoKitBase {
             return flatternArray_1.flattenArray(yield Promise.all(resultPromises));
         });
         this.isCardIssue = (card, issue) => {
-            return (card.content_url === issue.url) || (card.note === issue.html_url);
+            return card.content_url === issue.url || card.note === issue.html_url;
         };
         this.getCardIssueFromNote = (card) => {
             try {
@@ -335,7 +586,7 @@ class ProjectsOctoKit extends OctoKitBase_1.OctoKitBase {
         this.getCardRepos = (columns) => {
             const cards = this.getAllCards(columns);
             const repos = {};
-            for (let card of cards) {
+            for (const card of cards) {
                 const issueFromNote = this.getCardIssueFromNote(card);
                 const issueFromContent = this.getCardIssueFromContentUrl(card);
                 const issue = issueFromNote !== null && issueFromNote !== void 0 ? issueFromNote : issueFromContent;
@@ -356,8 +607,7 @@ class ProjectsOctoKit extends OctoKitBase_1.OctoKitBase {
                 return [];
             }
             const { cards } = column;
-            const cardIssues = cards
-                .map((card) => {
+            const cardIssues = cards.map((card) => {
                 const cardIssue = issues.find((issue) => {
                     return this.isCardIssue(card, issue);
                 });
@@ -399,6 +649,23 @@ class ProjectsOctoKit extends OctoKitBase_1.OctoKitBase {
             }
             return data;
         });
+        this.updateBoardComment = (commentUrl, body) => __awaiter(this, void 0, void 0, function* () {
+            const comment = parseIssueUrl_1.parseCommentUrl(commentUrl);
+            if (!comment) {
+                throw new Error(`cannot parse the comment ${commentUrl}`);
+            }
+            const { owner, repo, issueNumber, commentId } = comment;
+            const { status } = yield this.kit.issues.updateComment({
+                owner,
+                repo,
+                issue_number: issueNumber,
+                comment_id: commentId,
+                body,
+            });
+            if (status !== 200) {
+                throw new Error(`Failed to update the comment ${commentUrl}`);
+            }
+        });
         this.getBoardHeaderText = (fileUrl) => __awaiter(this, void 0, void 0, function* () {
             const fileRef = parseFileUrl_1.parseFileUrl(fileUrl);
             const { data } = yield this.kit.repos.getContent(Object.assign({ accept: 'application/vnd.github.VERSION.raw' }, fileRef));
@@ -414,13 +681,3556 @@ exports.ProjectsOctoKit = ProjectsOctoKit;
 
 /***/ }),
 
-/***/ 44:
-/***/ (function(__unusedmodule, exports) {
+/***/ 1406:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.arrayUnique = void 0;
+const arrayUnique = (array) => {
+    const set = new Set(array);
+    return [...set];
+};
+exports.arrayUnique = arrayUnique;
+
+
+/***/ }),
+
+/***/ 1617:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.cardLink = void 0;
+const projectLink_1 = __webpack_require__(7065);
+const cardLink = (card, projectWithConfig) => {
+    return `${projectLink_1.projectLink(projectWithConfig)}#card-${card.id}`;
+};
+exports.cardLink = cardLink;
+
+
+/***/ }),
+
+/***/ 6449:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.emojiIcon = void 0;
+const ident_1 = __webpack_require__(7468);
+const emojiIcon = (icon, title) => {
+    const iconString = `${icon}${ident_1.ident(1)}`;
+    if (!title) {
+        return iconString;
+    }
+    return `<i title="${title}">${iconString}</i>`;
+};
+exports.emojiIcon = emojiIcon;
+
+
+/***/ }),
+
+/***/ 8001:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.env = void 0;
+const env = (name) => {
+    return process.env[name];
+};
+exports.env = env;
+
+
+/***/ }),
+
+/***/ 7738:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.filterPlannedProjectData = exports.filterUnassignedIssues = void 0;
+// const filterUnplannedCards = (cardsWithIssue: ICardWithIssue[]): ICardWithIssue[] => {
+//   const cards = filterNewCards(cardsWithIssue);
+//   return filterUnassignedIssues(cards);
+// };
+const filterUnassignedIssues = (cardsWithIssue) => {
+    const cards = cardsWithIssue.filter(({ issue }) => {
+        if (!issue) {
+            return true;
+        }
+        return issue.assignees.length > 0;
+    });
+    return cards;
+};
+exports.filterUnassignedIssues = filterUnassignedIssues;
+const filterNewCards = (cardsWithIssue) => {
+    const cards = cardsWithIssue.filter((card) => {
+        return !card.isNew;
+    });
+    return cards;
+};
+const filterPlannedProjectData = (data) => {
+    return Object.assign(Object.assign({}, data), { 
+        // combined
+        inWorkIssues: filterNewCards(data.inWorkIssues), doneOrDeployIssues: filterNewCards(data.doneOrDeployIssues), allPlannedIssues: filterNewCards(data.allPlannedIssues), issuesToSolve: filterNewCards(data.issuesToSolve), 
+        // plain
+        backlogIssues: filterNewCards(data.backlogIssues), committedIssues: filterNewCards(data.committedIssues), progressIssues: filterNewCards(data.progressIssues), inReviewIssues: filterNewCards(data.inReviewIssues), blockedIssues: filterNewCards(data.blockedIssues), waitingToDeployIssues: filterNewCards(data.waitingToDeployIssues), doneIssues: filterNewCards(data.doneIssues) });
+};
+exports.filterPlannedProjectData = filterPlannedProjectData;
+
+
+/***/ }),
+
+/***/ 1065:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.flattenArray = void 0;
+const flattenArray = (input, output = []) => {
+    for (const value of input) {
+        Array.isArray(value) ? exports.flattenArray(value, output) : output.push(value);
+    }
+    return output;
+};
+exports.flattenArray = flattenArray;
+
+
+/***/ }),
+
+/***/ 1976:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.capitalize = void 0;
+const capitalize = (str) => {
+    return `${str[0].toUpperCase()}${str.substring(1)}`;
+};
+exports.capitalize = capitalize;
+
+
+/***/ }),
+
+/***/ 1624:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.notEmpty = void 0;
+const notEmpty = (value) => {
+    return value !== null && value !== undefined;
+};
+exports.notEmpty = notEmpty;
+
+
+/***/ }),
+
+/***/ 1881:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.pluck = void 0;
+const pluck = (propName) => {
+    return (obj) => {
+        return obj[propName];
+    };
+};
+exports.pluck = pluck;
+
+
+/***/ }),
+
+/***/ 1618:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.toLowerCase = void 0;
+const toLowerCase = (str) => {
+    return str.toLowerCase();
+};
+exports.toLowerCase = toLowerCase;
+
+
+/***/ }),
+
+/***/ 6273:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getProjectData = void 0;
+const measure_1 = __webpack_require__(2715);
+const TColumnTypes_1 = __webpack_require__(187);
+const filterPlannedProjectData_1 = __webpack_require__(7738);
+const getProjectData = (projectKit, config, project) => __awaiter(void 0, void 0, void 0, function* () {
+    return yield measure_1.measure(`Get data for the "${project.project.name}" project`, () => __awaiter(void 0, void 0, void 0, function* () {
+        const columns = yield measure_1.measure('Fetching columns', () => __awaiter(void 0, void 0, void 0, function* () {
+            return yield projectKit.getColumns(project);
+        }));
+        const cards = yield measure_1.measure('Fetching cards', () => __awaiter(void 0, void 0, void 0, function* () {
+            return yield projectKit.getCards(columns);
+        }));
+        const repos = yield measure_1.measure('Fetching Repos', () => __awaiter(void 0, void 0, void 0, function* () {
+            return yield projectKit.getCardRepos(cards);
+        }));
+        console.log('- Repos: ', repos);
+        const issues = yield measure_1.measure('Fetching Issues', () => __awaiter(void 0, void 0, void 0, function* () {
+            return yield projectKit.getReposIssues(repos);
+        }));
+        const backlogIssues = yield projectKit.mergeCardsWithIssuesForColumn(issues, cards, TColumnTypes_1.TColumnTypes.Backlog, config, project);
+        console.log(`BacklogIssues: ${backlogIssues.length} items`);
+        const committedIssues = yield projectKit.mergeCardsWithIssuesForColumn(issues, cards, TColumnTypes_1.TColumnTypes.Committed, config, project);
+        console.log(`CommittedIssues: ${committedIssues.length} items`);
+        const blockedIssues = yield projectKit.mergeCardsWithIssuesForColumn(issues, cards, TColumnTypes_1.TColumnTypes.Blocked, config, project);
+        console.log(`BlockedIssues: ${blockedIssues.length} items`);
+        const progressIssues = yield projectKit.mergeCardsWithIssuesForColumn(issues, cards, TColumnTypes_1.TColumnTypes.InProgress, config, project);
+        console.log(`ProgressIssues: ${progressIssues.length} items`);
+        const inReviewIssues = yield projectKit.mergeCardsWithIssuesForColumn(issues, cards, TColumnTypes_1.TColumnTypes.InReview, config, project);
+        console.log(`InReviewIssues: ${inReviewIssues.length} items`);
+        const waitingToDeployIssues = yield projectKit.mergeCardsWithIssuesForColumn(issues, cards, TColumnTypes_1.TColumnTypes.WaitingToDeploy, config, project);
+        console.log(`WaitingToDeployIssues: ${waitingToDeployIssues.length} items`);
+        const doneIssues = yield projectKit.mergeCardsWithIssuesForColumn(issues, cards, TColumnTypes_1.TColumnTypes.Done, config, project);
+        console.log(`doneIssues: ${doneIssues.length} items`);
+        const inWorkIssues = [...progressIssues, ...inReviewIssues];
+        const doneOrDeployIssues = [...waitingToDeployIssues, ...doneIssues];
+        const allPlannedIssues = [
+            ...blockedIssues,
+            ...committedIssues,
+            ...inWorkIssues,
+            ...doneOrDeployIssues,
+        ];
+        const unassignedIssues = filterPlannedProjectData_1.filterUnassignedIssues([
+            ...blockedIssues,
+            ...committedIssues,
+        ]);
+        const toSolveIssues = [
+            ...inWorkIssues,
+            ...blockedIssues,
+            ...committedIssues,
+        ];
+        return {
+            project,
+            // combined
+            inWorkIssues,
+            doneOrDeployIssues,
+            allPlannedIssues,
+            issuesToSolve: toSolveIssues,
+            unassignedIssues,
+            // plain
+            backlogIssues,
+            committedIssues,
+            progressIssues,
+            inReviewIssues,
+            blockedIssues,
+            waitingToDeployIssues,
+            doneIssues,
+        };
+    }));
+});
+exports.getProjectData = getProjectData;
+
+
+/***/ }),
+
+/***/ 8686:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getProjectStats = void 0;
+const renderDaysLeft_1 = __webpack_require__(7342);
+const arrayUnique_1 = __webpack_require__(1406);
+const flatternArray_1 = __webpack_require__(1065);
+const notEmpty_1 = __webpack_require__(1624);
+const pluck_1 = __webpack_require__(1881);
+const getDevelopers = (cardsWithIssue, projectWithConfig) => {
+    /**
+     * If `developers` list set on the Project config, use the list,
+     * otherwise infer the developers list from the assigned issues.
+     */
+    const { projectConfig } = projectWithConfig;
+    if (typeof projectConfig !== 'number' && projectConfig.developers) {
+        return projectConfig.developers;
+    }
+    const developersWithDuplicates = cardsWithIssue
+        .map(({ issue }) => {
+        if (!issue) {
+            return;
+        }
+        return issue.assignees.map(pluck_1.pluck('login'));
+    })
+        .filter(notEmpty_1.notEmpty);
+    const developers = arrayUnique_1.arrayUnique(flatternArray_1.flattenArray(developersWithDuplicates));
+    return developers;
+};
+// const asigneesToDevelopers = (assignees: TRepoIssue['assignees']) => {
+//   return assignees.map((as) => {
+//     return as.login;
+//   });
+// };
+// const countAssignedIssues = (
+//   developer: string,
+//   cardsWithIssue: ICardWithIssue[],
+// ) => {
+//   const result = cardsWithIssue.reduce((current, { issue }) => {
+//     if (!issue) {
+//       return current;
+//     }
+//     const { assignees } = issue;
+//     if (!assignees || !assignees.length) {
+//       return current;
+//     }
+//     const developers = asigneesToDevelopers(assignees);
+//     return developers.includes(developer) ? current + 1 : current;
+//   }, 0);
+//   return result;
+// };
+// const getBusiestDeveloper = (cardsWithIssue: ICardWithIssue[]): IDeveloperWithIssuesCount => {
+//   const developers = getDevelopers(cardsWithIssue)
+//     .map<IDeveloperWithIssuesCount>((developer) => {
+//       return {
+//         login: developer,
+//         issuesCount: countAssignedIssues(developer, cardsWithIssue),
+//         issueType: 'assigned',
+//       }
+//     })
+//     .sort((dev1, dev2) => {
+//       return dev2.issuesCount - dev1.issuesCount;
+//     });
+//   return developers[0];
+// };
+const getProjectStats = (data, config) => {
+    const { 
+    // combined
+    inWorkIssues, doneOrDeployIssues, allPlannedIssues, issuesToSolve: toSolveIssues, 
+    // plain
+    committedIssues, } = data;
+    const daysLeft = renderDaysLeft_1.getWorkDays(config);
+    const doneRate = doneOrDeployIssues.length / allPlannedIssues.length;
+    const inWorkRate = inWorkIssues.length / allPlannedIssues.length;
+    const committedRate = committedIssues.length / allPlannedIssues.length;
+    const developers = getDevelopers(allPlannedIssues, data.project);
+    const issuesDeveloperLeftRatio = toSolveIssues.length / developers.length;
+    const issuesDeveloperRatio = toSolveIssues.length / developers.length;
+    const issuesDayLeftRatio = daysLeft
+        ? toSolveIssues.length / Math.max(daysLeft.businessDaysLeft, 1)
+        : undefined;
+    const issuesDayRatio = daysLeft
+        ? allPlannedIssues.length / daysLeft.totalBusinessDaysInSprint
+        : undefined;
+    const issuesDeveloperDayLeftRatio = issuesDayLeftRatio
+        ? issuesDayLeftRatio / developers.length
+        : undefined;
+    const issuesDeveloperDayRatio = issuesDayRatio
+        ? issuesDayRatio / developers.length
+        : undefined;
+    return {
+        doneRate,
+        inWorkRate,
+        committedRate,
+        // number of developers on the board
+        developers,
+        // inital issues per developer load
+        issuesDeveloperRatio,
+        // how many issues per developer left to solve
+        issuesDeveloperLeftRatio,
+        // inital issues per day load
+        issuesDayRatio,
+        // how many issues per day left to solve
+        issuesDayLeftRatio,
+        // inital per day per developer ratio
+        issuesDeveloperDayRatio,
+        // how many issues per day per developer left to solve
+        issuesDeveloperDayLeftRatio,
+    };
+};
+exports.getProjectStats = getProjectStats;
+
+
+/***/ }),
+
+/***/ 1368:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.isBugCard = void 0;
+const pluck_1 = __webpack_require__(1881);
+const toLowerCase_1 = __webpack_require__(1618);
+const isBugCard = (card) => {
+    const { issue } = card;
+    if (!issue) {
+        return false;
+    }
+    const { labels } = issue;
+    const isBug = labels.map(pluck_1.pluck('name')).map(toLowerCase_1.toLowerCase).includes('bug');
+    return isBug;
+};
+exports.isBugCard = isBugCard;
+
+
+/***/ }),
+
+/***/ 8010:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.isDoneColumn = void 0;
+const TColumnTypes_1 = __webpack_require__(187);
+const isDoneColumn = (column) => {
+    switch (column) {
+        case TColumnTypes_1.TColumnTypes.WaitingToDeploy:
+        case TColumnTypes_1.TColumnTypes.Done: {
+            return true;
+        }
+        default: {
+            return false;
+        }
+    }
+};
+exports.isDoneColumn = isDoneColumn;
+
+
+/***/ }),
+
+/***/ 8363:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.isNewCard = void 0;
+const dateAddDays = (startDate, days) => {
+    const date = new Date();
+    date.setDate(startDate.getDate() + days);
+    return date;
+};
+/**
+ * Check if card is a new - was created after
+ * the sprint start date.
+ */
+const isNewCard = (card, config, projectWithConfig) => {
+    const { sprintStartDate: sprintStartDateString } = config;
+    if (!sprintStartDateString) {
+        return false;
+    }
+    const cardCreationDate = new Date(card.created_at);
+    const sprintStartDate = new Date(sprintStartDateString);
+    const { projectConfig } = projectWithConfig;
+    const newCardsCutoffDays = typeof projectConfig === 'number' || !projectConfig.newCardsCutoffDays
+        ? 0
+        : projectConfig.newCardsCutoffDays;
+    return (cardCreationDate.getTime() >=
+        dateAddDays(sprintStartDate, newCardsCutoffDays).getTime());
+};
+exports.isNewCard = isNewCard;
+
+
+/***/ }),
+
+/***/ 2715:
+/***/ (function(__unused_webpack_module, exports) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.measure = void 0;
+const measure = (blockName, callback) => __awaiter(void 0, void 0, void 0, function* () {
+    // const labelSuffix = `__${shortId().substr(0, 4).toLowerCase()}`;
+    const label = `${blockName}`;
+    console.log(`> ${label}`);
+    const timingLabel = `- ${label}`;
+    console.time(timingLabel);
+    const result = yield callback();
+    console.timeEnd(timingLabel);
+    const suffix = Array.isArray(result) ? ` [${result.length} items]` : '';
+    console.log(`< ${label}${suffix}`);
+    return result;
+});
+exports.measure = measure;
+
+
+/***/ }),
+
+/***/ 9996:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.parseFileUrl = void 0;
+const parseFileUrl = (fileUrl) => {
+    const uri = new URL(fileUrl);
+    const { pathname } = uri;
+    const split = pathname.split('/');
+    const path = decodeURIComponent(split.slice(4).join('/'));
+    return {
+        owner: split[1],
+        repo: split[2],
+        path: `/${path}`,
+    };
+};
+exports.parseFileUrl = parseFileUrl;
+
+
+/***/ }),
+
+/***/ 5983:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.parseIssueApiUrl = exports.parseCommentUrl = exports.parseIssueUrl = void 0;
+const parseIssueUrl = (issueUrl) => {
+    const uri = new URL(issueUrl);
+    const { pathname } = uri;
+    if (uri.hostname !== 'github.com') {
+        return null;
+    }
+    const split = pathname.split('/');
+    return {
+        owner: split[1],
+        repo: split[2],
+        issueNumber: parseInt(split[4], 10),
+    };
+};
+exports.parseIssueUrl = parseIssueUrl;
+const parseCommentUrl = (issueUrl) => {
+    const uri = new URL(issueUrl);
+    const { pathname, hash } = uri;
+    if (uri.hostname !== 'github.com') {
+        return null;
+    }
+    const split = pathname.split('/');
+    return {
+        owner: split[1],
+        repo: split[2],
+        issueNumber: parseInt(split[4], 10),
+        commentId: parseInt(hash.split('#issuecomment-')[1], 10),
+    };
+};
+exports.parseCommentUrl = parseCommentUrl;
+const parseIssueApiUrl = (issueUrl) => {
+    const uri = new URL(issueUrl);
+    const { pathname } = uri;
+    const split = pathname.split('/');
+    return {
+        owner: split[2],
+        repo: split[3],
+        issueNumber: parseInt(split[5], 10),
+    };
+};
+exports.parseIssueApiUrl = parseIssueApiUrl;
+
+
+/***/ }),
+
+/***/ 7065:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.projectLink = void 0;
+const repoUrl_1 = __webpack_require__(198);
+const projectLink = (projectWithConfig) => {
+    const { project, repo } = projectWithConfig;
+    return `${repoUrl_1.repoUrl(repo)}/projects/${project.number}`;
+};
+exports.projectLink = projectLink;
+
+
+/***/ }),
+
+/***/ 5501:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.rateToPercent = void 0;
+const rateToPercent = (rate) => {
+    return `${Math.round(100 * rate)}%`;
+};
+exports.rateToPercent = rateToPercent;
+
+
+/***/ }),
+
+/***/ 198:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.repoUrl = void 0;
+const repoUrl = (repo) => {
+    return `https://github.com/${repo.owner}/${repo.repo}`;
+};
+exports.repoUrl = repoUrl;
+
+
+/***/ }),
+
+/***/ 8192:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getCardPriority = void 0;
+/**
+ * Find out card priority by the `priorityLabels` setting,
+ * larger the number, more priority the card has.
+ */
+const getCardPriority = (cardWithIssue, { projectConfig }, 
+// if actual priority not set, use this value (0 is the least priority)
+notDefinedValue = 0) => {
+    const { issue } = cardWithIssue;
+    if (!issue || typeof projectConfig === 'number') {
+        return notDefinedValue;
+    }
+    const { priorityLabels } = projectConfig;
+    if (!priorityLabels) {
+        return notDefinedValue;
+    }
+    const cardPrioritylabel = priorityLabels.find((priorityLabel) => {
+        const foundLabel = issue.labels.find((issueLabel) => {
+            return issueLabel.name === priorityLabel;
+        });
+        return !!foundLabel;
+    });
+    if (!cardPrioritylabel) {
+        return notDefinedValue;
+    }
+    return Number.MAX_SAFE_INTEGER - priorityLabels.indexOf(cardPrioritylabel);
+};
+exports.getCardPriority = getCardPriority;
+
+
+/***/ }),
+
+/***/ 2032:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getSortResultByIssuePresence = void 0;
+const TArraySortResult_1 = __webpack_require__(8147);
+const getSortResultByIssuePresence = (cardWithIssue1, cardWithIssue2) => {
+    const { issue: issue1 } = cardWithIssue1;
+    const { issue: issue2 } = cardWithIssue2;
+    if (!issue1 && !issue2) {
+        return null;
+    }
+    if (!issue1) {
+        return TArraySortResult_1.TArraySortResult.SecondEarlier;
+    }
+    if (!issue2) {
+        return TArraySortResult_1.TArraySortResult.FirstEarlier;
+    }
+    return null;
+};
+exports.getSortResultByIssuePresence = getSortResultByIssuePresence;
+
+
+/***/ }),
+
+/***/ 1733:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.sortCardsByAssigneesInPlace = exports.sortByAssigneesPredicate = void 0;
+const TArraySortResult_1 = __webpack_require__(8147);
+const sortByAssigneesPredicate = (cardWithIssue1, cardWithIssue2) => {
+    const { issue: issue1 } = cardWithIssue1;
+    const { issue: issue2 } = cardWithIssue2;
+    if (!issue1 && !issue2) {
+        return;
+    }
+    if (!issue1 || !issue1.assignees.length) {
+        return TArraySortResult_1.TArraySortResult.SecondEarlier;
+    }
+    if (!issue2 || !issue2.assignees.length) {
+        return TArraySortResult_1.TArraySortResult.FirstEarlier;
+    }
+    if (issue1.assignees[0].login < issue2.assignees[0].login) {
+        return TArraySortResult_1.TArraySortResult.FirstEarlier;
+    }
+    if (issue1.assignees[0].login > issue2.assignees[0].login) {
+        return TArraySortResult_1.TArraySortResult.SecondEarlier;
+    }
+    return TArraySortResult_1.TArraySortResult.Equal;
+};
+exports.sortByAssigneesPredicate = sortByAssigneesPredicate;
+const sortCardsByAssigneesInPlace = (cardsWithIssue) => {
+    const result = cardsWithIssue.sort((card1, card2) => {
+        var _a;
+        return (_a = exports.sortByAssigneesPredicate(card1, card2)) !== null && _a !== void 0 ? _a : TArraySortResult_1.TArraySortResult.Equal;
+    });
+    return result;
+};
+exports.sortCardsByAssigneesInPlace = sortCardsByAssigneesInPlace;
+
+
+/***/ }),
+
+/***/ 769:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.sortCardsByLabelPriorityInPlace = void 0;
+const getCardPriority_1 = __webpack_require__(8192);
+const TArraySortResult_1 = __webpack_require__(8147);
+const getSortResultByIssuePresence_1 = __webpack_require__(2032);
+// const sortCardsByPriorityLabelsPredicateFactory = (
+//   projectWithConfig: IProjectWithConfig,
+//   predicate?: TSortPredicate,
+// ) => {
+//   return
+// };
+const sortCardsByLabelPriorityInPlace = (cardsWithIssue, projectWithConfig, predicate) => {
+    const result = cardsWithIssue.sort((cardWithIssue1, cardWithIssue2) => {
+        var _a;
+        const baseSort = getSortResultByIssuePresence_1.getSortResultByIssuePresence(cardWithIssue1, cardWithIssue2);
+        if (baseSort !== null) {
+            return baseSort;
+        }
+        const defaultPriority = (predicate)
+            ? null
+            : undefined;
+        const cardPriority1 = getCardPriority_1.getCardPriority(cardWithIssue1, projectWithConfig, defaultPriority);
+        const cardPriority2 = getCardPriority_1.getCardPriority(cardWithIssue2, projectWithConfig, defaultPriority);
+        if (cardPriority1 === null && cardPriority2 === null && predicate) {
+            return (_a = predicate(cardWithIssue1, cardWithIssue2)) !== null && _a !== void 0 ? _a : TArraySortResult_1.TArraySortResult.Equal;
+        }
+        if (cardPriority1 === null) {
+            return TArraySortResult_1.TArraySortResult.SecondEarlier;
+        }
+        if (cardPriority2 === null) {
+            return TArraySortResult_1.TArraySortResult.FirstEarlier;
+        }
+        if (cardPriority1 > cardPriority2) {
+            return TArraySortResult_1.TArraySortResult.FirstEarlier;
+        }
+        if (cardPriority1 < cardPriority2) {
+            return TArraySortResult_1.TArraySortResult.SecondEarlier;
+        }
+        return TArraySortResult_1.TArraySortResult.Equal;
+    });
+    return result;
+};
+exports.sortCardsByLabelPriorityInPlace = sortCardsByLabelPriorityInPlace;
+
+
+/***/ }),
+
+/***/ 3536:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.sortCardsInPlace = void 0;
+const sortCardsByLabelPriorityInPlace_1 = __webpack_require__(769);
+const sortCardsByAssigneesInPlace_1 = __webpack_require__(1733);
+/**
+ * The Default way of sorting the cards. !IN PLACE!
+ */
+const sortCardsInPlace = (cards, projectWithConfig) => {
+    sortCardsByLabelPriorityInPlace_1.sortCardsByLabelPriorityInPlace(cards, projectWithConfig, sortCardsByAssigneesInPlace_1.sortByAssigneesPredicate);
+    return cards;
+};
+exports.sortCardsInPlace = sortCardsInPlace;
+
+
+/***/ }),
+
+/***/ 3864:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.addParens = void 0;
+const addParens = (str) => {
+    if (!str) {
+        return str;
+    }
+    return `(${str})`;
+};
+exports.addParens = addParens;
+
+
+/***/ }),
+
+/***/ 616:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.addTitle = void 0;
+const addTitle = (title, str) => {
+    if (!str) {
+        return str;
+    }
+    return `<i title="${title}">${str}</i>`;
+};
+exports.addTitle = addTitle;
+
+
+/***/ }),
+
+/***/ 7468:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ident = void 0;
+const ident = (steps) => {
+    const step = `  `;
+    const items = new Array(steps).fill(step);
+    return items.join();
+};
+exports.ident = ident;
+
+
+/***/ }),
+
+/***/ 8452:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.renderCard = void 0;
+const IIssueState_1 = __webpack_require__(3145);
+const TColumnTypes_1 = __webpack_require__(187);
+const cardLink_1 = __webpack_require__(1617);
+const notEmpty_1 = __webpack_require__(1624);
+const isBugCard_1 = __webpack_require__(1368);
+const isDoneColumn_1 = __webpack_require__(8010);
+const emojiIcon_1 = __webpack_require__(6449);
+const mapColumnToEmoji = (column, { projectConfig }) => {
+    switch (column) {
+        case TColumnTypes_1.TColumnTypes.Committed: {
+            return '';
+        }
+        case TColumnTypes_1.TColumnTypes.InProgress: {
+            return '';
+        }
+        case TColumnTypes_1.TColumnTypes.InReview: {
+            return emojiIcon_1.emojiIcon('👀', column);
+        }
+        case TColumnTypes_1.TColumnTypes.WaitingToDeploy: {
+            return emojiIcon_1.emojiIcon('🏗️', column);
+        }
+        case TColumnTypes_1.TColumnTypes.Blocked: {
+            return '';
+        }
+        case TColumnTypes_1.TColumnTypes.Done: {
+            // if list items not rendered as list items,
+            // show the check emoji
+            if (typeof projectConfig === 'number' ||
+                !projectConfig.isCheckListItems) {
+                return emojiIcon_1.emojiIcon('✅', column);
+            }
+            return '';
+        }
+        default:
+        case TColumnTypes_1.TColumnTypes.Backlog: {
+            throw new Error("Don't render the Backlog items.");
+        }
+    }
+};
+const mapIssueTypeToEmoji = (cardWithIssue) => {
+    const { issue } = cardWithIssue;
+    if (!issue) {
+        return emojiIcon_1.emojiIcon('🃏', 'Card');
+    }
+    if (isBugCard_1.isBugCard(cardWithIssue)) {
+        return emojiIcon_1.emojiIcon('🐛', 'Bug');
+    }
+    return '';
+};
+const newToEmpoji = ({ isNew }) => {
+    if (isNew) {
+        return emojiIcon_1.emojiIcon('🆕', 'New');
+    }
+    return '';
+};
+const renderAssignees = (cardWithIssue) => {
+    const { issue, card } = cardWithIssue;
+    // if no issue linked - use creator of the card instead
+    if (!issue) {
+        return `@${card.creator.login}`;
+    }
+    const { assignees } = issue;
+    if (!assignees.length) {
+        return `🙋**free issue**`;
+    }
+    const users = assignees.map((user) => {
+        return `@${user.login}`;
+    });
+    return users.join(' ');
+};
+const renderItemIssueStatus = (cardWithIssue, column, asCheckList) => {
+    if (!asCheckList) {
+        return '';
+    }
+    const { issue } = cardWithIssue;
+    if (!issue) {
+        return !isDoneColumn_1.isDoneColumn(column) ? '[ ] ' : '[x] ';
+    }
+    return issue.state === IIssueState_1.IIssueState.Open ? '[ ] ' : '[x] ';
+};
+const renderLabelImage = (label) => {
+    const { name, color } = label;
+    const cleanColor = color.replace('#', '');
+    const encodedName = encodeURIComponent(name);
+    return `<img src="https://img.shields.io/badge/-${encodedName}-${cleanColor}" height="15" alt="label: ${name}" />`;
+};
+const renderIssueLabel = (label) => {
+    const { url, description } = label;
+    const uri = new URL(url);
+    uri.hostname = uri.hostname.replace('api.', '');
+    uri.pathname = uri.pathname.replace(/^\/repos/, '');
+    return `<a href="${uri}" title="${description}">${renderLabelImage(label)}</a>`;
+};
+const renderPriorityLabels = (cardWithIssue, projectWithConfig) => {
+    const { projectConfig } = projectWithConfig;
+    if (typeof projectConfig === 'number') {
+        return '';
+    }
+    const { priorityLabels } = projectConfig;
+    if (!priorityLabels) {
+        return '';
+    }
+    const { issue } = cardWithIssue;
+    if (!issue) {
+        return '';
+    }
+    const cardLabels = priorityLabels
+        .map((label) => {
+        const issueLabel = issue.labels.find((issueLabel) => {
+            return issueLabel.name === label;
+        });
+        return issueLabel;
+    })
+        .filter(notEmpty_1.notEmpty)
+        .map(renderIssueLabel);
+    const result = cardLabels.join('');
+    return result ? `${result} ` : '';
+};
+const renderCard = (cardWithIssue, projectWithConfig, asCheckList = false) => {
+    const { column, issue, card } = cardWithIssue;
+    const title = !issue ? card.note : issue.title;
+    /**
+     * If no associated issue found, item `url` it the URL to the
+     * card itself, otherwise `url` is the link to the issue.
+     */
+    const url = !issue
+        ? `[#card-${card.id}](${cardLink_1.cardLink(card, projectWithConfig)})`
+        : issue.html_url;
+    const assignees = renderAssignees(cardWithIssue);
+    const labels = renderPriorityLabels(cardWithIssue, projectWithConfig);
+    const stateEmoji = mapColumnToEmoji(column, projectWithConfig);
+    const typeEmoji = mapIssueTypeToEmoji(cardWithIssue);
+    const newEmoji = newToEmpoji(cardWithIssue);
+    const issueStatus = renderItemIssueStatus(cardWithIssue, column, asCheckList);
+    return `- ${issueStatus}${labels}${newEmoji}${stateEmoji}${typeEmoji}${title} ${url} ${assignees}`;
+};
+exports.renderCard = renderCard;
+
+
+/***/ }),
+
+/***/ 7342:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.renderDaysLeft = exports.getWorkDays = void 0;
+const moment_1 = __importDefault(__webpack_require__(9623));
+const getBusinessDatesCount = (startDate, endDate) => {
+    let count = 0;
+    const curDate = startDate;
+    while (curDate <= endDate) {
+        const dayOfWeek = curDate.getDay();
+        if (!(dayOfWeek == 6 || dayOfWeek == 0))
+            count++;
+        curDate.setDate(curDate.getDate() + 1);
+    }
+    return count;
+};
+const daysLeftToEmoj = (daysLeft, totalDays) => {
+    const ratio = daysLeft / totalDays;
+    if (ratio < 0.2) {
+        return '🔥🔥🔥';
+    }
+    if (ratio < 0.3) {
+        return '🔥🔥';
+    }
+    if (ratio < 0.4) {
+        return '🔥';
+    }
+    return '';
+};
+const getWorkDays = (config) => {
+    const { sprintStartDate: sprintStartDateString, sprintDuration, sprintNumberHolidays = 0, } = config;
+    if (!sprintStartDateString || !sprintDuration) {
+        return;
+    }
+    const sprintStartDate = moment_1.default(sprintStartDateString).toDate();
+    const sprintEndDate = moment_1.default(sprintStartDateString)
+        .add('days', sprintDuration)
+        .toDate();
+    const totalBusinessDaysInSprint = getBusinessDatesCount(sprintStartDate, sprintEndDate) -
+        sprintNumberHolidays;
+    const businessDaysLeft = getBusinessDatesCount(new Date(), sprintEndDate) - sprintNumberHolidays;
+    return {
+        businessDaysLeft,
+        totalBusinessDaysInSprint,
+    };
+};
+exports.getWorkDays = getWorkDays;
+const renderDaysLeft = (config) => {
+    const days = exports.getWorkDays(config);
+    if (!days) {
+        return;
+    }
+    const { businessDaysLeft, totalBusinessDaysInSprint } = days;
+    const daysLeft = Math.max(businessDaysLeft, 0);
+    return `${daysLeftToEmoj(daysLeft, totalBusinessDaysInSprint)} **${daysLeft}** work days left`;
+};
+exports.renderDaysLeft = renderDaysLeft;
+
+
+/***/ }),
+
+/***/ 1163:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.renderIssuesBlock = void 0;
+const ident_1 = __webpack_require__(7468);
+const renderCard_1 = __webpack_require__(8452);
+const notEmpty_1 = __webpack_require__(1624);
+const capitalize_1 = __webpack_require__(1976);
+const sortCardsInPlace_1 = __webpack_require__(3536);
+const TArraySortResult_1 = __webpack_require__(8147);
+const NONE_LABEL = 'codespaces-board-undefined-label';
+const findLabel = (labelName, found = true) => {
+    return ({ issue }) => {
+        if (!issue) {
+            return false;
+        }
+        const foundLabel = issue.labels.find((issueLabel) => {
+            return issueLabel.name === labelName;
+        });
+        return !!foundLabel === found;
+    };
+};
+const getIssuesForLabel = (label, cardsWithIssue) => {
+    const originalCards = [...cardsWithIssue];
+    const result = originalCards.filter(findLabel(label));
+    const rest = originalCards.filter(findLabel(label, false));
+    return [result, rest];
+};
+const groupIssuesByLabels = (cardsWithIssues, projectWithConfig) => {
+    var _a;
+    const result = {};
+    const { projectConfig } = projectWithConfig;
+    const labels = typeof projectConfig === 'number' ? [] : (_a = projectConfig.trackLabels) !== null && _a !== void 0 ? _a : [];
+    const includedIssues = new Set();
+    for (const label of labels) {
+        const [cardsForLabel, restCards] = getIssuesForLabel(label, cardsWithIssues);
+        /**
+         * !! We return the `restCards` above - the list of cards that does not hold
+         * the label, and reassign the "rest" list to the original one, so we don't
+         * match the same card against other labels. This enforces descending priority
+         * of the `trackLabels` labels list defined in the project config.
+         * e.g. with the ["port-forwarding", "workbench", "performance", "serverless"]
+         * list in the config, the issues with both "port-forwarding" and "performance"
+         * labels, will show up only in the` Port-forwarding` section since it has the
+         * higher precedence over the "performance" label.
+         */
+        cardsWithIssues = restCards;
+        const sortedIssuesForLabel = sortCardsInPlace_1.sortCardsInPlace(cardsForLabel, projectWithConfig);
+        result[label] = sortedIssuesForLabel;
+        for (const issueForLabel of sortedIssuesForLabel) {
+            includedIssues.add(issueForLabel);
+        }
+    }
+    // get all issues that have no label
+    const notIncludedIssues = cardsWithIssues.filter((issue) => {
+        return !includedIssues.has(issue);
+    });
+    result[NONE_LABEL] = notIncludedIssues;
+    return result;
+};
+const renderTitle = (title) => {
+    return `### **${title}**`;
+};
+const renderIssuesSection = (cardsWithIssues, projectWithConfig, title) => {
+    const { projectConfig } = projectWithConfig;
+    const issueItems = [title];
+    const isCheckList = typeof projectConfig === 'number'
+        ? undefined
+        : projectConfig.isCheckListItems;
+    for (const cardWithIssue of cardsWithIssues) {
+        const item = renderCard_1.renderCard(cardWithIssue, projectWithConfig, isCheckList);
+        issueItems.push(`${ident_1.ident(0)}${item}`);
+    }
+    return issueItems.filter(notEmpty_1.notEmpty).join('\n');
+};
+const renderIssuesList = (issues, projectWithConfig) => {
+    const issueGroups = groupIssuesByLabels(issues, projectWithConfig);
+    const items = Object.entries(issueGroups)
+        // make the general section to be first in the list
+        .sort(([labelName1], [labelName2]) => {
+        if (labelName1 === labelName2) {
+            return TArraySortResult_1.TArraySortResult.Equal;
+        }
+        if (labelName1 === NONE_LABEL) {
+            return TArraySortResult_1.TArraySortResult.FirstEarlier;
+        }
+        if (labelName2 === NONE_LABEL) {
+            return TArraySortResult_1.TArraySortResult.SecondEarlier;
+        }
+        return TArraySortResult_1.TArraySortResult.Equal;
+    })
+        .map(([labelName, issues]) => {
+        if (!issues.length) {
+            return;
+        }
+        const title = labelName === NONE_LABEL ? undefined : `\n**${capitalize_1.capitalize(labelName)}**`;
+        return renderIssuesSection(issues, projectWithConfig, title);
+    });
+    return items.filter(notEmpty_1.notEmpty).join('\n');
+};
+const renderIssuesBlock = (title, issues, projectConfig, 
+/**
+ * if there is no issues in the list, should we render the title?
+ * For some of the blocks, for instance the `In work`, it makes
+ * sense to render the title without the list since we want to
+ * highlight that there is no issues that currently in the progress.
+ */
+isRenderEmptyBlock = true) => {
+    if (!isRenderEmptyBlock && !issues.length) {
+        return undefined;
+    }
+    return [renderTitle(title), renderIssuesList(issues, projectConfig)].join('\n');
+};
+exports.renderIssuesBlock = renderIssuesBlock;
+
+
+/***/ }),
+
+/***/ 1296:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.renderNewItemsSuffix = void 0;
+const emojiIcon_1 = __webpack_require__(6449);
+const renderNewItemsSuffix = (plannedIssues, allIssues) => {
+    const addedIssues = allIssues.length - plannedIssues.length;
+    const addedIssuesString = addedIssues > 0 ? ` **+${addedIssues} new** ${emojiIcon_1.emojiIcon('💥', 'New')}` : '';
+    return addedIssuesString;
+};
+exports.renderNewItemsSuffix = renderNewItemsSuffix;
+
+
+/***/ }),
+
+/***/ 8282:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.renderProject = void 0;
+const rateToPercent_1 = __webpack_require__(5501);
+const getProjectStats_1 = __webpack_require__(8686);
+const renderIssuesBlock_1 = __webpack_require__(1163);
+const renderProjectOverview_1 = __webpack_require__(3560);
+const filterPlannedProjectData_1 = __webpack_require__(7738);
+const renderProjectTitle_1 = __webpack_require__(4752);
+const renderNewItemsSuffix_1 = __webpack_require__(1296);
+const addTitle_1 = __webpack_require__(616);
+const renderProject = (allData, projectWithConfig, config) => {
+    const { 
+    // combined
+    inWorkIssues, doneOrDeployIssues, allPlannedIssues, 
+    // plain
+    backlogIssues, committedIssues, blockedIssues, } = allData;
+    const plannedData = filterPlannedProjectData_1.filterPlannedProjectData(allData);
+    const { allPlannedIssues: plannedAllPlannedIssues, doneOrDeployIssues: plannedDoneOrDeployIssues, } = plannedData;
+    const { doneRate, inWorkRate, committedRate } = getProjectStats_1.getProjectStats(plannedData, config);
+    const { project } = projectWithConfig;
+    const blockedIssuesString = renderIssuesBlock_1.renderIssuesBlock(`⚠️  ${blockedIssues.length} Blocked`, blockedIssues, projectWithConfig, false);
+    const inWorkCount = `${inWorkIssues.length}`;
+    const inWorkIssuesString = renderIssuesBlock_1.renderIssuesBlock(`🏃  ${inWorkCount} In work (${rateToPercent_1.rateToPercent(inWorkRate)})`, inWorkIssues, projectWithConfig);
+    const committedIssuesString = renderIssuesBlock_1.renderIssuesBlock(`💪 ${committedIssues.length} Committed (${rateToPercent_1.rateToPercent(committedRate)})`, committedIssues, projectWithConfig);
+    const doneCount = `${plannedDoneOrDeployIssues.length}/${plannedAllPlannedIssues.length}`;
+    const newItemsDone = renderNewItemsSuffix_1.renderNewItemsSuffix(plannedAllPlannedIssues, allPlannedIssues);
+    const doneIssuesString = renderIssuesBlock_1.renderIssuesBlock(`🙌 ${doneCount} Done (${rateToPercent_1.rateToPercent(doneRate)})${addTitle_1.addTitle('Items added after sprint start date', newItemsDone)}`, doneOrDeployIssues, projectWithConfig);
+    const projectLink = `Link: [${project.name}](${project.html_url})`;
+    const backlogIssuesCountString = `\nBacklog: [${backlogIssues.length} issues](${project.html_url})`;
+    const projectWithData = { data: allData, project: projectWithConfig };
+    return [
+        '',
+        renderProjectTitle_1.renderProjectTitle(project, allData, config),
+        projectLink,
+        renderProjectOverview_1.renderProjectOverview(config, projectWithData),
+        '',
+        blockedIssuesString,
+        committedIssuesString,
+        inWorkIssuesString,
+        doneIssuesString,
+        backlogIssuesCountString,
+    ].join('\n');
+};
+exports.renderProject = renderProject;
+
+
+/***/ }),
+
+/***/ 3560:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.renderProjectOverview = void 0;
+const filterPlannedProjectData_1 = __webpack_require__(7738);
+const getProjectStats_1 = __webpack_require__(8686);
+const addParens_1 = __webpack_require__(3864);
+const ident_1 = __webpack_require__(7468);
+const renderDaysLeft_1 = __webpack_require__(7342);
+const renderNewItemsSuffix_1 = __webpack_require__(1296);
+const renderPerLine = (unit, leftRatio, totalRatio, identation = 0) => {
+    if (!leftRatio || !totalRatio) {
+        return;
+    }
+    const left = leftRatio.toFixed(1);
+    const was = totalRatio.toFixed(1);
+    return `${ident_1.ident(identation)}- ${unit}: **${left}** left / **${was}** total`;
+};
+// const renderDeveloper = (
+//   developer: IDeveloperWithIssuesCount,
+//   config: IConfig,
+//   identation = 0,
+// ) => {
+//   const { login, issuesCount } = developer
+//   const daysLeft = getWorkDays(config);
+//   const suffix = (daysLeft)
+//     ? ` / **${(issuesCount / Math.max(1, daysLeft.businessDaysLeft)).toFixed(1)} per day left**`
+//     : '';
+//   return `${ident(identation)}- 🥵 @${login}: **${issuesCount} issues**${suffix}`;
+// };
+const renderDeveloper = (developer, config, identation = 0) => {
+    return `${ident_1.ident(identation)}- @${developer}`;
+};
+const renderDevelopers = (developers, config, identation = 0) => {
+    const title = `${ident_1.ident(identation)}- 🧑‍💻 **${developers.length}** developers`;
+    // const devs = developers
+    //   .sort()
+    //   .map((developer) => {
+    //     return renderDeveloper(developer, config, identation + 1);
+    //   })
+    //   .join('\n');
+    return [
+        title,
+    ].join('\n');
+};
+const renderIssuesLoadSection = (stats, identation = 0) => {
+    const { issuesDeveloperLeftRatio, issuesDeveloperRatio, issuesDayLeftRatio, issuesDayRatio, issuesDeveloperDayRatio, issuesDeveloperDayLeftRatio, } = stats;
+    // Load - 🔥 <b>high</b>
+    return [
+        renderPerLine('issues per day', issuesDayLeftRatio, issuesDayRatio, identation),
+        renderPerLine('issues per developer', issuesDeveloperLeftRatio, issuesDeveloperRatio, identation),
+        renderPerLine('issues per developer/day', issuesDeveloperDayLeftRatio, issuesDeveloperDayRatio, identation),
+    ].join('\n');
+};
+const renderIssuesLoad = (allStats, plannedStats, config, identation = 0) => {
+    return [
+        '<details>',
+        '<summary>🌡️ <b>Load</b></summary>',
+        '',
+        `- **Planned:**`,
+        renderIssuesLoadSection(plannedStats, identation + 1),
+        `- **Including new issues:**`,
+        renderIssuesLoadSection(allStats, identation + 1),
+        '</details>',
+    ].join('\n');
+};
+/**
+ * Render the `🔭 Overview` section with project stats.
+ */
+const renderProjectOverview = (config, projectWithData) => {
+    const { data: allData } = projectWithData;
+    const plannedData = filterPlannedProjectData_1.filterPlannedProjectData(allData);
+    const { allPlannedIssues: allPlannedIssuesAdded } = allData;
+    const { issuesToSolve, allPlannedIssues } = plannedData;
+    const allStats = getProjectStats_1.getProjectStats(allData, config);
+    const plannedStats = getProjectStats_1.getProjectStats(plannedData, config);
+    const { developers } = allStats;
+    const addedIssues = renderNewItemsSuffix_1.renderNewItemsSuffix(allPlannedIssuesAdded, allPlannedIssues);
+    return [
+        `- 📅 ${renderDaysLeft_1.renderDaysLeft(config)}`,
+        `- 🗒️ **${issuesToSolve.length}** issues left / **${allPlannedIssues.length}** total${addParens_1.addParens(addedIssues)}`,
+        renderDevelopers(developers, config),
+        renderIssuesLoad(allStats, plannedStats, config),
+    ].join('\n');
+};
+exports.renderProjectOverview = renderProjectOverview;
+
+
+/***/ }),
+
+/***/ 4752:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.renderProjectTitle = void 0;
+const rateToPercent_1 = __webpack_require__(5501);
+const getProjectStats_1 = __webpack_require__(8686);
+const filterPlannedProjectData_1 = __webpack_require__(7738);
+const addTitle_1 = __webpack_require__(616);
+const renderProjectTitle = (project, allData, config) => {
+    const plannedData = filterPlannedProjectData_1.filterPlannedProjectData(allData);
+    const { doneRate } = getProjectStats_1.getProjectStats(plannedData, config);
+    const { allPlannedIssues } = allData;
+    const { allPlannedIssues: plannedAllPlannedIssues } = plannedData;
+    const surgeRate = (allPlannedIssues.length - plannedAllPlannedIssues.length) /
+        plannedAllPlannedIssues.length;
+    const surgeEmoji = surgeRate >= 0.1 ? '💥' : '';
+    const surgeString = surgeRate > 0
+        ? ` (**+${rateToPercent_1.rateToPercent(surgeRate)} flood**${surgeEmoji})`
+        : '';
+    const suffix = addTitle_1.addTitle('Items added after sprint start date', surgeString);
+    const projectTitle = `## ${project.name} - ${rateToPercent_1.rateToPercent(doneRate)} done${suffix}`;
+    return projectTitle;
+};
+exports.renderProjectTitle = renderProjectTitle;
+
+
+/***/ }),
+
+/***/ 7351:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const os = __importStar(__webpack_require__(2087));
+const utils_1 = __webpack_require__(5278);
+/**
+ * Commands
+ *
+ * Command Format:
+ *   ::name key=value,key=value::message
+ *
+ * Examples:
+ *   ::warning::This is the message
+ *   ::set-env name=MY_VAR::some value
+ */
+function issueCommand(command, properties, message) {
+    const cmd = new Command(command, properties, message);
+    process.stdout.write(cmd.toString() + os.EOL);
+}
+exports.issueCommand = issueCommand;
+function issue(name, message = '') {
+    issueCommand(name, {}, message);
+}
+exports.issue = issue;
+const CMD_STRING = '::';
+class Command {
+    constructor(command, properties, message) {
+        if (!command) {
+            command = 'missing.command';
+        }
+        this.command = command;
+        this.properties = properties;
+        this.message = message;
+    }
+    toString() {
+        let cmdStr = CMD_STRING + this.command;
+        if (this.properties && Object.keys(this.properties).length > 0) {
+            cmdStr += ' ';
+            let first = true;
+            for (const key in this.properties) {
+                if (this.properties.hasOwnProperty(key)) {
+                    const val = this.properties[key];
+                    if (val) {
+                        if (first) {
+                            first = false;
+                        }
+                        else {
+                            cmdStr += ',';
+                        }
+                        cmdStr += `${key}=${escapeProperty(val)}`;
+                    }
+                }
+            }
+        }
+        cmdStr += `${CMD_STRING}${escapeData(this.message)}`;
+        return cmdStr;
+    }
+}
+function escapeData(s) {
+    return utils_1.toCommandValue(s)
+        .replace(/%/g, '%25')
+        .replace(/\r/g, '%0D')
+        .replace(/\n/g, '%0A');
+}
+function escapeProperty(s) {
+    return utils_1.toCommandValue(s)
+        .replace(/%/g, '%25')
+        .replace(/\r/g, '%0D')
+        .replace(/\n/g, '%0A')
+        .replace(/:/g, '%3A')
+        .replace(/,/g, '%2C');
+}
+//# sourceMappingURL=command.js.map
+
+/***/ }),
+
+/***/ 2186:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const command_1 = __webpack_require__(7351);
+const file_command_1 = __webpack_require__(717);
+const utils_1 = __webpack_require__(5278);
+const os = __importStar(__webpack_require__(2087));
+const path = __importStar(__webpack_require__(5622));
+/**
+ * The code to exit an action
+ */
+var ExitCode;
+(function (ExitCode) {
+    /**
+     * A code indicating that the action was successful
+     */
+    ExitCode[ExitCode["Success"] = 0] = "Success";
+    /**
+     * A code indicating that the action was a failure
+     */
+    ExitCode[ExitCode["Failure"] = 1] = "Failure";
+})(ExitCode = exports.ExitCode || (exports.ExitCode = {}));
+//-----------------------------------------------------------------------
+// Variables
+//-----------------------------------------------------------------------
+/**
+ * Sets env variable for this action and future actions in the job
+ * @param name the name of the variable to set
+ * @param val the value of the variable. Non-string values will be converted to a string via JSON.stringify
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function exportVariable(name, val) {
+    const convertedVal = utils_1.toCommandValue(val);
+    process.env[name] = convertedVal;
+    const filePath = process.env['GITHUB_ENV'] || '';
+    if (filePath) {
+        const delimiter = '_GitHubActionsFileCommandDelimeter_';
+        const commandValue = `${name}<<${delimiter}${os.EOL}${convertedVal}${os.EOL}${delimiter}`;
+        file_command_1.issueCommand('ENV', commandValue);
+    }
+    else {
+        command_1.issueCommand('set-env', { name }, convertedVal);
+    }
+}
+exports.exportVariable = exportVariable;
+/**
+ * Registers a secret which will get masked from logs
+ * @param secret value of the secret
+ */
+function setSecret(secret) {
+    command_1.issueCommand('add-mask', {}, secret);
+}
+exports.setSecret = setSecret;
+/**
+ * Prepends inputPath to the PATH (for this action and future actions)
+ * @param inputPath
+ */
+function addPath(inputPath) {
+    const filePath = process.env['GITHUB_PATH'] || '';
+    if (filePath) {
+        file_command_1.issueCommand('PATH', inputPath);
+    }
+    else {
+        command_1.issueCommand('add-path', {}, inputPath);
+    }
+    process.env['PATH'] = `${inputPath}${path.delimiter}${process.env['PATH']}`;
+}
+exports.addPath = addPath;
+/**
+ * Gets the value of an input.  The value is also trimmed.
+ *
+ * @param     name     name of the input to get
+ * @param     options  optional. See InputOptions.
+ * @returns   string
+ */
+function getInput(name, options) {
+    const val = process.env[`INPUT_${name.replace(/ /g, '_').toUpperCase()}`] || '';
+    if (options && options.required && !val) {
+        throw new Error(`Input required and not supplied: ${name}`);
+    }
+    return val.trim();
+}
+exports.getInput = getInput;
+/**
+ * Sets the value of an output.
+ *
+ * @param     name     name of the output to set
+ * @param     value    value to store. Non-string values will be converted to a string via JSON.stringify
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function setOutput(name, value) {
+    command_1.issueCommand('set-output', { name }, value);
+}
+exports.setOutput = setOutput;
+/**
+ * Enables or disables the echoing of commands into stdout for the rest of the step.
+ * Echoing is disabled by default if ACTIONS_STEP_DEBUG is not set.
+ *
+ */
+function setCommandEcho(enabled) {
+    command_1.issue('echo', enabled ? 'on' : 'off');
+}
+exports.setCommandEcho = setCommandEcho;
+//-----------------------------------------------------------------------
+// Results
+//-----------------------------------------------------------------------
+/**
+ * Sets the action status to failed.
+ * When the action exits it will be with an exit code of 1
+ * @param message add error issue message
+ */
+function setFailed(message) {
+    process.exitCode = ExitCode.Failure;
+    error(message);
+}
+exports.setFailed = setFailed;
+//-----------------------------------------------------------------------
+// Logging Commands
+//-----------------------------------------------------------------------
+/**
+ * Gets whether Actions Step Debug is on or not
+ */
+function isDebug() {
+    return process.env['RUNNER_DEBUG'] === '1';
+}
+exports.isDebug = isDebug;
+/**
+ * Writes debug message to user log
+ * @param message debug message
+ */
+function debug(message) {
+    command_1.issueCommand('debug', {}, message);
+}
+exports.debug = debug;
+/**
+ * Adds an error issue
+ * @param message error issue message. Errors will be converted to string via toString()
+ */
+function error(message) {
+    command_1.issue('error', message instanceof Error ? message.toString() : message);
+}
+exports.error = error;
+/**
+ * Adds an warning issue
+ * @param message warning issue message. Errors will be converted to string via toString()
+ */
+function warning(message) {
+    command_1.issue('warning', message instanceof Error ? message.toString() : message);
+}
+exports.warning = warning;
+/**
+ * Writes info to log with console.log.
+ * @param message info message
+ */
+function info(message) {
+    process.stdout.write(message + os.EOL);
+}
+exports.info = info;
+/**
+ * Begin an output group.
+ *
+ * Output until the next `groupEnd` will be foldable in this group
+ *
+ * @param name The name of the output group
+ */
+function startGroup(name) {
+    command_1.issue('group', name);
+}
+exports.startGroup = startGroup;
+/**
+ * End an output group.
+ */
+function endGroup() {
+    command_1.issue('endgroup');
+}
+exports.endGroup = endGroup;
+/**
+ * Wrap an asynchronous function call in a group.
+ *
+ * Returns the same type as the function itself.
+ *
+ * @param name The name of the group
+ * @param fn The function to wrap in the group
+ */
+function group(name, fn) {
+    return __awaiter(this, void 0, void 0, function* () {
+        startGroup(name);
+        let result;
+        try {
+            result = yield fn();
+        }
+        finally {
+            endGroup();
+        }
+        return result;
+    });
+}
+exports.group = group;
+//-----------------------------------------------------------------------
+// Wrapper action state
+//-----------------------------------------------------------------------
+/**
+ * Saves state for current action, the state can only be retrieved by this action's post job execution.
+ *
+ * @param     name     name of the state to store
+ * @param     value    value to store. Non-string values will be converted to a string via JSON.stringify
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function saveState(name, value) {
+    command_1.issueCommand('save-state', { name }, value);
+}
+exports.saveState = saveState;
+/**
+ * Gets the value of an state set by this action's main execution.
+ *
+ * @param     name     name of the state to get
+ * @returns   string
+ */
+function getState(name) {
+    return process.env[`STATE_${name}`] || '';
+}
+exports.getState = getState;
+//# sourceMappingURL=core.js.map
+
+/***/ }),
+
+/***/ 717:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+// For internal use, subject to change.
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+// We use any as a valid input type
+/* eslint-disable @typescript-eslint/no-explicit-any */
+const fs = __importStar(__webpack_require__(5747));
+const os = __importStar(__webpack_require__(2087));
+const utils_1 = __webpack_require__(5278);
+function issueCommand(command, message) {
+    const filePath = process.env[`GITHUB_${command}`];
+    if (!filePath) {
+        throw new Error(`Unable to find environment variable for file command ${command}`);
+    }
+    if (!fs.existsSync(filePath)) {
+        throw new Error(`Missing file at path: ${filePath}`);
+    }
+    fs.appendFileSync(filePath, `${utils_1.toCommandValue(message)}${os.EOL}`, {
+        encoding: 'utf8'
+    });
+}
+exports.issueCommand = issueCommand;
+//# sourceMappingURL=file-command.js.map
+
+/***/ }),
+
+/***/ 5278:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+// We use any as a valid input type
+/* eslint-disable @typescript-eslint/no-explicit-any */
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+/**
+ * Sanitizes an input into a string so it can be passed into issueCommand safely
+ * @param input input to sanitize into a string
+ */
+function toCommandValue(input) {
+    if (input === null || input === undefined) {
+        return '';
+    }
+    else if (typeof input === 'string' || input instanceof String) {
+        return input;
+    }
+    return JSON.stringify(input);
+}
+exports.toCommandValue = toCommandValue;
+//# sourceMappingURL=utils.js.map
+
+/***/ }),
+
+/***/ 4087:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Context = void 0;
+const fs_1 = __webpack_require__(5747);
+const os_1 = __webpack_require__(2087);
+class Context {
+    /**
+     * Hydrate the context from the environment
+     */
+    constructor() {
+        this.payload = {};
+        if (process.env.GITHUB_EVENT_PATH) {
+            if (fs_1.existsSync(process.env.GITHUB_EVENT_PATH)) {
+                this.payload = JSON.parse(fs_1.readFileSync(process.env.GITHUB_EVENT_PATH, { encoding: 'utf8' }));
+            }
+            else {
+                const path = process.env.GITHUB_EVENT_PATH;
+                process.stdout.write(`GITHUB_EVENT_PATH ${path} does not exist${os_1.EOL}`);
+            }
+        }
+        this.eventName = process.env.GITHUB_EVENT_NAME;
+        this.sha = process.env.GITHUB_SHA;
+        this.ref = process.env.GITHUB_REF;
+        this.workflow = process.env.GITHUB_WORKFLOW;
+        this.action = process.env.GITHUB_ACTION;
+        this.actor = process.env.GITHUB_ACTOR;
+        this.job = process.env.GITHUB_JOB;
+        this.runNumber = parseInt(process.env.GITHUB_RUN_NUMBER, 10);
+        this.runId = parseInt(process.env.GITHUB_RUN_ID, 10);
+    }
+    get issue() {
+        const payload = this.payload;
+        return Object.assign(Object.assign({}, this.repo), { number: (payload.issue || payload.pull_request || payload).number });
+    }
+    get repo() {
+        if (process.env.GITHUB_REPOSITORY) {
+            const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
+            return { owner, repo };
+        }
+        if (this.payload.repository) {
+            return {
+                owner: this.payload.repository.owner.login,
+                repo: this.payload.repository.name
+            };
+        }
+        throw new Error("context.repo requires a GITHUB_REPOSITORY environment variable like 'owner/repo'");
+    }
+}
+exports.Context = Context;
+//# sourceMappingURL=context.js.map
+
+/***/ }),
+
+/***/ 5438:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getOctokit = exports.context = void 0;
+const Context = __importStar(__webpack_require__(4087));
+const utils_1 = __webpack_require__(3030);
+exports.context = new Context.Context();
+/**
+ * Returns a hydrated octokit ready to use for GitHub Actions
+ *
+ * @param     token    the repo PAT or GITHUB_TOKEN
+ * @param     options  other options to set
+ */
+function getOctokit(token, options) {
+    return new utils_1.GitHub(utils_1.getOctokitOptions(token, options));
+}
+exports.getOctokit = getOctokit;
+//# sourceMappingURL=github.js.map
+
+/***/ }),
+
+/***/ 7914:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getApiBaseUrl = exports.getProxyAgent = exports.getAuthString = void 0;
+const httpClient = __importStar(__webpack_require__(9925));
+function getAuthString(token, options) {
+    if (!token && !options.auth) {
+        throw new Error('Parameter token or opts.auth is required');
+    }
+    else if (token && options.auth) {
+        throw new Error('Parameters token and opts.auth may not both be specified');
+    }
+    return typeof options.auth === 'string' ? options.auth : `token ${token}`;
+}
+exports.getAuthString = getAuthString;
+function getProxyAgent(destinationUrl) {
+    const hc = new httpClient.HttpClient();
+    return hc.getAgent(destinationUrl);
+}
+exports.getProxyAgent = getProxyAgent;
+function getApiBaseUrl() {
+    return process.env['GITHUB_API_URL'] || 'https://api.github.com';
+}
+exports.getApiBaseUrl = getApiBaseUrl;
+//# sourceMappingURL=utils.js.map
+
+/***/ }),
+
+/***/ 3030:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getOctokitOptions = exports.GitHub = exports.context = void 0;
+const Context = __importStar(__webpack_require__(4087));
+const Utils = __importStar(__webpack_require__(7914));
+// octokit + plugins
+const core_1 = __webpack_require__(6762);
+const plugin_rest_endpoint_methods_1 = __webpack_require__(3044);
+const plugin_paginate_rest_1 = __webpack_require__(4193);
+exports.context = new Context.Context();
+const baseUrl = Utils.getApiBaseUrl();
+const defaults = {
+    baseUrl,
+    request: {
+        agent: Utils.getProxyAgent(baseUrl)
+    }
+};
+exports.GitHub = core_1.Octokit.plugin(plugin_rest_endpoint_methods_1.restEndpointMethods, plugin_paginate_rest_1.paginateRest).defaults(defaults);
+/**
+ * Convience function to correctly format Octokit Options to pass into the constructor.
+ *
+ * @param     token    the repo PAT or GITHUB_TOKEN
+ * @param     options  other options to set
+ */
+function getOctokitOptions(token, options) {
+    const opts = Object.assign({}, options || {}); // Shallow clone - don't mutate the object provided by the caller
+    // Auth
+    const auth = Utils.getAuthString(token, opts);
+    if (auth) {
+        opts.auth = auth;
+    }
+    return opts;
+}
+exports.getOctokitOptions = getOctokitOptions;
+//# sourceMappingURL=utils.js.map
+
+/***/ }),
+
+/***/ 9925:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const http = __webpack_require__(8605);
+const https = __webpack_require__(7211);
+const pm = __webpack_require__(6443);
+let tunnel;
+var HttpCodes;
+(function (HttpCodes) {
+    HttpCodes[HttpCodes["OK"] = 200] = "OK";
+    HttpCodes[HttpCodes["MultipleChoices"] = 300] = "MultipleChoices";
+    HttpCodes[HttpCodes["MovedPermanently"] = 301] = "MovedPermanently";
+    HttpCodes[HttpCodes["ResourceMoved"] = 302] = "ResourceMoved";
+    HttpCodes[HttpCodes["SeeOther"] = 303] = "SeeOther";
+    HttpCodes[HttpCodes["NotModified"] = 304] = "NotModified";
+    HttpCodes[HttpCodes["UseProxy"] = 305] = "UseProxy";
+    HttpCodes[HttpCodes["SwitchProxy"] = 306] = "SwitchProxy";
+    HttpCodes[HttpCodes["TemporaryRedirect"] = 307] = "TemporaryRedirect";
+    HttpCodes[HttpCodes["PermanentRedirect"] = 308] = "PermanentRedirect";
+    HttpCodes[HttpCodes["BadRequest"] = 400] = "BadRequest";
+    HttpCodes[HttpCodes["Unauthorized"] = 401] = "Unauthorized";
+    HttpCodes[HttpCodes["PaymentRequired"] = 402] = "PaymentRequired";
+    HttpCodes[HttpCodes["Forbidden"] = 403] = "Forbidden";
+    HttpCodes[HttpCodes["NotFound"] = 404] = "NotFound";
+    HttpCodes[HttpCodes["MethodNotAllowed"] = 405] = "MethodNotAllowed";
+    HttpCodes[HttpCodes["NotAcceptable"] = 406] = "NotAcceptable";
+    HttpCodes[HttpCodes["ProxyAuthenticationRequired"] = 407] = "ProxyAuthenticationRequired";
+    HttpCodes[HttpCodes["RequestTimeout"] = 408] = "RequestTimeout";
+    HttpCodes[HttpCodes["Conflict"] = 409] = "Conflict";
+    HttpCodes[HttpCodes["Gone"] = 410] = "Gone";
+    HttpCodes[HttpCodes["TooManyRequests"] = 429] = "TooManyRequests";
+    HttpCodes[HttpCodes["InternalServerError"] = 500] = "InternalServerError";
+    HttpCodes[HttpCodes["NotImplemented"] = 501] = "NotImplemented";
+    HttpCodes[HttpCodes["BadGateway"] = 502] = "BadGateway";
+    HttpCodes[HttpCodes["ServiceUnavailable"] = 503] = "ServiceUnavailable";
+    HttpCodes[HttpCodes["GatewayTimeout"] = 504] = "GatewayTimeout";
+})(HttpCodes = exports.HttpCodes || (exports.HttpCodes = {}));
+var Headers;
+(function (Headers) {
+    Headers["Accept"] = "accept";
+    Headers["ContentType"] = "content-type";
+})(Headers = exports.Headers || (exports.Headers = {}));
+var MediaTypes;
+(function (MediaTypes) {
+    MediaTypes["ApplicationJson"] = "application/json";
+})(MediaTypes = exports.MediaTypes || (exports.MediaTypes = {}));
+/**
+ * Returns the proxy URL, depending upon the supplied url and proxy environment variables.
+ * @param serverUrl  The server URL where the request will be sent. For example, https://api.github.com
+ */
+function getProxyUrl(serverUrl) {
+    let proxyUrl = pm.getProxyUrl(new URL(serverUrl));
+    return proxyUrl ? proxyUrl.href : '';
+}
+exports.getProxyUrl = getProxyUrl;
+const HttpRedirectCodes = [
+    HttpCodes.MovedPermanently,
+    HttpCodes.ResourceMoved,
+    HttpCodes.SeeOther,
+    HttpCodes.TemporaryRedirect,
+    HttpCodes.PermanentRedirect
+];
+const HttpResponseRetryCodes = [
+    HttpCodes.BadGateway,
+    HttpCodes.ServiceUnavailable,
+    HttpCodes.GatewayTimeout
+];
+const RetryableHttpVerbs = ['OPTIONS', 'GET', 'DELETE', 'HEAD'];
+const ExponentialBackoffCeiling = 10;
+const ExponentialBackoffTimeSlice = 5;
+class HttpClientError extends Error {
+    constructor(message, statusCode) {
+        super(message);
+        this.name = 'HttpClientError';
+        this.statusCode = statusCode;
+        Object.setPrototypeOf(this, HttpClientError.prototype);
+    }
+}
+exports.HttpClientError = HttpClientError;
+class HttpClientResponse {
+    constructor(message) {
+        this.message = message;
+    }
+    readBody() {
+        return new Promise(async (resolve, reject) => {
+            let output = Buffer.alloc(0);
+            this.message.on('data', (chunk) => {
+                output = Buffer.concat([output, chunk]);
+            });
+            this.message.on('end', () => {
+                resolve(output.toString());
+            });
+        });
+    }
+}
+exports.HttpClientResponse = HttpClientResponse;
+function isHttps(requestUrl) {
+    let parsedUrl = new URL(requestUrl);
+    return parsedUrl.protocol === 'https:';
+}
+exports.isHttps = isHttps;
+class HttpClient {
+    constructor(userAgent, handlers, requestOptions) {
+        this._ignoreSslError = false;
+        this._allowRedirects = true;
+        this._allowRedirectDowngrade = false;
+        this._maxRedirects = 50;
+        this._allowRetries = false;
+        this._maxRetries = 1;
+        this._keepAlive = false;
+        this._disposed = false;
+        this.userAgent = userAgent;
+        this.handlers = handlers || [];
+        this.requestOptions = requestOptions;
+        if (requestOptions) {
+            if (requestOptions.ignoreSslError != null) {
+                this._ignoreSslError = requestOptions.ignoreSslError;
+            }
+            this._socketTimeout = requestOptions.socketTimeout;
+            if (requestOptions.allowRedirects != null) {
+                this._allowRedirects = requestOptions.allowRedirects;
+            }
+            if (requestOptions.allowRedirectDowngrade != null) {
+                this._allowRedirectDowngrade = requestOptions.allowRedirectDowngrade;
+            }
+            if (requestOptions.maxRedirects != null) {
+                this._maxRedirects = Math.max(requestOptions.maxRedirects, 0);
+            }
+            if (requestOptions.keepAlive != null) {
+                this._keepAlive = requestOptions.keepAlive;
+            }
+            if (requestOptions.allowRetries != null) {
+                this._allowRetries = requestOptions.allowRetries;
+            }
+            if (requestOptions.maxRetries != null) {
+                this._maxRetries = requestOptions.maxRetries;
+            }
+        }
+    }
+    options(requestUrl, additionalHeaders) {
+        return this.request('OPTIONS', requestUrl, null, additionalHeaders || {});
+    }
+    get(requestUrl, additionalHeaders) {
+        return this.request('GET', requestUrl, null, additionalHeaders || {});
+    }
+    del(requestUrl, additionalHeaders) {
+        return this.request('DELETE', requestUrl, null, additionalHeaders || {});
+    }
+    post(requestUrl, data, additionalHeaders) {
+        return this.request('POST', requestUrl, data, additionalHeaders || {});
+    }
+    patch(requestUrl, data, additionalHeaders) {
+        return this.request('PATCH', requestUrl, data, additionalHeaders || {});
+    }
+    put(requestUrl, data, additionalHeaders) {
+        return this.request('PUT', requestUrl, data, additionalHeaders || {});
+    }
+    head(requestUrl, additionalHeaders) {
+        return this.request('HEAD', requestUrl, null, additionalHeaders || {});
+    }
+    sendStream(verb, requestUrl, stream, additionalHeaders) {
+        return this.request(verb, requestUrl, stream, additionalHeaders);
+    }
+    /**
+     * Gets a typed object from an endpoint
+     * Be aware that not found returns a null.  Other errors (4xx, 5xx) reject the promise
+     */
+    async getJson(requestUrl, additionalHeaders = {}) {
+        additionalHeaders[Headers.Accept] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.Accept, MediaTypes.ApplicationJson);
+        let res = await this.get(requestUrl, additionalHeaders);
+        return this._processResponse(res, this.requestOptions);
+    }
+    async postJson(requestUrl, obj, additionalHeaders = {}) {
+        let data = JSON.stringify(obj, null, 2);
+        additionalHeaders[Headers.Accept] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.Accept, MediaTypes.ApplicationJson);
+        additionalHeaders[Headers.ContentType] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.ContentType, MediaTypes.ApplicationJson);
+        let res = await this.post(requestUrl, data, additionalHeaders);
+        return this._processResponse(res, this.requestOptions);
+    }
+    async putJson(requestUrl, obj, additionalHeaders = {}) {
+        let data = JSON.stringify(obj, null, 2);
+        additionalHeaders[Headers.Accept] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.Accept, MediaTypes.ApplicationJson);
+        additionalHeaders[Headers.ContentType] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.ContentType, MediaTypes.ApplicationJson);
+        let res = await this.put(requestUrl, data, additionalHeaders);
+        return this._processResponse(res, this.requestOptions);
+    }
+    async patchJson(requestUrl, obj, additionalHeaders = {}) {
+        let data = JSON.stringify(obj, null, 2);
+        additionalHeaders[Headers.Accept] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.Accept, MediaTypes.ApplicationJson);
+        additionalHeaders[Headers.ContentType] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.ContentType, MediaTypes.ApplicationJson);
+        let res = await this.patch(requestUrl, data, additionalHeaders);
+        return this._processResponse(res, this.requestOptions);
+    }
+    /**
+     * Makes a raw http request.
+     * All other methods such as get, post, patch, and request ultimately call this.
+     * Prefer get, del, post and patch
+     */
+    async request(verb, requestUrl, data, headers) {
+        if (this._disposed) {
+            throw new Error('Client has already been disposed.');
+        }
+        let parsedUrl = new URL(requestUrl);
+        let info = this._prepareRequest(verb, parsedUrl, headers);
+        // Only perform retries on reads since writes may not be idempotent.
+        let maxTries = this._allowRetries && RetryableHttpVerbs.indexOf(verb) != -1
+            ? this._maxRetries + 1
+            : 1;
+        let numTries = 0;
+        let response;
+        while (numTries < maxTries) {
+            response = await this.requestRaw(info, data);
+            // Check if it's an authentication challenge
+            if (response &&
+                response.message &&
+                response.message.statusCode === HttpCodes.Unauthorized) {
+                let authenticationHandler;
+                for (let i = 0; i < this.handlers.length; i++) {
+                    if (this.handlers[i].canHandleAuthentication(response)) {
+                        authenticationHandler = this.handlers[i];
+                        break;
+                    }
+                }
+                if (authenticationHandler) {
+                    return authenticationHandler.handleAuthentication(this, info, data);
+                }
+                else {
+                    // We have received an unauthorized response but have no handlers to handle it.
+                    // Let the response return to the caller.
+                    return response;
+                }
+            }
+            let redirectsRemaining = this._maxRedirects;
+            while (HttpRedirectCodes.indexOf(response.message.statusCode) != -1 &&
+                this._allowRedirects &&
+                redirectsRemaining > 0) {
+                const redirectUrl = response.message.headers['location'];
+                if (!redirectUrl) {
+                    // if there's no location to redirect to, we won't
+                    break;
+                }
+                let parsedRedirectUrl = new URL(redirectUrl);
+                if (parsedUrl.protocol == 'https:' &&
+                    parsedUrl.protocol != parsedRedirectUrl.protocol &&
+                    !this._allowRedirectDowngrade) {
+                    throw new Error('Redirect from HTTPS to HTTP protocol. This downgrade is not allowed for security reasons. If you want to allow this behavior, set the allowRedirectDowngrade option to true.');
+                }
+                // we need to finish reading the response before reassigning response
+                // which will leak the open socket.
+                await response.readBody();
+                // strip authorization header if redirected to a different hostname
+                if (parsedRedirectUrl.hostname !== parsedUrl.hostname) {
+                    for (let header in headers) {
+                        // header names are case insensitive
+                        if (header.toLowerCase() === 'authorization') {
+                            delete headers[header];
+                        }
+                    }
+                }
+                // let's make the request with the new redirectUrl
+                info = this._prepareRequest(verb, parsedRedirectUrl, headers);
+                response = await this.requestRaw(info, data);
+                redirectsRemaining--;
+            }
+            if (HttpResponseRetryCodes.indexOf(response.message.statusCode) == -1) {
+                // If not a retry code, return immediately instead of retrying
+                return response;
+            }
+            numTries += 1;
+            if (numTries < maxTries) {
+                await response.readBody();
+                await this._performExponentialBackoff(numTries);
+            }
+        }
+        return response;
+    }
+    /**
+     * Needs to be called if keepAlive is set to true in request options.
+     */
+    dispose() {
+        if (this._agent) {
+            this._agent.destroy();
+        }
+        this._disposed = true;
+    }
+    /**
+     * Raw request.
+     * @param info
+     * @param data
+     */
+    requestRaw(info, data) {
+        return new Promise((resolve, reject) => {
+            let callbackForResult = function (err, res) {
+                if (err) {
+                    reject(err);
+                }
+                resolve(res);
+            };
+            this.requestRawWithCallback(info, data, callbackForResult);
+        });
+    }
+    /**
+     * Raw request with callback.
+     * @param info
+     * @param data
+     * @param onResult
+     */
+    requestRawWithCallback(info, data, onResult) {
+        let socket;
+        if (typeof data === 'string') {
+            info.options.headers['Content-Length'] = Buffer.byteLength(data, 'utf8');
+        }
+        let callbackCalled = false;
+        let handleResult = (err, res) => {
+            if (!callbackCalled) {
+                callbackCalled = true;
+                onResult(err, res);
+            }
+        };
+        let req = info.httpModule.request(info.options, (msg) => {
+            let res = new HttpClientResponse(msg);
+            handleResult(null, res);
+        });
+        req.on('socket', sock => {
+            socket = sock;
+        });
+        // If we ever get disconnected, we want the socket to timeout eventually
+        req.setTimeout(this._socketTimeout || 3 * 60000, () => {
+            if (socket) {
+                socket.end();
+            }
+            handleResult(new Error('Request timeout: ' + info.options.path), null);
+        });
+        req.on('error', function (err) {
+            // err has statusCode property
+            // res should have headers
+            handleResult(err, null);
+        });
+        if (data && typeof data === 'string') {
+            req.write(data, 'utf8');
+        }
+        if (data && typeof data !== 'string') {
+            data.on('close', function () {
+                req.end();
+            });
+            data.pipe(req);
+        }
+        else {
+            req.end();
+        }
+    }
+    /**
+     * Gets an http agent. This function is useful when you need an http agent that handles
+     * routing through a proxy server - depending upon the url and proxy environment variables.
+     * @param serverUrl  The server URL where the request will be sent. For example, https://api.github.com
+     */
+    getAgent(serverUrl) {
+        let parsedUrl = new URL(serverUrl);
+        return this._getAgent(parsedUrl);
+    }
+    _prepareRequest(method, requestUrl, headers) {
+        const info = {};
+        info.parsedUrl = requestUrl;
+        const usingSsl = info.parsedUrl.protocol === 'https:';
+        info.httpModule = usingSsl ? https : http;
+        const defaultPort = usingSsl ? 443 : 80;
+        info.options = {};
+        info.options.host = info.parsedUrl.hostname;
+        info.options.port = info.parsedUrl.port
+            ? parseInt(info.parsedUrl.port)
+            : defaultPort;
+        info.options.path =
+            (info.parsedUrl.pathname || '') + (info.parsedUrl.search || '');
+        info.options.method = method;
+        info.options.headers = this._mergeHeaders(headers);
+        if (this.userAgent != null) {
+            info.options.headers['user-agent'] = this.userAgent;
+        }
+        info.options.agent = this._getAgent(info.parsedUrl);
+        // gives handlers an opportunity to participate
+        if (this.handlers) {
+            this.handlers.forEach(handler => {
+                handler.prepareRequest(info.options);
+            });
+        }
+        return info;
+    }
+    _mergeHeaders(headers) {
+        const lowercaseKeys = obj => Object.keys(obj).reduce((c, k) => ((c[k.toLowerCase()] = obj[k]), c), {});
+        if (this.requestOptions && this.requestOptions.headers) {
+            return Object.assign({}, lowercaseKeys(this.requestOptions.headers), lowercaseKeys(headers));
+        }
+        return lowercaseKeys(headers || {});
+    }
+    _getExistingOrDefaultHeader(additionalHeaders, header, _default) {
+        const lowercaseKeys = obj => Object.keys(obj).reduce((c, k) => ((c[k.toLowerCase()] = obj[k]), c), {});
+        let clientHeader;
+        if (this.requestOptions && this.requestOptions.headers) {
+            clientHeader = lowercaseKeys(this.requestOptions.headers)[header];
+        }
+        return additionalHeaders[header] || clientHeader || _default;
+    }
+    _getAgent(parsedUrl) {
+        let agent;
+        let proxyUrl = pm.getProxyUrl(parsedUrl);
+        let useProxy = proxyUrl && proxyUrl.hostname;
+        if (this._keepAlive && useProxy) {
+            agent = this._proxyAgent;
+        }
+        if (this._keepAlive && !useProxy) {
+            agent = this._agent;
+        }
+        // if agent is already assigned use that agent.
+        if (!!agent) {
+            return agent;
+        }
+        const usingSsl = parsedUrl.protocol === 'https:';
+        let maxSockets = 100;
+        if (!!this.requestOptions) {
+            maxSockets = this.requestOptions.maxSockets || http.globalAgent.maxSockets;
+        }
+        if (useProxy) {
+            // If using proxy, need tunnel
+            if (!tunnel) {
+                tunnel = __webpack_require__(4294);
+            }
+            const agentOptions = {
+                maxSockets: maxSockets,
+                keepAlive: this._keepAlive,
+                proxy: {
+                    proxyAuth: `${proxyUrl.username}:${proxyUrl.password}`,
+                    host: proxyUrl.hostname,
+                    port: proxyUrl.port
+                }
+            };
+            let tunnelAgent;
+            const overHttps = proxyUrl.protocol === 'https:';
+            if (usingSsl) {
+                tunnelAgent = overHttps ? tunnel.httpsOverHttps : tunnel.httpsOverHttp;
+            }
+            else {
+                tunnelAgent = overHttps ? tunnel.httpOverHttps : tunnel.httpOverHttp;
+            }
+            agent = tunnelAgent(agentOptions);
+            this._proxyAgent = agent;
+        }
+        // if reusing agent across request and tunneling agent isn't assigned create a new agent
+        if (this._keepAlive && !agent) {
+            const options = { keepAlive: this._keepAlive, maxSockets: maxSockets };
+            agent = usingSsl ? new https.Agent(options) : new http.Agent(options);
+            this._agent = agent;
+        }
+        // if not using private agent and tunnel agent isn't setup then use global agent
+        if (!agent) {
+            agent = usingSsl ? https.globalAgent : http.globalAgent;
+        }
+        if (usingSsl && this._ignoreSslError) {
+            // we don't want to set NODE_TLS_REJECT_UNAUTHORIZED=0 since that will affect request for entire process
+            // http.RequestOptions doesn't expose a way to modify RequestOptions.agent.options
+            // we have to cast it to any and change it directly
+            agent.options = Object.assign(agent.options || {}, {
+                rejectUnauthorized: false
+            });
+        }
+        return agent;
+    }
+    _performExponentialBackoff(retryNumber) {
+        retryNumber = Math.min(ExponentialBackoffCeiling, retryNumber);
+        const ms = ExponentialBackoffTimeSlice * Math.pow(2, retryNumber);
+        return new Promise(resolve => setTimeout(() => resolve(), ms));
+    }
+    static dateTimeDeserializer(key, value) {
+        if (typeof value === 'string') {
+            let a = new Date(value);
+            if (!isNaN(a.valueOf())) {
+                return a;
+            }
+        }
+        return value;
+    }
+    async _processResponse(res, options) {
+        return new Promise(async (resolve, reject) => {
+            const statusCode = res.message.statusCode;
+            const response = {
+                statusCode: statusCode,
+                result: null,
+                headers: {}
+            };
+            // not found leads to null obj returned
+            if (statusCode == HttpCodes.NotFound) {
+                resolve(response);
+            }
+            let obj;
+            let contents;
+            // get the result from the body
+            try {
+                contents = await res.readBody();
+                if (contents && contents.length > 0) {
+                    if (options && options.deserializeDates) {
+                        obj = JSON.parse(contents, HttpClient.dateTimeDeserializer);
+                    }
+                    else {
+                        obj = JSON.parse(contents);
+                    }
+                    response.result = obj;
+                }
+                response.headers = res.message.headers;
+            }
+            catch (err) {
+                // Invalid resource (contents not json);  leaving result obj null
+            }
+            // note that 3xx redirects are handled by the http layer.
+            if (statusCode > 299) {
+                let msg;
+                // if exception/error in body, attempt to get better error
+                if (obj && obj.message) {
+                    msg = obj.message;
+                }
+                else if (contents && contents.length > 0) {
+                    // it may be the case that the exception is in the body message as string
+                    msg = contents;
+                }
+                else {
+                    msg = 'Failed request: (' + statusCode + ')';
+                }
+                let err = new HttpClientError(msg, statusCode);
+                err.result = response.result;
+                reject(err);
+            }
+            else {
+                resolve(response);
+            }
+        });
+    }
+}
+exports.HttpClient = HttpClient;
+
+
+/***/ }),
+
+/***/ 6443:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+function getProxyUrl(reqUrl) {
+    let usingSsl = reqUrl.protocol === 'https:';
+    let proxyUrl;
+    if (checkBypass(reqUrl)) {
+        return proxyUrl;
+    }
+    let proxyVar;
+    if (usingSsl) {
+        proxyVar = process.env['https_proxy'] || process.env['HTTPS_PROXY'];
+    }
+    else {
+        proxyVar = process.env['http_proxy'] || process.env['HTTP_PROXY'];
+    }
+    if (proxyVar) {
+        proxyUrl = new URL(proxyVar);
+    }
+    return proxyUrl;
+}
+exports.getProxyUrl = getProxyUrl;
+function checkBypass(reqUrl) {
+    if (!reqUrl.hostname) {
+        return false;
+    }
+    let noProxy = process.env['no_proxy'] || process.env['NO_PROXY'] || '';
+    if (!noProxy) {
+        return false;
+    }
+    // Determine the request port
+    let reqPort;
+    if (reqUrl.port) {
+        reqPort = Number(reqUrl.port);
+    }
+    else if (reqUrl.protocol === 'http:') {
+        reqPort = 80;
+    }
+    else if (reqUrl.protocol === 'https:') {
+        reqPort = 443;
+    }
+    // Format the request hostname and hostname with port
+    let upperReqHosts = [reqUrl.hostname.toUpperCase()];
+    if (typeof reqPort === 'number') {
+        upperReqHosts.push(`${upperReqHosts[0]}:${reqPort}`);
+    }
+    // Compare request host against noproxy
+    for (let upperNoProxyItem of noProxy
+        .split(',')
+        .map(x => x.trim().toUpperCase())
+        .filter(x => x)) {
+        if (upperReqHosts.some(x => x === upperNoProxyItem)) {
+            return true;
+        }
+    }
+    return false;
+}
+exports.checkBypass = checkBypass;
+
+
+/***/ }),
+
+/***/ 334:
+/***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
 
 
-Object.defineProperty(exports, '__esModule', { value: true });
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+
+async function auth(token) {
+  const tokenType = token.split(/\./).length === 3 ? "app" : /^v\d+\./.test(token) ? "installation" : "oauth";
+  return {
+    type: "token",
+    token: token,
+    tokenType
+  };
+}
+
+/**
+ * Prefix token for usage in the Authorization header
+ *
+ * @param token OAuth token or JSON Web Token
+ */
+function withAuthorizationPrefix(token) {
+  if (token.split(/\./).length === 3) {
+    return `bearer ${token}`;
+  }
+
+  return `token ${token}`;
+}
+
+async function hook(token, request, route, parameters) {
+  const endpoint = request.endpoint.merge(route, parameters);
+  endpoint.headers.authorization = withAuthorizationPrefix(token);
+  return request(endpoint);
+}
+
+const createTokenAuth = function createTokenAuth(token) {
+  if (!token) {
+    throw new Error("[@octokit/auth-token] No token passed to createTokenAuth");
+  }
+
+  if (typeof token !== "string") {
+    throw new Error("[@octokit/auth-token] Token passed to createTokenAuth is not a string");
+  }
+
+  token = token.replace(/^(token|bearer) +/i, "");
+  return Object.assign(auth.bind(null, token), {
+    hook: hook.bind(null, token)
+  });
+};
+
+exports.createTokenAuth = createTokenAuth;
+//# sourceMappingURL=index.js.map
+
+
+/***/ }),
+
+/***/ 6762:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+
+var universalUserAgent = __webpack_require__(5030);
+var beforeAfterHook = __webpack_require__(3682);
+var request = __webpack_require__(6234);
+var graphql = __webpack_require__(8467);
+var authToken = __webpack_require__(334);
+
+function _defineProperty(obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+
+  return obj;
+}
+
+function ownKeys(object, enumerableOnly) {
+  var keys = Object.keys(object);
+
+  if (Object.getOwnPropertySymbols) {
+    var symbols = Object.getOwnPropertySymbols(object);
+    if (enumerableOnly) symbols = symbols.filter(function (sym) {
+      return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+    });
+    keys.push.apply(keys, symbols);
+  }
+
+  return keys;
+}
+
+function _objectSpread2(target) {
+  for (var i = 1; i < arguments.length; i++) {
+    var source = arguments[i] != null ? arguments[i] : {};
+
+    if (i % 2) {
+      ownKeys(Object(source), true).forEach(function (key) {
+        _defineProperty(target, key, source[key]);
+      });
+    } else if (Object.getOwnPropertyDescriptors) {
+      Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
+    } else {
+      ownKeys(Object(source)).forEach(function (key) {
+        Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+      });
+    }
+  }
+
+  return target;
+}
+
+const VERSION = "3.1.2";
+
+class Octokit {
+  constructor(options = {}) {
+    const hook = new beforeAfterHook.Collection();
+    const requestDefaults = {
+      baseUrl: request.request.endpoint.DEFAULTS.baseUrl,
+      headers: {},
+      request: Object.assign({}, options.request, {
+        hook: hook.bind(null, "request")
+      }),
+      mediaType: {
+        previews: [],
+        format: ""
+      }
+    }; // prepend default user agent with `options.userAgent` if set
+
+    requestDefaults.headers["user-agent"] = [options.userAgent, `octokit-core.js/${VERSION} ${universalUserAgent.getUserAgent()}`].filter(Boolean).join(" ");
+
+    if (options.baseUrl) {
+      requestDefaults.baseUrl = options.baseUrl;
+    }
+
+    if (options.previews) {
+      requestDefaults.mediaType.previews = options.previews;
+    }
+
+    if (options.timeZone) {
+      requestDefaults.headers["time-zone"] = options.timeZone;
+    }
+
+    this.request = request.request.defaults(requestDefaults);
+    this.graphql = graphql.withCustomRequest(this.request).defaults(_objectSpread2(_objectSpread2({}, requestDefaults), {}, {
+      baseUrl: requestDefaults.baseUrl.replace(/\/api\/v3$/, "/api")
+    }));
+    this.log = Object.assign({
+      debug: () => {},
+      info: () => {},
+      warn: console.warn.bind(console),
+      error: console.error.bind(console)
+    }, options.log);
+    this.hook = hook; // (1) If neither `options.authStrategy` nor `options.auth` are set, the `octokit` instance
+    //     is unauthenticated. The `this.auth()` method is a no-op and no request hook is registred.
+    // (2) If only `options.auth` is set, use the default token authentication strategy.
+    // (3) If `options.authStrategy` is set then use it and pass in `options.auth`. Always pass own request as many strategies accept a custom request instance.
+    // TODO: type `options.auth` based on `options.authStrategy`.
+
+    if (!options.authStrategy) {
+      if (!options.auth) {
+        // (1)
+        this.auth = async () => ({
+          type: "unauthenticated"
+        });
+      } else {
+        // (2)
+        const auth = authToken.createTokenAuth(options.auth); // @ts-ignore  ¯\_(ツ)_/¯
+
+        hook.wrap("request", auth.hook);
+        this.auth = auth;
+      }
+    } else {
+      const auth = options.authStrategy(Object.assign({
+        request: this.request
+      }, options.auth)); // @ts-ignore  ¯\_(ツ)_/¯
+
+      hook.wrap("request", auth.hook);
+      this.auth = auth;
+    } // apply plugins
+    // https://stackoverflow.com/a/16345172
+
+
+    const classConstructor = this.constructor;
+    classConstructor.plugins.forEach(plugin => {
+      Object.assign(this, plugin(this, options));
+    });
+  }
+
+  static defaults(defaults) {
+    const OctokitWithDefaults = class extends this {
+      constructor(...args) {
+        const options = args[0] || {};
+
+        if (typeof defaults === "function") {
+          super(defaults(options));
+          return;
+        }
+
+        super(Object.assign({}, defaults, options, options.userAgent && defaults.userAgent ? {
+          userAgent: `${options.userAgent} ${defaults.userAgent}`
+        } : null));
+      }
+
+    };
+    return OctokitWithDefaults;
+  }
+  /**
+   * Attach a plugin (or many) to your Octokit instance.
+   *
+   * @example
+   * const API = Octokit.plugin(plugin1, plugin2, plugin3, ...)
+   */
+
+
+  static plugin(...newPlugins) {
+    var _a;
+
+    const currentPlugins = this.plugins;
+    const NewOctokit = (_a = class extends this {}, _a.plugins = currentPlugins.concat(newPlugins.filter(plugin => !currentPlugins.includes(plugin))), _a);
+    return NewOctokit;
+  }
+
+}
+Octokit.VERSION = VERSION;
+Octokit.plugins = [];
+
+exports.Octokit = Octokit;
+//# sourceMappingURL=index.js.map
+
+
+/***/ }),
+
+/***/ 9440:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+
+var isPlainObject = __webpack_require__(558);
+var universalUserAgent = __webpack_require__(5030);
+
+function lowercaseKeys(object) {
+  if (!object) {
+    return {};
+  }
+
+  return Object.keys(object).reduce((newObj, key) => {
+    newObj[key.toLowerCase()] = object[key];
+    return newObj;
+  }, {});
+}
+
+function mergeDeep(defaults, options) {
+  const result = Object.assign({}, defaults);
+  Object.keys(options).forEach(key => {
+    if (isPlainObject.isPlainObject(options[key])) {
+      if (!(key in defaults)) Object.assign(result, {
+        [key]: options[key]
+      });else result[key] = mergeDeep(defaults[key], options[key]);
+    } else {
+      Object.assign(result, {
+        [key]: options[key]
+      });
+    }
+  });
+  return result;
+}
+
+function removeUndefinedProperties(obj) {
+  for (const key in obj) {
+    if (obj[key] === undefined) {
+      delete obj[key];
+    }
+  }
+
+  return obj;
+}
+
+function merge(defaults, route, options) {
+  if (typeof route === "string") {
+    let [method, url] = route.split(" ");
+    options = Object.assign(url ? {
+      method,
+      url
+    } : {
+      url: method
+    }, options);
+  } else {
+    options = Object.assign({}, route);
+  } // lowercase header names before merging with defaults to avoid duplicates
+
+
+  options.headers = lowercaseKeys(options.headers); // remove properties with undefined values before merging
+
+  removeUndefinedProperties(options);
+  removeUndefinedProperties(options.headers);
+  const mergedOptions = mergeDeep(defaults || {}, options); // mediaType.previews arrays are merged, instead of overwritten
+
+  if (defaults && defaults.mediaType.previews.length) {
+    mergedOptions.mediaType.previews = defaults.mediaType.previews.filter(preview => !mergedOptions.mediaType.previews.includes(preview)).concat(mergedOptions.mediaType.previews);
+  }
+
+  mergedOptions.mediaType.previews = mergedOptions.mediaType.previews.map(preview => preview.replace(/-preview/, ""));
+  return mergedOptions;
+}
+
+function addQueryParameters(url, parameters) {
+  const separator = /\?/.test(url) ? "&" : "?";
+  const names = Object.keys(parameters);
+
+  if (names.length === 0) {
+    return url;
+  }
+
+  return url + separator + names.map(name => {
+    if (name === "q") {
+      return "q=" + parameters.q.split("+").map(encodeURIComponent).join("+");
+    }
+
+    return `${name}=${encodeURIComponent(parameters[name])}`;
+  }).join("&");
+}
+
+const urlVariableRegex = /\{[^}]+\}/g;
+
+function removeNonChars(variableName) {
+  return variableName.replace(/^\W+|\W+$/g, "").split(/,/);
+}
+
+function extractUrlVariableNames(url) {
+  const matches = url.match(urlVariableRegex);
+
+  if (!matches) {
+    return [];
+  }
+
+  return matches.map(removeNonChars).reduce((a, b) => a.concat(b), []);
+}
+
+function omit(object, keysToOmit) {
+  return Object.keys(object).filter(option => !keysToOmit.includes(option)).reduce((obj, key) => {
+    obj[key] = object[key];
+    return obj;
+  }, {});
+}
+
+// Based on https://github.com/bramstein/url-template, licensed under BSD
+// TODO: create separate package.
+//
+// Copyright (c) 2012-2014, Bram Stein
+// All rights reserved.
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions
+// are met:
+//  1. Redistributions of source code must retain the above copyright
+//     notice, this list of conditions and the following disclaimer.
+//  2. Redistributions in binary form must reproduce the above copyright
+//     notice, this list of conditions and the following disclaimer in the
+//     documentation and/or other materials provided with the distribution.
+//  3. The name of the author may not be used to endorse or promote products
+//     derived from this software without specific prior written permission.
+// THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR IMPLIED
+// WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+// MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
+// EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+// INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+// BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+// OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+// NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+// EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+/* istanbul ignore file */
+function encodeReserved(str) {
+  return str.split(/(%[0-9A-Fa-f]{2})/g).map(function (part) {
+    if (!/%[0-9A-Fa-f]/.test(part)) {
+      part = encodeURI(part).replace(/%5B/g, "[").replace(/%5D/g, "]");
+    }
+
+    return part;
+  }).join("");
+}
+
+function encodeUnreserved(str) {
+  return encodeURIComponent(str).replace(/[!'()*]/g, function (c) {
+    return "%" + c.charCodeAt(0).toString(16).toUpperCase();
+  });
+}
+
+function encodeValue(operator, value, key) {
+  value = operator === "+" || operator === "#" ? encodeReserved(value) : encodeUnreserved(value);
+
+  if (key) {
+    return encodeUnreserved(key) + "=" + value;
+  } else {
+    return value;
+  }
+}
+
+function isDefined(value) {
+  return value !== undefined && value !== null;
+}
+
+function isKeyOperator(operator) {
+  return operator === ";" || operator === "&" || operator === "?";
+}
+
+function getValues(context, operator, key, modifier) {
+  var value = context[key],
+      result = [];
+
+  if (isDefined(value) && value !== "") {
+    if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+      value = value.toString();
+
+      if (modifier && modifier !== "*") {
+        value = value.substring(0, parseInt(modifier, 10));
+      }
+
+      result.push(encodeValue(operator, value, isKeyOperator(operator) ? key : ""));
+    } else {
+      if (modifier === "*") {
+        if (Array.isArray(value)) {
+          value.filter(isDefined).forEach(function (value) {
+            result.push(encodeValue(operator, value, isKeyOperator(operator) ? key : ""));
+          });
+        } else {
+          Object.keys(value).forEach(function (k) {
+            if (isDefined(value[k])) {
+              result.push(encodeValue(operator, value[k], k));
+            }
+          });
+        }
+      } else {
+        const tmp = [];
+
+        if (Array.isArray(value)) {
+          value.filter(isDefined).forEach(function (value) {
+            tmp.push(encodeValue(operator, value));
+          });
+        } else {
+          Object.keys(value).forEach(function (k) {
+            if (isDefined(value[k])) {
+              tmp.push(encodeUnreserved(k));
+              tmp.push(encodeValue(operator, value[k].toString()));
+            }
+          });
+        }
+
+        if (isKeyOperator(operator)) {
+          result.push(encodeUnreserved(key) + "=" + tmp.join(","));
+        } else if (tmp.length !== 0) {
+          result.push(tmp.join(","));
+        }
+      }
+    }
+  } else {
+    if (operator === ";") {
+      if (isDefined(value)) {
+        result.push(encodeUnreserved(key));
+      }
+    } else if (value === "" && (operator === "&" || operator === "?")) {
+      result.push(encodeUnreserved(key) + "=");
+    } else if (value === "") {
+      result.push("");
+    }
+  }
+
+  return result;
+}
+
+function parseUrl(template) {
+  return {
+    expand: expand.bind(null, template)
+  };
+}
+
+function expand(template, context) {
+  var operators = ["+", "#", ".", "/", ";", "?", "&"];
+  return template.replace(/\{([^\{\}]+)\}|([^\{\}]+)/g, function (_, expression, literal) {
+    if (expression) {
+      let operator = "";
+      const values = [];
+
+      if (operators.indexOf(expression.charAt(0)) !== -1) {
+        operator = expression.charAt(0);
+        expression = expression.substr(1);
+      }
+
+      expression.split(/,/g).forEach(function (variable) {
+        var tmp = /([^:\*]*)(?::(\d+)|(\*))?/.exec(variable);
+        values.push(getValues(context, operator, tmp[1], tmp[2] || tmp[3]));
+      });
+
+      if (operator && operator !== "+") {
+        var separator = ",";
+
+        if (operator === "?") {
+          separator = "&";
+        } else if (operator !== "#") {
+          separator = operator;
+        }
+
+        return (values.length !== 0 ? operator : "") + values.join(separator);
+      } else {
+        return values.join(",");
+      }
+    } else {
+      return encodeReserved(literal);
+    }
+  });
+}
+
+function parse(options) {
+  // https://fetch.spec.whatwg.org/#methods
+  let method = options.method.toUpperCase(); // replace :varname with {varname} to make it RFC 6570 compatible
+
+  let url = (options.url || "/").replace(/:([a-z]\w+)/g, "{$1}");
+  let headers = Object.assign({}, options.headers);
+  let body;
+  let parameters = omit(options, ["method", "baseUrl", "url", "headers", "request", "mediaType"]); // extract variable names from URL to calculate remaining variables later
+
+  const urlVariableNames = extractUrlVariableNames(url);
+  url = parseUrl(url).expand(parameters);
+
+  if (!/^http/.test(url)) {
+    url = options.baseUrl + url;
+  }
+
+  const omittedParameters = Object.keys(options).filter(option => urlVariableNames.includes(option)).concat("baseUrl");
+  const remainingParameters = omit(parameters, omittedParameters);
+  const isBinaryRequest = /application\/octet-stream/i.test(headers.accept);
+
+  if (!isBinaryRequest) {
+    if (options.mediaType.format) {
+      // e.g. application/vnd.github.v3+json => application/vnd.github.v3.raw
+      headers.accept = headers.accept.split(/,/).map(preview => preview.replace(/application\/vnd(\.\w+)(\.v3)?(\.\w+)?(\+json)?$/, `application/vnd$1$2.${options.mediaType.format}`)).join(",");
+    }
+
+    if (options.mediaType.previews.length) {
+      const previewsFromAcceptHeader = headers.accept.match(/[\w-]+(?=-preview)/g) || [];
+      headers.accept = previewsFromAcceptHeader.concat(options.mediaType.previews).map(preview => {
+        const format = options.mediaType.format ? `.${options.mediaType.format}` : "+json";
+        return `application/vnd.github.${preview}-preview${format}`;
+      }).join(",");
+    }
+  } // for GET/HEAD requests, set URL query parameters from remaining parameters
+  // for PATCH/POST/PUT/DELETE requests, set request body from remaining parameters
+
+
+  if (["GET", "HEAD"].includes(method)) {
+    url = addQueryParameters(url, remainingParameters);
+  } else {
+    if ("data" in remainingParameters) {
+      body = remainingParameters.data;
+    } else {
+      if (Object.keys(remainingParameters).length) {
+        body = remainingParameters;
+      } else {
+        headers["content-length"] = 0;
+      }
+    }
+  } // default content-type for JSON if body is set
+
+
+  if (!headers["content-type"] && typeof body !== "undefined") {
+    headers["content-type"] = "application/json; charset=utf-8";
+  } // GitHub expects 'content-length: 0' header for PUT/PATCH requests without body.
+  // fetch does not allow to set `content-length` header, but we can set body to an empty string
+
+
+  if (["PATCH", "PUT"].includes(method) && typeof body === "undefined") {
+    body = "";
+  } // Only return body/request keys if present
+
+
+  return Object.assign({
+    method,
+    url,
+    headers
+  }, typeof body !== "undefined" ? {
+    body
+  } : null, options.request ? {
+    request: options.request
+  } : null);
+}
+
+function endpointWithDefaults(defaults, route, options) {
+  return parse(merge(defaults, route, options));
+}
+
+function withDefaults(oldDefaults, newDefaults) {
+  const DEFAULTS = merge(oldDefaults, newDefaults);
+  const endpoint = endpointWithDefaults.bind(null, DEFAULTS);
+  return Object.assign(endpoint, {
+    DEFAULTS,
+    defaults: withDefaults.bind(null, DEFAULTS),
+    merge: merge.bind(null, DEFAULTS),
+    parse
+  });
+}
+
+const VERSION = "6.0.8";
+
+const userAgent = `octokit-endpoint.js/${VERSION} ${universalUserAgent.getUserAgent()}`; // DEFAULTS has all properties set that EndpointOptions has, except url.
+// So we use RequestParameters and add method as additional required property.
+
+const DEFAULTS = {
+  method: "GET",
+  baseUrl: "https://api.github.com",
+  headers: {
+    accept: "application/vnd.github.v3+json",
+    "user-agent": userAgent
+  },
+  mediaType: {
+    format: "",
+    previews: []
+  }
+};
+
+const endpoint = withDefaults(null, DEFAULTS);
+
+exports.endpoint = endpoint;
+//# sourceMappingURL=index.js.map
+
+
+/***/ }),
+
+/***/ 558:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+
+/*!
+ * is-plain-object <https://github.com/jonschlinkert/is-plain-object>
+ *
+ * Copyright (c) 2014-2017, Jon Schlinkert.
+ * Released under the MIT License.
+ */
+
+function isObject(o) {
+  return Object.prototype.toString.call(o) === '[object Object]';
+}
+
+function isPlainObject(o) {
+  var ctor,prot;
+
+  if (isObject(o) === false) return false;
+
+  // If has modified constructor
+  ctor = o.constructor;
+  if (ctor === undefined) return true;
+
+  // If has modified prototype
+  prot = ctor.prototype;
+  if (isObject(prot) === false) return false;
+
+  // If constructor does not have an Object-specific method
+  if (prot.hasOwnProperty('isPrototypeOf') === false) {
+    return false;
+  }
+
+  // Most likely a plain Object
+  return true;
+}
+
+exports.isPlainObject = isPlainObject;
+
+
+/***/ }),
+
+/***/ 8467:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+
+var request = __webpack_require__(6234);
+var universalUserAgent = __webpack_require__(5030);
+
+const VERSION = "4.5.6";
+
+class GraphqlError extends Error {
+  constructor(request, response) {
+    const message = response.data.errors[0].message;
+    super(message);
+    Object.assign(this, response.data);
+    Object.assign(this, {
+      headers: response.headers
+    });
+    this.name = "GraphqlError";
+    this.request = request; // Maintains proper stack trace (only available on V8)
+
+    /* istanbul ignore next */
+
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, this.constructor);
+    }
+  }
+
+}
+
+const NON_VARIABLE_OPTIONS = ["method", "baseUrl", "url", "headers", "request", "query", "mediaType"];
+const GHES_V3_SUFFIX_REGEX = /\/api\/v3\/?$/;
+function graphql(request, query, options) {
+  if (typeof query === "string" && options && "query" in options) {
+    return Promise.reject(new Error(`[@octokit/graphql] "query" cannot be used as variable name`));
+  }
+
+  const parsedOptions = typeof query === "string" ? Object.assign({
+    query
+  }, options) : query;
+  const requestOptions = Object.keys(parsedOptions).reduce((result, key) => {
+    if (NON_VARIABLE_OPTIONS.includes(key)) {
+      result[key] = parsedOptions[key];
+      return result;
+    }
+
+    if (!result.variables) {
+      result.variables = {};
+    }
+
+    result.variables[key] = parsedOptions[key];
+    return result;
+  }, {}); // workaround for GitHub Enterprise baseUrl set with /api/v3 suffix
+  // https://github.com/octokit/auth-app.js/issues/111#issuecomment-657610451
+
+  const baseUrl = parsedOptions.baseUrl || request.endpoint.DEFAULTS.baseUrl;
+
+  if (GHES_V3_SUFFIX_REGEX.test(baseUrl)) {
+    requestOptions.url = baseUrl.replace(GHES_V3_SUFFIX_REGEX, "/api/graphql");
+  }
+
+  return request(requestOptions).then(response => {
+    if (response.data.errors) {
+      const headers = {};
+
+      for (const key of Object.keys(response.headers)) {
+        headers[key] = response.headers[key];
+      }
+
+      throw new GraphqlError(requestOptions, {
+        headers,
+        data: response.data
+      });
+    }
+
+    return response.data.data;
+  });
+}
+
+function withDefaults(request$1, newDefaults) {
+  const newRequest = request$1.defaults(newDefaults);
+
+  const newApi = (query, options) => {
+    return graphql(newRequest, query, options);
+  };
+
+  return Object.assign(newApi, {
+    defaults: withDefaults.bind(null, newRequest),
+    endpoint: request.request.endpoint
+  });
+}
+
+const graphql$1 = withDefaults(request.request, {
+  headers: {
+    "user-agent": `octokit-graphql.js/${VERSION} ${universalUserAgent.getUserAgent()}`
+  },
+  method: "POST",
+  url: "/graphql"
+});
+function withCustomRequest(customRequest) {
+  return withDefaults(customRequest, {
+    method: "POST",
+    url: "/graphql"
+  });
+}
+
+exports.graphql = graphql$1;
+exports.withCustomRequest = withCustomRequest;
+//# sourceMappingURL=index.js.map
+
+
+/***/ }),
+
+/***/ 4193:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+
+const VERSION = "2.4.0";
+
+/**
+ * Some “list” response that can be paginated have a different response structure
+ *
+ * They have a `total_count` key in the response (search also has `incomplete_results`,
+ * /installation/repositories also has `repository_selection`), as well as a key with
+ * the list of the items which name varies from endpoint to endpoint.
+ *
+ * Octokit normalizes these responses so that paginated results are always returned following
+ * the same structure. One challenge is that if the list response has only one page, no Link
+ * header is provided, so this header alone is not sufficient to check wether a response is
+ * paginated or not.
+ *
+ * We check if a "total_count" key is present in the response data, but also make sure that
+ * a "url" property is not, as the "Get the combined status for a specific ref" endpoint would
+ * otherwise match: https://developer.github.com/v3/repos/statuses/#get-the-combined-status-for-a-specific-ref
+ */
+function normalizePaginatedListResponse(response) {
+  const responseNeedsNormalization = "total_count" in response.data && !("url" in response.data);
+  if (!responseNeedsNormalization) return response; // keep the additional properties intact as there is currently no other way
+  // to retrieve the same information.
+
+  const incompleteResults = response.data.incomplete_results;
+  const repositorySelection = response.data.repository_selection;
+  const totalCount = response.data.total_count;
+  delete response.data.incomplete_results;
+  delete response.data.repository_selection;
+  delete response.data.total_count;
+  const namespaceKey = Object.keys(response.data)[0];
+  const data = response.data[namespaceKey];
+  response.data = data;
+
+  if (typeof incompleteResults !== "undefined") {
+    response.data.incomplete_results = incompleteResults;
+  }
+
+  if (typeof repositorySelection !== "undefined") {
+    response.data.repository_selection = repositorySelection;
+  }
+
+  response.data.total_count = totalCount;
+  return response;
+}
+
+function iterator(octokit, route, parameters) {
+  const options = typeof route === "function" ? route.endpoint(parameters) : octokit.request.endpoint(route, parameters);
+  const requestMethod = typeof route === "function" ? route : octokit.request;
+  const method = options.method;
+  const headers = options.headers;
+  let url = options.url;
+  return {
+    [Symbol.asyncIterator]: () => ({
+      next() {
+        if (!url) {
+          return Promise.resolve({
+            done: true
+          });
+        }
+
+        return requestMethod({
+          method,
+          url,
+          headers
+        }).then(normalizePaginatedListResponse).then(response => {
+          // `response.headers.link` format:
+          // '<https://api.github.com/users/aseemk/followers?page=2>; rel="next", <https://api.github.com/users/aseemk/followers?page=2>; rel="last"'
+          // sets `url` to undefined if "next" URL is not present or `link` header is not set
+          url = ((response.headers.link || "").match(/<([^>]+)>;\s*rel="next"/) || [])[1];
+          return {
+            value: response
+          };
+        });
+      }
+
+    })
+  };
+}
+
+function paginate(octokit, route, parameters, mapFn) {
+  if (typeof parameters === "function") {
+    mapFn = parameters;
+    parameters = undefined;
+  }
+
+  return gather(octokit, [], iterator(octokit, route, parameters)[Symbol.asyncIterator](), mapFn);
+}
+
+function gather(octokit, results, iterator, mapFn) {
+  return iterator.next().then(result => {
+    if (result.done) {
+      return results;
+    }
+
+    let earlyExit = false;
+
+    function done() {
+      earlyExit = true;
+    }
+
+    results = results.concat(mapFn ? mapFn(result.value, done) : result.value.data);
+
+    if (earlyExit) {
+      return results;
+    }
+
+    return gather(octokit, results, iterator, mapFn);
+  });
+}
+
+/**
+ * @param octokit Octokit instance
+ * @param options Options passed to Octokit constructor
+ */
+
+function paginateRest(octokit) {
+  return {
+    paginate: Object.assign(paginate.bind(null, octokit), {
+      iterator: iterator.bind(null, octokit)
+    })
+  };
+}
+paginateRest.VERSION = VERSION;
+
+exports.paginateRest = paginateRest;
+//# sourceMappingURL=index.js.map
+
+
+/***/ }),
+
+/***/ 3044:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 const Endpoints = {
   actions: {
@@ -1576,1314 +5386,82 @@ exports.restEndpointMethods = restEndpointMethods;
 
 /***/ }),
 
-/***/ 53:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.Context = void 0;
-const fs_1 = __webpack_require__(747);
-const os_1 = __webpack_require__(87);
-class Context {
-    /**
-     * Hydrate the context from the environment
-     */
-    constructor() {
-        this.payload = {};
-        if (process.env.GITHUB_EVENT_PATH) {
-            if (fs_1.existsSync(process.env.GITHUB_EVENT_PATH)) {
-                this.payload = JSON.parse(fs_1.readFileSync(process.env.GITHUB_EVENT_PATH, { encoding: 'utf8' }));
-            }
-            else {
-                const path = process.env.GITHUB_EVENT_PATH;
-                process.stdout.write(`GITHUB_EVENT_PATH ${path} does not exist${os_1.EOL}`);
-            }
-        }
-        this.eventName = process.env.GITHUB_EVENT_NAME;
-        this.sha = process.env.GITHUB_SHA;
-        this.ref = process.env.GITHUB_REF;
-        this.workflow = process.env.GITHUB_WORKFLOW;
-        this.action = process.env.GITHUB_ACTION;
-        this.actor = process.env.GITHUB_ACTOR;
-        this.job = process.env.GITHUB_JOB;
-        this.runNumber = parseInt(process.env.GITHUB_RUN_NUMBER, 10);
-        this.runId = parseInt(process.env.GITHUB_RUN_ID, 10);
-    }
-    get issue() {
-        const payload = this.payload;
-        return Object.assign(Object.assign({}, this.repo), { number: (payload.issue || payload.pull_request || payload).number });
-    }
-    get repo() {
-        if (process.env.GITHUB_REPOSITORY) {
-            const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
-            return { owner, repo };
-        }
-        if (this.payload.repository) {
-            return {
-                owner: this.payload.repository.owner.login,
-                repo: this.payload.repository.name
-            };
-        }
-        throw new Error("context.repo requires a GITHUB_REPOSITORY environment variable like 'owner/repo'");
-    }
-}
-exports.Context = Context;
-//# sourceMappingURL=context.js.map
-
-/***/ }),
-
-/***/ 62:
-/***/ (function(__unusedmodule, exports) {
+/***/ 537:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 "use strict";
 
 
-Object.defineProperty(exports, '__esModule', { value: true });
+Object.defineProperty(exports, "__esModule", ({ value: true }));
 
-/*!
- * is-plain-object <https://github.com/jonschlinkert/is-plain-object>
- *
- * Copyright (c) 2014-2017, Jon Schlinkert.
- * Released under the MIT License.
+function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
+
+var deprecation = __webpack_require__(8932);
+var once = _interopDefault(__webpack_require__(1223));
+
+const logOnce = once(deprecation => console.warn(deprecation));
+/**
+ * Error with extra properties to help with debugging
  */
 
-function isObject(o) {
-  return Object.prototype.toString.call(o) === '[object Object]';
-}
+class RequestError extends Error {
+  constructor(message, statusCode, options) {
+    super(message); // Maintains proper stack trace (only available on V8)
 
-function isPlainObject(o) {
-  var ctor,prot;
+    /* istanbul ignore next */
 
-  if (isObject(o) === false) return false;
-
-  // If has modified constructor
-  ctor = o.constructor;
-  if (ctor === undefined) return true;
-
-  // If has modified prototype
-  prot = ctor.prototype;
-  if (isObject(prot) === false) return false;
-
-  // If constructor does not have an Object-specific method
-  if (prot.hasOwnProperty('isPrototypeOf') === false) {
-    return false;
-  }
-
-  // Most likely a plain Object
-  return true;
-}
-
-exports.isPlainObject = isPlainObject;
-
-
-/***/ }),
-
-/***/ 65:
-/***/ (function(__unusedmodule, exports) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.flattenArray = void 0;
-exports.flattenArray = (input, output = []) => {
-    for (const value of input) {
-        Array.isArray(value) ? exports.flattenArray(value, output) : output.push(value);
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, this.constructor);
     }
-    return output;
-};
 
-
-/***/ }),
-
-/***/ 87:
-/***/ (function(module) {
-
-module.exports = require("os");
-
-/***/ }),
-
-/***/ 88:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.validateConfig = exports.getConfigSchema = exports.getConfigs = void 0;
-const jsonschema_1 = __webpack_require__(978);
-const path = __importStar(__webpack_require__(622));
-const env_1 = __webpack_require__(1);
-const constants_1 = __webpack_require__(105);
-const getWorkspacePath = (configFilePath) => {
-    const rootPath = env_1.env('GITHUB_WORKSPACE');
-    console.log(`rootPath variable: ${rootPath}`);
-    if (!rootPath) {
-        return;
-    }
-    console.log(`join the workspace path`);
-    return path.join(rootPath, configFilePath);
-};
-exports.getConfigs = (configFilePath) => {
-    var _a;
-    const configPath = (_a = getWorkspacePath(configFilePath)) !== null && _a !== void 0 ? _a : path.join(constants_1.PROJECT_ROOT, configFilePath);
-    console.log(`config path: "${configPath}"`);
-    const configs = require(configPath);
-    return configs;
-};
-exports.getConfigSchema = () => {
-    const schema = require(path.join(constants_1.PROJECT_ROOT, `./schemas/IConfig.json`));
-    return schema;
-};
-exports.validateConfig = (config) => {
-    const validator = new jsonschema_1.Validator();
-    const validationResult = validator.validate(config, exports.getConfigSchema());
-    const { errors } = validationResult;
-    return errors;
-};
-
-
-/***/ }),
-
-/***/ 105:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.PROJECT_ROOT = void 0;
-const path = __importStar(__webpack_require__(622));
-exports.PROJECT_ROOT = path.join(__dirname, '../');
-
-
-/***/ }),
-
-/***/ 109:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const core = __importStar(__webpack_require__(186));
-// add .env file support for dev purposes
-__webpack_require__(437).config();
-const AuthorizationError_1 = __webpack_require__(369);
-const ProjectsOctoKit_1 = __webpack_require__(32);
-const renderProject_1 = __webpack_require__(282);
-const getProjectData_1 = __webpack_require__(273);
-const env_1 = __webpack_require__(1);
-const config_1 = __webpack_require__(88);
-const TOKEN_NAME = 'REPO_GITHUB_PAT';
-const CONFIG_PATH = 'CONFIG_PATH';
-const overwriteBoardIssue = (issueContents, config, projectKit) => __awaiter(void 0, void 0, void 0, function* () {
-    const { status } = yield projectKit.updateBoardIssue(config.boardIssue, issueContents);
-    if (status !== 200) {
-        throw new Error(`Failed to update the issue ${config.boardIssue}`);
-    }
-    console.log(`Successfully updated the board issue ${config.boardIssue}`);
-});
-const getRegex = (projectId) => {
-    const regex = /<!--\s*codespaces-board:start\s*-->([\W\w]*)<!--\s*codespaces-board:end\s*-->/gim;
-    return regex;
-};
-const wrapIssueText = (text, projectId) => {
-    return [
-        `<!-- codespaces-board:start -->`,
-        `<!-- ⚠️ AUTO GENERATED GITHUB ACTION, DON'T EDIT BY HAND ⚠️ -->`,
-        `<!-- updated on: ${new Date().toISOString()} -->`,
-        text,
-        `<!-- codespaces-board:end -->`,
-    ].join('\n');
-};
-const updateBoardIssue = (issueContents, config, projectKit) => __awaiter(void 0, void 0, void 0, function* () {
-    if (!config.isReplaceProjectMarkers) {
-        return yield overwriteBoardIssue(issueContents, config, projectKit);
-    }
-    const issue = yield projectKit.getBoardIssue(config.boardIssue);
-    const { body } = issue;
-    const newBody = body.replace(getRegex(), wrapIssueText(issueContents));
-    yield overwriteBoardIssue(newBody, config, projectKit);
-});
-const processConfigRecord = (config, projectKit) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log('Processing config: \n', JSON.stringify(config, null, 2));
-    const validationErrors = config_1.validateConfig(config);
-    if (validationErrors.length) {
-        console.error(`\n\nNot valid config for the issue ${config.boardIssue}, skipping.. \n`, validationErrors, '\n\n');
-        return;
-    }
-    console.log(`- Config schema validation passed.`);
-    const repoProjects = yield projectKit.getAllProjects(config.repos);
-    const projectsWithData = [];
-    for (let { repo, projects } of repoProjects) {
-        for (let project of projects) {
-            console.log(`- Getting Project data for ${project.project.name}.`);
-            projectsWithData.push({
-                project,
-                data: yield getProjectData_1.getProjectData(projectKit, config, project),
-            });
-        }
-        const result = projectsWithData.map(({ project, data }) => {
-            return renderProject_1.renderProject(data, project, config);
-        });
-        const issueBody = result.join('\n') + '\n';
-        let header;
-        if (config.headerFileUrl) {
-            header = yield projectKit.getBoardHeaderText(config.headerFileUrl);
-        }
-        let footer;
-        if (config.footerFileUrl) {
-            footer = yield projectKit.getBoardHeaderText(config.footerFileUrl);
-        }
-        const issueContents = [
-            header,
-            // render all projects overview
-            // renderOverview(config, projectsWithData),
-            issueBody,
-            footer,
-        ].join('\n');
-        yield updateBoardIssue(issueContents, config, projectKit);
-    }
-});
-function run() {
-    var _a, _b;
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const token = (_a = env_1.env(TOKEN_NAME)) !== null && _a !== void 0 ? _a : core.getInput('token');
-            if (!token) {
-                throw new AuthorizationError_1.AuthorizationError('No token found.');
-            }
-            const projectKit = new ProjectsOctoKit_1.ProjectsOctoKit(token);
-            const configsFilePath = (_b = env_1.env(CONFIG_PATH)) !== null && _b !== void 0 ? _b : core.getInput('config');
-            for (let config of config_1.getConfigs(configsFilePath)) {
-                yield processConfigRecord(config, projectKit);
-            }
-        }
-        catch (error) {
-            console.error(error);
-            core.setFailed(error.message);
-        }
-    });
-}
-run();
-
-
-/***/ }),
-
-/***/ 145:
-/***/ (function(__unusedmodule, exports) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.IIssueState = void 0;
-var IIssueState;
-(function (IIssueState) {
-    IIssueState["Open"] = "open";
-    IIssueState["Closed"] = "closed";
-})(IIssueState = exports.IIssueState || (exports.IIssueState = {}));
-
-
-/***/ }),
-
-/***/ 147:
-/***/ (function(__unusedmodule, exports) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.TArraySortResult = void 0;
-var TArraySortResult;
-(function (TArraySortResult) {
-    TArraySortResult[TArraySortResult["FirstEarlier"] = -1] = "FirstEarlier";
-    TArraySortResult[TArraySortResult["SecondEarlier"] = 0] = "SecondEarlier";
-    TArraySortResult[TArraySortResult["Equal"] = 0] = "Equal";
-})(TArraySortResult = exports.TArraySortResult || (exports.TArraySortResult = {}));
-
-
-/***/ }),
-
-/***/ 163:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.renderIssuesBlock = void 0;
-const ident_1 = __webpack_require__(468);
-const renderCard_1 = __webpack_require__(452);
-const notEmpty_1 = __webpack_require__(624);
-const capitalize_1 = __webpack_require__(976);
-const sortCardsInPlace_1 = __webpack_require__(536);
-const TArraySortResult_1 = __webpack_require__(147);
-const NONE_LABEL = 'codespaces-board-undefined-label';
-const findLabel = (labelName, found = true) => {
-    return ({ issue }) => {
-        if (!issue) {
-            return false;
-        }
-        const foundLabel = issue.labels.find((issueLabel) => {
-            return issueLabel.name === labelName;
-        });
-        return !!foundLabel === found;
-    };
-};
-const getIssuesForLabel = (label, cardsWithIssue) => {
-    const originalCards = [...cardsWithIssue];
-    const result = originalCards.filter(findLabel(label));
-    const rest = originalCards.filter(findLabel(label, false));
-    return [result, rest];
-};
-const groupIssuesByLabels = (cardsWithIssues, projectWithConfig) => {
-    var _a;
-    const result = {};
-    const { projectConfig } = projectWithConfig;
-    const labels = typeof projectConfig === 'number' ? [] : (_a = projectConfig.trackLabels) !== null && _a !== void 0 ? _a : [];
-    const includedIssues = new Set();
-    for (let label of labels) {
-        const [cardsForLabel, restCards] = getIssuesForLabel(label, cardsWithIssues);
-        /**
-         * !! We return the `restCards` above - the list of cards that does not hold
-         * the label, and reassign the "rest" list to the original one, so we don't
-         * match the same card against other labels. This enforces descending priority
-         * of the `trackLabels` labels list defined in the project config.
-         * e.g. with the ["port-forwarding", "workbench", "performance", "serverless"]
-         * list in the config, the issues with both "port-forwarding" and "performance"
-         * labels, will show up only in the` Port-forwarding` section since it has the
-         * higher precedence over the "performance" label.
-         */
-        cardsWithIssues = restCards;
-        const sortedIssuesForLabel = sortCardsInPlace_1.sortCardsInPlace(cardsForLabel, projectWithConfig);
-        result[label] = sortedIssuesForLabel;
-        for (let issueForLabel of sortedIssuesForLabel) {
-            includedIssues.add(issueForLabel);
-        }
-    }
-    // get all issues that have no label
-    const notIncludedIssues = cardsWithIssues.filter((issue) => {
-        return !includedIssues.has(issue);
-    });
-    result[NONE_LABEL] = notIncludedIssues;
-    return result;
-};
-const renderTitle = (title) => {
-    return `### **${title}**`;
-};
-const renderIssuesSection = (cardsWithIssues, projectWithConfig, title) => {
-    const { projectConfig } = projectWithConfig;
-    const issueItems = [title];
-    const isCheckList = typeof projectConfig === 'number'
-        ? undefined
-        : projectConfig.isCheckListItems;
-    for (let cardWithIssue of cardsWithIssues) {
-        const item = renderCard_1.renderCard(cardWithIssue, projectWithConfig, isCheckList);
-        issueItems.push(`${ident_1.ident(0)}${item}`);
-    }
-    return issueItems.filter(notEmpty_1.notEmpty).join('\n');
-};
-const renderIssuesList = (issues, projectWithConfig) => {
-    const issueGroups = groupIssuesByLabels(issues, projectWithConfig);
-    const items = Object.entries(issueGroups)
-        // make the general section to be first in the list
-        .sort(([labelName1], [labelName2]) => {
-        if (labelName1 === labelName2) {
-            return TArraySortResult_1.TArraySortResult.Equal;
-        }
-        if (labelName1 === NONE_LABEL) {
-            return TArraySortResult_1.TArraySortResult.FirstEarlier;
-        }
-        if (labelName2 === NONE_LABEL) {
-            return TArraySortResult_1.TArraySortResult.SecondEarlier;
-        }
-        return TArraySortResult_1.TArraySortResult.Equal;
-    })
-        .map(([labelName, issues]) => {
-        if (!issues.length) {
-            return;
-        }
-        const title = labelName === NONE_LABEL ? undefined : `\n**${capitalize_1.capitalize(labelName)}**`;
-        return renderIssuesSection(issues, projectWithConfig, title);
-    });
-    return items.filter(notEmpty_1.notEmpty).join('\n');
-};
-exports.renderIssuesBlock = (title, issues, projectConfig, 
-/**
- * if there is no issues in the list, should we render the title?
- * For some of the blocks, for instance the `In work`, it makes
- * sense to render the title without the list since we want to
- * highlight that there is no issues that currently in the progress.
- */
-isRenderEmptyBlock = true) => {
-    if (!isRenderEmptyBlock && !issues.length) {
-        return undefined;
-    }
-    return [renderTitle(title), renderIssuesList(issues, projectConfig)].join('\n');
-};
-
-
-/***/ }),
-
-/***/ 186:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-    result["default"] = mod;
-    return result;
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const command_1 = __webpack_require__(351);
-const file_command_1 = __webpack_require__(717);
-const utils_1 = __webpack_require__(278);
-const os = __importStar(__webpack_require__(87));
-const path = __importStar(__webpack_require__(622));
-/**
- * The code to exit an action
- */
-var ExitCode;
-(function (ExitCode) {
-    /**
-     * A code indicating that the action was successful
-     */
-    ExitCode[ExitCode["Success"] = 0] = "Success";
-    /**
-     * A code indicating that the action was a failure
-     */
-    ExitCode[ExitCode["Failure"] = 1] = "Failure";
-})(ExitCode = exports.ExitCode || (exports.ExitCode = {}));
-//-----------------------------------------------------------------------
-// Variables
-//-----------------------------------------------------------------------
-/**
- * Sets env variable for this action and future actions in the job
- * @param name the name of the variable to set
- * @param val the value of the variable. Non-string values will be converted to a string via JSON.stringify
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function exportVariable(name, val) {
-    const convertedVal = utils_1.toCommandValue(val);
-    process.env[name] = convertedVal;
-    const filePath = process.env['GITHUB_ENV'] || '';
-    if (filePath) {
-        const delimiter = '_GitHubActionsFileCommandDelimeter_';
-        const commandValue = `${name}<<${delimiter}${os.EOL}${convertedVal}${os.EOL}${delimiter}`;
-        file_command_1.issueCommand('ENV', commandValue);
-    }
-    else {
-        command_1.issueCommand('set-env', { name }, convertedVal);
-    }
-}
-exports.exportVariable = exportVariable;
-/**
- * Registers a secret which will get masked from logs
- * @param secret value of the secret
- */
-function setSecret(secret) {
-    command_1.issueCommand('add-mask', {}, secret);
-}
-exports.setSecret = setSecret;
-/**
- * Prepends inputPath to the PATH (for this action and future actions)
- * @param inputPath
- */
-function addPath(inputPath) {
-    const filePath = process.env['GITHUB_PATH'] || '';
-    if (filePath) {
-        file_command_1.issueCommand('PATH', inputPath);
-    }
-    else {
-        command_1.issueCommand('add-path', {}, inputPath);
-    }
-    process.env['PATH'] = `${inputPath}${path.delimiter}${process.env['PATH']}`;
-}
-exports.addPath = addPath;
-/**
- * Gets the value of an input.  The value is also trimmed.
- *
- * @param     name     name of the input to get
- * @param     options  optional. See InputOptions.
- * @returns   string
- */
-function getInput(name, options) {
-    const val = process.env[`INPUT_${name.replace(/ /g, '_').toUpperCase()}`] || '';
-    if (options && options.required && !val) {
-        throw new Error(`Input required and not supplied: ${name}`);
-    }
-    return val.trim();
-}
-exports.getInput = getInput;
-/**
- * Sets the value of an output.
- *
- * @param     name     name of the output to set
- * @param     value    value to store. Non-string values will be converted to a string via JSON.stringify
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function setOutput(name, value) {
-    command_1.issueCommand('set-output', { name }, value);
-}
-exports.setOutput = setOutput;
-/**
- * Enables or disables the echoing of commands into stdout for the rest of the step.
- * Echoing is disabled by default if ACTIONS_STEP_DEBUG is not set.
- *
- */
-function setCommandEcho(enabled) {
-    command_1.issue('echo', enabled ? 'on' : 'off');
-}
-exports.setCommandEcho = setCommandEcho;
-//-----------------------------------------------------------------------
-// Results
-//-----------------------------------------------------------------------
-/**
- * Sets the action status to failed.
- * When the action exits it will be with an exit code of 1
- * @param message add error issue message
- */
-function setFailed(message) {
-    process.exitCode = ExitCode.Failure;
-    error(message);
-}
-exports.setFailed = setFailed;
-//-----------------------------------------------------------------------
-// Logging Commands
-//-----------------------------------------------------------------------
-/**
- * Gets whether Actions Step Debug is on or not
- */
-function isDebug() {
-    return process.env['RUNNER_DEBUG'] === '1';
-}
-exports.isDebug = isDebug;
-/**
- * Writes debug message to user log
- * @param message debug message
- */
-function debug(message) {
-    command_1.issueCommand('debug', {}, message);
-}
-exports.debug = debug;
-/**
- * Adds an error issue
- * @param message error issue message. Errors will be converted to string via toString()
- */
-function error(message) {
-    command_1.issue('error', message instanceof Error ? message.toString() : message);
-}
-exports.error = error;
-/**
- * Adds an warning issue
- * @param message warning issue message. Errors will be converted to string via toString()
- */
-function warning(message) {
-    command_1.issue('warning', message instanceof Error ? message.toString() : message);
-}
-exports.warning = warning;
-/**
- * Writes info to log with console.log.
- * @param message info message
- */
-function info(message) {
-    process.stdout.write(message + os.EOL);
-}
-exports.info = info;
-/**
- * Begin an output group.
- *
- * Output until the next `groupEnd` will be foldable in this group
- *
- * @param name The name of the output group
- */
-function startGroup(name) {
-    command_1.issue('group', name);
-}
-exports.startGroup = startGroup;
-/**
- * End an output group.
- */
-function endGroup() {
-    command_1.issue('endgroup');
-}
-exports.endGroup = endGroup;
-/**
- * Wrap an asynchronous function call in a group.
- *
- * Returns the same type as the function itself.
- *
- * @param name The name of the group
- * @param fn The function to wrap in the group
- */
-function group(name, fn) {
-    return __awaiter(this, void 0, void 0, function* () {
-        startGroup(name);
-        let result;
-        try {
-            result = yield fn();
-        }
-        finally {
-            endGroup();
-        }
-        return result;
-    });
-}
-exports.group = group;
-//-----------------------------------------------------------------------
-// Wrapper action state
-//-----------------------------------------------------------------------
-/**
- * Saves state for current action, the state can only be retrieved by this action's post job execution.
- *
- * @param     name     name of the state to store
- * @param     value    value to store. Non-string values will be converted to a string via JSON.stringify
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function saveState(name, value) {
-    command_1.issueCommand('save-state', { name }, value);
-}
-exports.saveState = saveState;
-/**
- * Gets the value of an state set by this action's main execution.
- *
- * @param     name     name of the state to get
- * @returns   string
- */
-function getState(name) {
-    return process.env[`STATE_${name}`] || '';
-}
-exports.getState = getState;
-//# sourceMappingURL=core.js.map
-
-/***/ }),
-
-/***/ 187:
-/***/ (function(__unusedmodule, exports) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.TColumnTypes = void 0;
-var TColumnTypes;
-(function (TColumnTypes) {
-    TColumnTypes["Backlog"] = "Backlog";
-    TColumnTypes["Committed"] = "Committed";
-    TColumnTypes["Blocked"] = "Blocked";
-    TColumnTypes["InProgress"] = "In progress";
-    TColumnTypes["InReview"] = "In review";
-    TColumnTypes["WaitingToDeploy"] = "Waiting to deploy";
-    TColumnTypes["Done"] = "Done";
-})(TColumnTypes = exports.TColumnTypes || (exports.TColumnTypes = {}));
-;
-
-
-/***/ }),
-
-/***/ 192:
-/***/ (function(__unusedmodule, exports) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.getCardPriority = void 0;
-/**
- * Find out card priority by the `priorityLabels` setting,
- * larger the number, more priority the card has.
- */
-exports.getCardPriority = (cardWithIssue, { projectConfig }, 
-// if actual priority not set, use this value (0 is the least priority)
-notDefinedValue = 0) => {
-    const { issue } = cardWithIssue;
-    if (!issue || typeof projectConfig === 'number') {
-        return notDefinedValue;
-    }
-    const { priorityLabels } = projectConfig;
-    if (!priorityLabels) {
-        return notDefinedValue;
-    }
-    const cardPrioritylabel = priorityLabels.find((priorityLabel) => {
-        const foundLabel = issue.labels.find((issueLabel) => {
-            return issueLabel.name === priorityLabel;
-        });
-        return !!foundLabel;
-    });
-    if (!cardPrioritylabel) {
-        return notDefinedValue;
-    }
-    return Number.MAX_SAFE_INTEGER - priorityLabels.indexOf(cardPrioritylabel);
-};
-
-
-/***/ }),
-
-/***/ 193:
-/***/ (function(__unusedmodule, exports) {
-
-"use strict";
-
-
-Object.defineProperty(exports, '__esModule', { value: true });
-
-const VERSION = "2.4.0";
-
-/**
- * Some “list” response that can be paginated have a different response structure
- *
- * They have a `total_count` key in the response (search also has `incomplete_results`,
- * /installation/repositories also has `repository_selection`), as well as a key with
- * the list of the items which name varies from endpoint to endpoint.
- *
- * Octokit normalizes these responses so that paginated results are always returned following
- * the same structure. One challenge is that if the list response has only one page, no Link
- * header is provided, so this header alone is not sufficient to check wether a response is
- * paginated or not.
- *
- * We check if a "total_count" key is present in the response data, but also make sure that
- * a "url" property is not, as the "Get the combined status for a specific ref" endpoint would
- * otherwise match: https://developer.github.com/v3/repos/statuses/#get-the-combined-status-for-a-specific-ref
- */
-function normalizePaginatedListResponse(response) {
-  const responseNeedsNormalization = "total_count" in response.data && !("url" in response.data);
-  if (!responseNeedsNormalization) return response; // keep the additional properties intact as there is currently no other way
-  // to retrieve the same information.
-
-  const incompleteResults = response.data.incomplete_results;
-  const repositorySelection = response.data.repository_selection;
-  const totalCount = response.data.total_count;
-  delete response.data.incomplete_results;
-  delete response.data.repository_selection;
-  delete response.data.total_count;
-  const namespaceKey = Object.keys(response.data)[0];
-  const data = response.data[namespaceKey];
-  response.data = data;
-
-  if (typeof incompleteResults !== "undefined") {
-    response.data.incomplete_results = incompleteResults;
-  }
-
-  if (typeof repositorySelection !== "undefined") {
-    response.data.repository_selection = repositorySelection;
-  }
-
-  response.data.total_count = totalCount;
-  return response;
-}
-
-function iterator(octokit, route, parameters) {
-  const options = typeof route === "function" ? route.endpoint(parameters) : octokit.request.endpoint(route, parameters);
-  const requestMethod = typeof route === "function" ? route : octokit.request;
-  const method = options.method;
-  const headers = options.headers;
-  let url = options.url;
-  return {
-    [Symbol.asyncIterator]: () => ({
-      next() {
-        if (!url) {
-          return Promise.resolve({
-            done: true
-          });
-        }
-
-        return requestMethod({
-          method,
-          url,
-          headers
-        }).then(normalizePaginatedListResponse).then(response => {
-          // `response.headers.link` format:
-          // '<https://api.github.com/users/aseemk/followers?page=2>; rel="next", <https://api.github.com/users/aseemk/followers?page=2>; rel="last"'
-          // sets `url` to undefined if "next" URL is not present or `link` header is not set
-          url = ((response.headers.link || "").match(/<([^>]+)>;\s*rel="next"/) || [])[1];
-          return {
-            value: response
-          };
-        });
+    this.name = "HttpError";
+    this.status = statusCode;
+    Object.defineProperty(this, "code", {
+      get() {
+        logOnce(new deprecation.Deprecation("[@octokit/request-error] `error.code` is deprecated, use `error.status`."));
+        return statusCode;
       }
 
-    })
-  };
-}
+    });
+    this.headers = options.headers || {}; // redact request credentials without mutating original request options
 
-function paginate(octokit, route, parameters, mapFn) {
-  if (typeof parameters === "function") {
-    mapFn = parameters;
-    parameters = undefined;
+    const requestCopy = Object.assign({}, options.request);
+
+    if (options.request.headers.authorization) {
+      requestCopy.headers = Object.assign({}, options.request.headers, {
+        authorization: options.request.headers.authorization.replace(/ .*$/, " [REDACTED]")
+      });
+    }
+
+    requestCopy.url = requestCopy.url // client_id & client_secret can be passed as URL query parameters to increase rate limit
+    // see https://developer.github.com/v3/#increasing-the-unauthenticated-rate-limit-for-oauth-applications
+    .replace(/\bclient_secret=\w+/g, "client_secret=[REDACTED]") // OAuth tokens can be passed as URL query parameters, although it is not recommended
+    // see https://developer.github.com/v3/#oauth2-token-sent-in-a-header
+    .replace(/\baccess_token=\w+/g, "access_token=[REDACTED]");
+    this.request = requestCopy;
   }
 
-  return gather(octokit, [], iterator(octokit, route, parameters)[Symbol.asyncIterator](), mapFn);
 }
 
-function gather(octokit, results, iterator, mapFn) {
-  return iterator.next().then(result => {
-    if (result.done) {
-      return results;
-    }
-
-    let earlyExit = false;
-
-    function done() {
-      earlyExit = true;
-    }
-
-    results = results.concat(mapFn ? mapFn(result.value, done) : result.value.data);
-
-    if (earlyExit) {
-      return results;
-    }
-
-    return gather(octokit, results, iterator, mapFn);
-  });
-}
-
-/**
- * @param octokit Octokit instance
- * @param options Options passed to Octokit constructor
- */
-
-function paginateRest(octokit) {
-  return {
-    paginate: Object.assign(paginate.bind(null, octokit), {
-      iterator: iterator.bind(null, octokit)
-    })
-  };
-}
-paginateRest.VERSION = VERSION;
-
-exports.paginateRest = paginateRest;
+exports.RequestError = RequestError;
 //# sourceMappingURL=index.js.map
 
 
 /***/ }),
 
-/***/ 198:
-/***/ (function(__unusedmodule, exports) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.repoUrl = void 0;
-exports.repoUrl = (repo) => {
-    return `https://github.com/${repo.owner}/${repo.repo}`;
-};
-
-
-/***/ }),
-
-/***/ 211:
-/***/ (function(module) {
-
-module.exports = require("https");
-
-/***/ }),
-
-/***/ 219:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ 6234:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 "use strict";
 
 
-var net = __webpack_require__(631);
-var tls = __webpack_require__(16);
-var http = __webpack_require__(605);
-var https = __webpack_require__(211);
-var events = __webpack_require__(614);
-var assert = __webpack_require__(357);
-var util = __webpack_require__(669);
-
-
-exports.httpOverHttp = httpOverHttp;
-exports.httpsOverHttp = httpsOverHttp;
-exports.httpOverHttps = httpOverHttps;
-exports.httpsOverHttps = httpsOverHttps;
-
-
-function httpOverHttp(options) {
-  var agent = new TunnelingAgent(options);
-  agent.request = http.request;
-  return agent;
-}
-
-function httpsOverHttp(options) {
-  var agent = new TunnelingAgent(options);
-  agent.request = http.request;
-  agent.createSocket = createSecureSocket;
-  agent.defaultPort = 443;
-  return agent;
-}
-
-function httpOverHttps(options) {
-  var agent = new TunnelingAgent(options);
-  agent.request = https.request;
-  return agent;
-}
-
-function httpsOverHttps(options) {
-  var agent = new TunnelingAgent(options);
-  agent.request = https.request;
-  agent.createSocket = createSecureSocket;
-  agent.defaultPort = 443;
-  return agent;
-}
-
-
-function TunnelingAgent(options) {
-  var self = this;
-  self.options = options || {};
-  self.proxyOptions = self.options.proxy || {};
-  self.maxSockets = self.options.maxSockets || http.Agent.defaultMaxSockets;
-  self.requests = [];
-  self.sockets = [];
-
-  self.on('free', function onFree(socket, host, port, localAddress) {
-    var options = toOptions(host, port, localAddress);
-    for (var i = 0, len = self.requests.length; i < len; ++i) {
-      var pending = self.requests[i];
-      if (pending.host === options.host && pending.port === options.port) {
-        // Detect the request to connect same origin server,
-        // reuse the connection.
-        self.requests.splice(i, 1);
-        pending.request.onSocket(socket);
-        return;
-      }
-    }
-    socket.destroy();
-    self.removeSocket(socket);
-  });
-}
-util.inherits(TunnelingAgent, events.EventEmitter);
-
-TunnelingAgent.prototype.addRequest = function addRequest(req, host, port, localAddress) {
-  var self = this;
-  var options = mergeOptions({request: req}, self.options, toOptions(host, port, localAddress));
-
-  if (self.sockets.length >= this.maxSockets) {
-    // We are over limit so we'll add it to the queue.
-    self.requests.push(options);
-    return;
-  }
-
-  // If we are under maxSockets create a new one.
-  self.createSocket(options, function(socket) {
-    socket.on('free', onFree);
-    socket.on('close', onCloseOrRemove);
-    socket.on('agentRemove', onCloseOrRemove);
-    req.onSocket(socket);
-
-    function onFree() {
-      self.emit('free', socket, options);
-    }
-
-    function onCloseOrRemove(err) {
-      self.removeSocket(socket);
-      socket.removeListener('free', onFree);
-      socket.removeListener('close', onCloseOrRemove);
-      socket.removeListener('agentRemove', onCloseOrRemove);
-    }
-  });
-};
-
-TunnelingAgent.prototype.createSocket = function createSocket(options, cb) {
-  var self = this;
-  var placeholder = {};
-  self.sockets.push(placeholder);
-
-  var connectOptions = mergeOptions({}, self.proxyOptions, {
-    method: 'CONNECT',
-    path: options.host + ':' + options.port,
-    agent: false,
-    headers: {
-      host: options.host + ':' + options.port
-    }
-  });
-  if (options.localAddress) {
-    connectOptions.localAddress = options.localAddress;
-  }
-  if (connectOptions.proxyAuth) {
-    connectOptions.headers = connectOptions.headers || {};
-    connectOptions.headers['Proxy-Authorization'] = 'Basic ' +
-        new Buffer(connectOptions.proxyAuth).toString('base64');
-  }
-
-  debug('making CONNECT request');
-  var connectReq = self.request(connectOptions);
-  connectReq.useChunkedEncodingByDefault = false; // for v0.6
-  connectReq.once('response', onResponse); // for v0.6
-  connectReq.once('upgrade', onUpgrade);   // for v0.6
-  connectReq.once('connect', onConnect);   // for v0.7 or later
-  connectReq.once('error', onError);
-  connectReq.end();
-
-  function onResponse(res) {
-    // Very hacky. This is necessary to avoid http-parser leaks.
-    res.upgrade = true;
-  }
-
-  function onUpgrade(res, socket, head) {
-    // Hacky.
-    process.nextTick(function() {
-      onConnect(res, socket, head);
-    });
-  }
-
-  function onConnect(res, socket, head) {
-    connectReq.removeAllListeners();
-    socket.removeAllListeners();
-
-    if (res.statusCode !== 200) {
-      debug('tunneling socket could not be established, statusCode=%d',
-        res.statusCode);
-      socket.destroy();
-      var error = new Error('tunneling socket could not be established, ' +
-        'statusCode=' + res.statusCode);
-      error.code = 'ECONNRESET';
-      options.request.emit('error', error);
-      self.removeSocket(placeholder);
-      return;
-    }
-    if (head.length > 0) {
-      debug('got illegal response body from proxy');
-      socket.destroy();
-      var error = new Error('got illegal response body from proxy');
-      error.code = 'ECONNRESET';
-      options.request.emit('error', error);
-      self.removeSocket(placeholder);
-      return;
-    }
-    debug('tunneling connection has established');
-    self.sockets[self.sockets.indexOf(placeholder)] = socket;
-    return cb(socket);
-  }
-
-  function onError(cause) {
-    connectReq.removeAllListeners();
-
-    debug('tunneling socket could not be established, cause=%s\n',
-          cause.message, cause.stack);
-    var error = new Error('tunneling socket could not be established, ' +
-                          'cause=' + cause.message);
-    error.code = 'ECONNRESET';
-    options.request.emit('error', error);
-    self.removeSocket(placeholder);
-  }
-};
-
-TunnelingAgent.prototype.removeSocket = function removeSocket(socket) {
-  var pos = this.sockets.indexOf(socket)
-  if (pos === -1) {
-    return;
-  }
-  this.sockets.splice(pos, 1);
-
-  var pending = this.requests.shift();
-  if (pending) {
-    // If we have pending requests and a socket gets closed a new one
-    // needs to be created to take over in the pool for the one that closed.
-    this.createSocket(pending, function(socket) {
-      pending.request.onSocket(socket);
-    });
-  }
-};
-
-function createSecureSocket(options, cb) {
-  var self = this;
-  TunnelingAgent.prototype.createSocket.call(self, options, function(socket) {
-    var hostHeader = options.request.getHeader('host');
-    var tlsOptions = mergeOptions({}, self.options, {
-      socket: socket,
-      servername: hostHeader ? hostHeader.replace(/:.*$/, '') : options.host
-    });
-
-    // 0 is dummy port for v0.6
-    var secureSocket = tls.connect(0, tlsOptions);
-    self.sockets[self.sockets.indexOf(socket)] = secureSocket;
-    cb(secureSocket);
-  });
-}
-
-
-function toOptions(host, port, localAddress) {
-  if (typeof host === 'string') { // since v0.10
-    return {
-      host: host,
-      port: port,
-      localAddress: localAddress
-    };
-  }
-  return host; // for v0.11 or later
-}
-
-function mergeOptions(target) {
-  for (var i = 1, len = arguments.length; i < len; ++i) {
-    var overrides = arguments[i];
-    if (typeof overrides === 'object') {
-      var keys = Object.keys(overrides);
-      for (var j = 0, keyLen = keys.length; j < keyLen; ++j) {
-        var k = keys[j];
-        if (overrides[k] !== undefined) {
-          target[k] = overrides[k];
-        }
-      }
-    }
-  }
-  return target;
-}
-
-
-var debug;
-if (process.env.NODE_DEBUG && /\btunnel\b/.test(process.env.NODE_DEBUG)) {
-  debug = function() {
-    var args = Array.prototype.slice.call(arguments);
-    if (typeof args[0] === 'string') {
-      args[0] = 'TUNNEL: ' + args[0];
-    } else {
-      args.unshift('TUNNEL:');
-    }
-    console.error.apply(console, args);
-  }
-} else {
-  debug = function() {};
-}
-exports.debug = debug; // for test
-
-
-/***/ }),
-
-/***/ 223:
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-var wrappy = __webpack_require__(940)
-module.exports = wrappy(once)
-module.exports.strict = wrappy(onceStrict)
-
-once.proto = once(function () {
-  Object.defineProperty(Function.prototype, 'once', {
-    value: function () {
-      return once(this)
-    },
-    configurable: true
-  })
-
-  Object.defineProperty(Function.prototype, 'onceStrict', {
-    value: function () {
-      return onceStrict(this)
-    },
-    configurable: true
-  })
-})
-
-function once (fn) {
-  var f = function () {
-    if (f.called) return f.value
-    f.called = true
-    return f.value = fn.apply(this, arguments)
-  }
-  f.called = false
-  return f
-}
-
-function onceStrict (fn) {
-  var f = function () {
-    if (f.called)
-      throw new Error(f.onceError)
-    f.called = true
-    return f.value = fn.apply(this, arguments)
-  }
-  var name = fn.name || 'Function wrapped with `once`'
-  f.onceError = name + " shouldn't be called more than once"
-  f.called = false
-  return f
-}
-
-
-/***/ }),
-
-/***/ 234:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, '__esModule', { value: true });
+Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
-var endpoint = __webpack_require__(440);
-var universalUserAgent = __webpack_require__(429);
-var isPlainObject = __webpack_require__(62);
+var endpoint = __webpack_require__(9440);
+var universalUserAgent = __webpack_require__(5030);
+var isPlainObject = __webpack_require__(9062);
 var nodeFetch = _interopDefault(__webpack_require__(467));
 var requestError = __webpack_require__(537);
 
@@ -3027,521 +5605,258 @@ exports.request = request;
 
 /***/ }),
 
-/***/ 273:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.getProjectData = void 0;
-const measure_1 = __webpack_require__(715);
-const TColumnTypes_1 = __webpack_require__(187);
-const filterPlannedProjectData_1 = __webpack_require__(738);
-exports.getProjectData = (projectKit, config, project) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield measure_1.measure(`Get data for the "${project.project.name}" project`, () => __awaiter(void 0, void 0, void 0, function* () {
-        const columns = yield measure_1.measure('Fetching columns', () => __awaiter(void 0, void 0, void 0, function* () {
-            return yield projectKit.getColumns(project);
-        }));
-        const cards = yield measure_1.measure('Fetching cards', () => __awaiter(void 0, void 0, void 0, function* () {
-            return yield projectKit.getCards(columns);
-        }));
-        const repos = yield measure_1.measure('Fetching Repos', () => __awaiter(void 0, void 0, void 0, function* () {
-            return yield projectKit.getCardRepos(cards);
-        }));
-        console.log('- Repos: ', repos);
-        const issues = yield measure_1.measure('Fetching Issues', () => __awaiter(void 0, void 0, void 0, function* () {
-            return yield projectKit.getReposIssues(repos);
-        }));
-        const backlogIssues = yield projectKit.mergeCardsWithIssuesForColumn(issues, cards, TColumnTypes_1.TColumnTypes.Backlog, config, project);
-        console.log(`BacklogIssues: ${backlogIssues.length} items`);
-        const committedIssues = yield projectKit.mergeCardsWithIssuesForColumn(issues, cards, TColumnTypes_1.TColumnTypes.Committed, config, project);
-        console.log(`CommittedIssues: ${committedIssues.length} items`);
-        const blockedIssues = yield projectKit.mergeCardsWithIssuesForColumn(issues, cards, TColumnTypes_1.TColumnTypes.Blocked, config, project);
-        console.log(`BlockedIssues: ${blockedIssues.length} items`);
-        const progressIssues = yield projectKit.mergeCardsWithIssuesForColumn(issues, cards, TColumnTypes_1.TColumnTypes.InProgress, config, project);
-        console.log(`ProgressIssues: ${progressIssues.length} items`);
-        const inReviewIssues = yield projectKit.mergeCardsWithIssuesForColumn(issues, cards, TColumnTypes_1.TColumnTypes.InReview, config, project);
-        console.log(`InReviewIssues: ${inReviewIssues.length} items`);
-        const waitingToDeployIssues = yield projectKit.mergeCardsWithIssuesForColumn(issues, cards, TColumnTypes_1.TColumnTypes.WaitingToDeploy, config, project);
-        console.log(`WaitingToDeployIssues: ${waitingToDeployIssues.length} items`);
-        const doneIssues = yield projectKit.mergeCardsWithIssuesForColumn(issues, cards, TColumnTypes_1.TColumnTypes.Done, config, project);
-        console.log(`doneIssues: ${doneIssues.length} items`);
-        const inWorkIssues = [...progressIssues, ...inReviewIssues];
-        const doneOrDeployIssues = [...waitingToDeployIssues, ...doneIssues];
-        const allPlannedIssues = [...blockedIssues, ...committedIssues, ...inWorkIssues, ...doneOrDeployIssues];
-        const unassignedIssues = filterPlannedProjectData_1.filterUnassignedIssues([...blockedIssues, ...committedIssues]);
-        const toSolveIssues = [...inWorkIssues, ...blockedIssues, ...committedIssues];
-        return {
-            project,
-            // combined
-            inWorkIssues,
-            doneOrDeployIssues,
-            allPlannedIssues,
-            issuesToSolve: toSolveIssues,
-            unassignedIssues,
-            // plain
-            backlogIssues,
-            committedIssues,
-            progressIssues,
-            inReviewIssues,
-            blockedIssues,
-            waitingToDeployIssues,
-            doneIssues,
-        };
-    }));
-});
-
-
-/***/ }),
-
-/***/ 278:
-/***/ (function(__unusedmodule, exports) {
-
-"use strict";
-
-// We use any as a valid input type
-/* eslint-disable @typescript-eslint/no-explicit-any */
-Object.defineProperty(exports, "__esModule", { value: true });
-/**
- * Sanitizes an input into a string so it can be passed into issueCommand safely
- * @param input input to sanitize into a string
- */
-function toCommandValue(input) {
-    if (input === null || input === undefined) {
-        return '';
-    }
-    else if (typeof input === 'string' || input instanceof String) {
-        return input;
-    }
-    return JSON.stringify(input);
-}
-exports.toCommandValue = toCommandValue;
-//# sourceMappingURL=utils.js.map
-
-/***/ }),
-
-/***/ 282:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.renderProject = void 0;
-const rateToPercent_1 = __webpack_require__(501);
-const getProjectStats_1 = __webpack_require__(686);
-const renderIssuesBlock_1 = __webpack_require__(163);
-const renderProjectOverview_1 = __webpack_require__(560);
-const filterPlannedProjectData_1 = __webpack_require__(738);
-const renderProjectTitle_1 = __webpack_require__(752);
-const renderNewItemsSuffix_1 = __webpack_require__(296);
-const addTitle_1 = __webpack_require__(616);
-exports.renderProject = (allData, projectWithConfig, config) => {
-    const { 
-    // combined
-    inWorkIssues, doneOrDeployIssues, allPlannedIssues, 
-    // plain
-    backlogIssues, committedIssues, blockedIssues, } = allData;
-    const plannedData = filterPlannedProjectData_1.filterPlannedProjectData(allData);
-    const { allPlannedIssues: plannedAllPlannedIssues, doneOrDeployIssues: plannedDoneOrDeployIssues, } = plannedData;
-    const { doneRate, inWorkRate, committedRate, } = getProjectStats_1.getProjectStats(plannedData, config);
-    const { project, } = projectWithConfig;
-    const blockedIssuesString = renderIssuesBlock_1.renderIssuesBlock(`⚠️  ${blockedIssues.length} Blocked`, blockedIssues, projectWithConfig, false);
-    const inWorkCount = `${inWorkIssues.length}`;
-    const inWorkIssuesString = renderIssuesBlock_1.renderIssuesBlock(`🏃  ${inWorkCount} In work (${rateToPercent_1.rateToPercent(inWorkRate)})`, inWorkIssues, projectWithConfig);
-    const committedIssuesString = renderIssuesBlock_1.renderIssuesBlock(`💪 ${committedIssues.length} Committed (${rateToPercent_1.rateToPercent(committedRate)})`, committedIssues, projectWithConfig);
-    const doneCount = `${plannedDoneOrDeployIssues.length}/${plannedAllPlannedIssues.length}`;
-    const newItemsDone = renderNewItemsSuffix_1.renderNewItemsSuffix(plannedAllPlannedIssues, allPlannedIssues);
-    const doneIssuesString = renderIssuesBlock_1.renderIssuesBlock(`🙌 ${doneCount} Done (${rateToPercent_1.rateToPercent(doneRate)})${addTitle_1.addTitle('Items added after sprint start date', newItemsDone)}`, doneOrDeployIssues, projectWithConfig);
-    const projectLink = `Link: [${project.name}](${project.html_url})`;
-    const backlogIssuesCountString = `\nBacklog: [${backlogIssues.length} issues](${project.html_url})`;
-    const projectWithData = { data: allData, project: projectWithConfig };
-    return [
-        '',
-        renderProjectTitle_1.renderProjectTitle(project, allData, config),
-        projectLink,
-        renderProjectOverview_1.renderProjectOverview(config, projectWithData),
-        '',
-        blockedIssuesString,
-        committedIssuesString,
-        inWorkIssuesString,
-        doneIssuesString,
-        backlogIssuesCountString,
-    ].join('\n');
-};
-
-
-/***/ }),
-
-/***/ 294:
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-module.exports = __webpack_require__(219);
-
-
-/***/ }),
-
-/***/ 296:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.renderNewItemsSuffix = void 0;
-const emojiIcon_1 = __webpack_require__(449);
-exports.renderNewItemsSuffix = (plannedIssues, allIssues) => {
-    const addedIssues = allIssues.length - plannedIssues.length;
-    const addedIssuesString = (addedIssues > 0)
-        ? ` **+${addedIssues} new** ${emojiIcon_1.emojiIcon('💥', 'New')}`
-        : '';
-    return addedIssuesString;
-};
-
-
-/***/ }),
-
-/***/ 334:
-/***/ (function(__unusedmodule, exports) {
+/***/ 9062:
+/***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
 
 
-Object.defineProperty(exports, '__esModule', { value: true });
+Object.defineProperty(exports, "__esModule", ({ value: true }));
 
-async function auth(token) {
-  const tokenType = token.split(/\./).length === 3 ? "app" : /^v\d+\./.test(token) ? "installation" : "oauth";
-  return {
-    type: "token",
-    token: token,
-    tokenType
-  };
-}
-
-/**
- * Prefix token for usage in the Authorization header
+/*!
+ * is-plain-object <https://github.com/jonschlinkert/is-plain-object>
  *
- * @param token OAuth token or JSON Web Token
+ * Copyright (c) 2014-2017, Jon Schlinkert.
+ * Released under the MIT License.
  */
-function withAuthorizationPrefix(token) {
-  if (token.split(/\./).length === 3) {
-    return `bearer ${token}`;
+
+function isObject(o) {
+  return Object.prototype.toString.call(o) === '[object Object]';
+}
+
+function isPlainObject(o) {
+  var ctor,prot;
+
+  if (isObject(o) === false) return false;
+
+  // If has modified constructor
+  ctor = o.constructor;
+  if (ctor === undefined) return true;
+
+  // If has modified prototype
+  prot = ctor.prototype;
+  if (isObject(prot) === false) return false;
+
+  // If constructor does not have an Object-specific method
+  if (prot.hasOwnProperty('isPrototypeOf') === false) {
+    return false;
   }
 
-  return `token ${token}`;
+  // Most likely a plain Object
+  return true;
 }
 
-async function hook(token, request, route, parameters) {
-  const endpoint = request.endpoint.merge(route, parameters);
-  endpoint.headers.authorization = withAuthorizationPrefix(token);
-  return request(endpoint);
+exports.isPlainObject = isPlainObject;
+
+
+/***/ }),
+
+/***/ 3682:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var register = __webpack_require__(4670)
+var addHook = __webpack_require__(5549)
+var removeHook = __webpack_require__(6819)
+
+// bind with array of arguments: https://stackoverflow.com/a/21792913
+var bind = Function.bind
+var bindable = bind.bind(bind)
+
+function bindApi (hook, state, name) {
+  var removeHookRef = bindable(removeHook, null).apply(null, name ? [state, name] : [state])
+  hook.api = { remove: removeHookRef }
+  hook.remove = removeHookRef
+
+  ;['before', 'error', 'after', 'wrap'].forEach(function (kind) {
+    var args = name ? [state, kind, name] : [state, kind]
+    hook[kind] = hook.api[kind] = bindable(addHook, null).apply(null, args)
+  })
 }
 
-const createTokenAuth = function createTokenAuth(token) {
-  if (!token) {
-    throw new Error("[@octokit/auth-token] No token passed to createTokenAuth");
+function HookSingular () {
+  var singularHookName = 'h'
+  var singularHookState = {
+    registry: {}
+  }
+  var singularHook = register.bind(null, singularHookState, singularHookName)
+  bindApi(singularHook, singularHookState, singularHookName)
+  return singularHook
+}
+
+function HookCollection () {
+  var state = {
+    registry: {}
   }
 
-  if (typeof token !== "string") {
-    throw new Error("[@octokit/auth-token] Token passed to createTokenAuth is not a string");
+  var hook = register.bind(null, state)
+  bindApi(hook, state)
+
+  return hook
+}
+
+var collectionHookDeprecationMessageDisplayed = false
+function Hook () {
+  if (!collectionHookDeprecationMessageDisplayed) {
+    console.warn('[before-after-hook]: "Hook()" repurposing warning, use "Hook.Collection()". Read more: https://git.io/upgrade-before-after-hook-to-1.4')
+    collectionHookDeprecationMessageDisplayed = true
+  }
+  return HookCollection()
+}
+
+Hook.Singular = HookSingular.bind()
+Hook.Collection = HookCollection.bind()
+
+module.exports = Hook
+// expose constructors as a named property for TypeScript
+module.exports.Hook = Hook
+module.exports.Singular = Hook.Singular
+module.exports.Collection = Hook.Collection
+
+
+/***/ }),
+
+/***/ 5549:
+/***/ ((module) => {
+
+module.exports = addHook
+
+function addHook (state, kind, name, hook) {
+  var orig = hook
+  if (!state.registry[name]) {
+    state.registry[name] = []
   }
 
-  token = token.replace(/^(token|bearer) +/i, "");
-  return Object.assign(auth.bind(null, token), {
-    hook: hook.bind(null, token)
-  });
-};
-
-exports.createTokenAuth = createTokenAuth;
-//# sourceMappingURL=index.js.map
-
-
-/***/ }),
-
-/***/ 342:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.renderDaysLeft = exports.getWorkDays = void 0;
-const moment_1 = __importDefault(__webpack_require__(623));
-const getBusinessDatesCount = (startDate, endDate) => {
-    var count = 0;
-    var curDate = startDate;
-    while (curDate <= endDate) {
-        var dayOfWeek = curDate.getDay();
-        if (!(dayOfWeek == 6 || dayOfWeek == 0))
-            count++;
-        curDate.setDate(curDate.getDate() + 1);
+  if (kind === 'before') {
+    hook = function (method, options) {
+      return Promise.resolve()
+        .then(orig.bind(null, options))
+        .then(method.bind(null, options))
     }
-    return count;
-};
-const daysLeftToEmoj = (daysLeft, totalDays) => {
-    const ratio = daysLeft / totalDays;
-    if (ratio < 0.2) {
-        return '🔥🔥🔥';
-    }
-    if (ratio < 0.3) {
-        return '🔥🔥';
-    }
-    if (ratio < 0.4) {
-        return '🔥';
-    }
-    return '';
-};
-exports.getWorkDays = (config) => {
-    const { sprintStartDate: sprintStartDateString, sprintDuration, sprintNumberHolidays = 0, } = config;
-    if (!sprintStartDateString || !sprintDuration) {
-        return;
-    }
-    const sprintStartDate = moment_1.default(sprintStartDateString).toDate();
-    const sprintEndDate = moment_1.default(sprintStartDateString)
-        .add('days', sprintDuration)
-        .toDate();
-    const totalBusinessDaysInSprint = getBusinessDatesCount(sprintStartDate, sprintEndDate) -
-        sprintNumberHolidays;
-    const businessDaysLeft = getBusinessDatesCount(new Date(), sprintEndDate) - sprintNumberHolidays;
-    return {
-        businessDaysLeft,
-        totalBusinessDaysInSprint: totalBusinessDaysInSprint,
-    };
-};
-exports.renderDaysLeft = (config) => {
-    const days = exports.getWorkDays(config);
-    if (!days) {
-        return;
-    }
-    const { businessDaysLeft, totalBusinessDaysInSprint } = days;
-    const daysLeft = Math.max(businessDaysLeft, 0);
-    return `${daysLeftToEmoj(daysLeft, totalBusinessDaysInSprint)} **${daysLeft}** work days left`;
-};
-
-
-/***/ }),
-
-/***/ 351:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-    result["default"] = mod;
-    return result;
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const os = __importStar(__webpack_require__(87));
-const utils_1 = __webpack_require__(278);
-/**
- * Commands
- *
- * Command Format:
- *   ::name key=value,key=value::message
- *
- * Examples:
- *   ::warning::This is the message
- *   ::set-env name=MY_VAR::some value
- */
-function issueCommand(command, properties, message) {
-    const cmd = new Command(command, properties, message);
-    process.stdout.write(cmd.toString() + os.EOL);
-}
-exports.issueCommand = issueCommand;
-function issue(name, message = '') {
-    issueCommand(name, {}, message);
-}
-exports.issue = issue;
-const CMD_STRING = '::';
-class Command {
-    constructor(command, properties, message) {
-        if (!command) {
-            command = 'missing.command';
-        }
-        this.command = command;
-        this.properties = properties;
-        this.message = message;
-    }
-    toString() {
-        let cmdStr = CMD_STRING + this.command;
-        if (this.properties && Object.keys(this.properties).length > 0) {
-            cmdStr += ' ';
-            let first = true;
-            for (const key in this.properties) {
-                if (this.properties.hasOwnProperty(key)) {
-                    const val = this.properties[key];
-                    if (val) {
-                        if (first) {
-                            first = false;
-                        }
-                        else {
-                            cmdStr += ',';
-                        }
-                        cmdStr += `${key}=${escapeProperty(val)}`;
-                    }
-                }
-            }
-        }
-        cmdStr += `${CMD_STRING}${escapeData(this.message)}`;
-        return cmdStr;
-    }
-}
-function escapeData(s) {
-    return utils_1.toCommandValue(s)
-        .replace(/%/g, '%25')
-        .replace(/\r/g, '%0D')
-        .replace(/\n/g, '%0A');
-}
-function escapeProperty(s) {
-    return utils_1.toCommandValue(s)
-        .replace(/%/g, '%25')
-        .replace(/\r/g, '%0D')
-        .replace(/\n/g, '%0A')
-        .replace(/:/g, '%3A')
-        .replace(/,/g, '%2C');
-}
-//# sourceMappingURL=command.js.map
-
-/***/ }),
-
-/***/ 357:
-/***/ (function(module) {
-
-module.exports = require("assert");
-
-/***/ }),
-
-/***/ 363:
-/***/ (function(__unusedmodule, exports) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.isNewCard = void 0;
-const dateAddDays = (startDate, days) => {
-    const date = new Date();
-    date.setDate(startDate.getDate() + days);
-    return date;
-};
-/**
- * Check if card is a new - was created after
- * the sprint start date.
- */
-exports.isNewCard = (card, config, projectWithConfig) => {
-    const { sprintStartDate: sprintStartDateString } = config;
-    if (!sprintStartDateString) {
-        return false;
-    }
-    const cardCreationDate = new Date(card.created_at);
-    const sprintStartDate = new Date(sprintStartDateString);
-    const { projectConfig } = projectWithConfig;
-    const newCardsCutoffDays = (typeof projectConfig === 'number' || !projectConfig.newCardsCutoffDays)
-        ? 0
-        : projectConfig.newCardsCutoffDays;
-    return cardCreationDate.getTime() >= dateAddDays(sprintStartDate, newCardsCutoffDays).getTime();
-};
-
-
-/***/ }),
-
-/***/ 368:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.isBugCard = void 0;
-const pluck_1 = __webpack_require__(881);
-const toLowerCase_1 = __webpack_require__(618);
-exports.isBugCard = (card) => {
-    const { issue } = card;
-    if (!issue) {
-        return false;
-    }
-    const { labels } = issue;
-    const isBug = labels.map(pluck_1.pluck('name')).map(toLowerCase_1.toLowerCase).includes('bug');
-    return isBug;
-};
-
-
-/***/ }),
-
-/***/ 369:
-/***/ (function(__unusedmodule, exports) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.AuthorizationError = void 0;
-class AuthorizationError extends Error {
-}
-exports.AuthorizationError = AuthorizationError;
-
-
-/***/ }),
-
-/***/ 406:
-/***/ (function(__unusedmodule, exports) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.arrayUnique = void 0;
-exports.arrayUnique = (array) => {
-    const set = new Set(array);
-    return [...set];
-};
-
-
-/***/ }),
-
-/***/ 413:
-/***/ (function(module) {
-
-module.exports = require("stream");
-
-/***/ }),
-
-/***/ 429:
-/***/ (function(__unusedmodule, exports) {
-
-"use strict";
-
-
-Object.defineProperty(exports, '__esModule', { value: true });
-
-function getUserAgent() {
-  if (typeof navigator === "object" && "userAgent" in navigator) {
-    return navigator.userAgent;
   }
 
-  if (typeof process === "object" && "version" in process) {
-    return `Node.js/${process.version.substr(1)} (${process.platform}; ${process.arch})`;
+  if (kind === 'after') {
+    hook = function (method, options) {
+      var result
+      return Promise.resolve()
+        .then(method.bind(null, options))
+        .then(function (result_) {
+          result = result_
+          return orig(result, options)
+        })
+        .then(function () {
+          return result
+        })
+    }
   }
 
-  return "<environment undetectable>";
-}
+  if (kind === 'error') {
+    hook = function (method, options) {
+      return Promise.resolve()
+        .then(method.bind(null, options))
+        .catch(function (error) {
+          return orig(error, options)
+        })
+    }
+  }
 
-exports.getUserAgent = getUserAgent;
-//# sourceMappingURL=index.js.map
+  state.registry[name].push({
+    hook: hook,
+    orig: orig
+  })
+}
 
 
 /***/ }),
 
-/***/ 437:
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ 4670:
+/***/ ((module) => {
+
+module.exports = register
+
+function register (state, name, method, options) {
+  if (typeof method !== 'function') {
+    throw new Error('method for before hook must be a function')
+  }
+
+  if (!options) {
+    options = {}
+  }
+
+  if (Array.isArray(name)) {
+    return name.reverse().reduce(function (callback, name) {
+      return register.bind(null, state, name, callback, options)
+    }, method)()
+  }
+
+  return Promise.resolve()
+    .then(function () {
+      if (!state.registry[name]) {
+        return method(options)
+      }
+
+      return (state.registry[name]).reduce(function (method, registered) {
+        return registered.hook.bind(null, method, options)
+      }, method)()
+    })
+}
+
+
+/***/ }),
+
+/***/ 6819:
+/***/ ((module) => {
+
+module.exports = removeHook
+
+function removeHook (state, name, method) {
+  if (!state.registry[name]) {
+    return
+  }
+
+  var index = state.registry[name]
+    .map(function (registered) { return registered.orig })
+    .indexOf(method)
+
+  if (index === -1) {
+    return
+  }
+
+  state.registry[name].splice(index, 1)
+}
+
+
+/***/ }),
+
+/***/ 8932:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+
+class Deprecation extends Error {
+  constructor(message) {
+    super(message); // Maintains proper stack trace (only available on V8)
+
+    /* istanbul ignore next */
+
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, this.constructor);
+    }
+
+    this.name = 'Deprecation';
+  }
+
+}
+
+exports.Deprecation = Deprecation;
+
+
+/***/ }),
+
+/***/ 2437:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 /* @flow */
 /*::
@@ -3566,8 +5881,8 @@ type DotenvConfigOutput = {
 
 */
 
-const fs = __webpack_require__(747)
-const path = __webpack_require__(622)
+const fs = __webpack_require__(5747)
+const path = __webpack_require__(5622)
 
 function log (message /*: string */) {
   console.log(`[dotenv][DEBUG] ${message}`)
@@ -3660,3120 +5975,13 @@ module.exports.parse = parse
 
 /***/ }),
 
-/***/ 438:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.getOctokit = exports.context = void 0;
-const Context = __importStar(__webpack_require__(53));
-const utils_1 = __webpack_require__(30);
-exports.context = new Context.Context();
-/**
- * Returns a hydrated octokit ready to use for GitHub Actions
- *
- * @param     token    the repo PAT or GITHUB_TOKEN
- * @param     options  other options to set
- */
-function getOctokit(token, options) {
-    return new utils_1.GitHub(utils_1.getOctokitOptions(token, options));
-}
-exports.getOctokit = getOctokit;
-//# sourceMappingURL=github.js.map
-
-/***/ }),
-
-/***/ 440:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ 1568:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
 
 
-Object.defineProperty(exports, '__esModule', { value: true });
-
-var isPlainObject = __webpack_require__(558);
-var universalUserAgent = __webpack_require__(429);
-
-function lowercaseKeys(object) {
-  if (!object) {
-    return {};
-  }
-
-  return Object.keys(object).reduce((newObj, key) => {
-    newObj[key.toLowerCase()] = object[key];
-    return newObj;
-  }, {});
-}
-
-function mergeDeep(defaults, options) {
-  const result = Object.assign({}, defaults);
-  Object.keys(options).forEach(key => {
-    if (isPlainObject.isPlainObject(options[key])) {
-      if (!(key in defaults)) Object.assign(result, {
-        [key]: options[key]
-      });else result[key] = mergeDeep(defaults[key], options[key]);
-    } else {
-      Object.assign(result, {
-        [key]: options[key]
-      });
-    }
-  });
-  return result;
-}
-
-function removeUndefinedProperties(obj) {
-  for (const key in obj) {
-    if (obj[key] === undefined) {
-      delete obj[key];
-    }
-  }
-
-  return obj;
-}
-
-function merge(defaults, route, options) {
-  if (typeof route === "string") {
-    let [method, url] = route.split(" ");
-    options = Object.assign(url ? {
-      method,
-      url
-    } : {
-      url: method
-    }, options);
-  } else {
-    options = Object.assign({}, route);
-  } // lowercase header names before merging with defaults to avoid duplicates
-
-
-  options.headers = lowercaseKeys(options.headers); // remove properties with undefined values before merging
-
-  removeUndefinedProperties(options);
-  removeUndefinedProperties(options.headers);
-  const mergedOptions = mergeDeep(defaults || {}, options); // mediaType.previews arrays are merged, instead of overwritten
-
-  if (defaults && defaults.mediaType.previews.length) {
-    mergedOptions.mediaType.previews = defaults.mediaType.previews.filter(preview => !mergedOptions.mediaType.previews.includes(preview)).concat(mergedOptions.mediaType.previews);
-  }
-
-  mergedOptions.mediaType.previews = mergedOptions.mediaType.previews.map(preview => preview.replace(/-preview/, ""));
-  return mergedOptions;
-}
-
-function addQueryParameters(url, parameters) {
-  const separator = /\?/.test(url) ? "&" : "?";
-  const names = Object.keys(parameters);
-
-  if (names.length === 0) {
-    return url;
-  }
-
-  return url + separator + names.map(name => {
-    if (name === "q") {
-      return "q=" + parameters.q.split("+").map(encodeURIComponent).join("+");
-    }
-
-    return `${name}=${encodeURIComponent(parameters[name])}`;
-  }).join("&");
-}
-
-const urlVariableRegex = /\{[^}]+\}/g;
-
-function removeNonChars(variableName) {
-  return variableName.replace(/^\W+|\W+$/g, "").split(/,/);
-}
-
-function extractUrlVariableNames(url) {
-  const matches = url.match(urlVariableRegex);
-
-  if (!matches) {
-    return [];
-  }
-
-  return matches.map(removeNonChars).reduce((a, b) => a.concat(b), []);
-}
-
-function omit(object, keysToOmit) {
-  return Object.keys(object).filter(option => !keysToOmit.includes(option)).reduce((obj, key) => {
-    obj[key] = object[key];
-    return obj;
-  }, {});
-}
-
-// Based on https://github.com/bramstein/url-template, licensed under BSD
-// TODO: create separate package.
-//
-// Copyright (c) 2012-2014, Bram Stein
-// All rights reserved.
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions
-// are met:
-//  1. Redistributions of source code must retain the above copyright
-//     notice, this list of conditions and the following disclaimer.
-//  2. Redistributions in binary form must reproduce the above copyright
-//     notice, this list of conditions and the following disclaimer in the
-//     documentation and/or other materials provided with the distribution.
-//  3. The name of the author may not be used to endorse or promote products
-//     derived from this software without specific prior written permission.
-// THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR IMPLIED
-// WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-// MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
-// EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
-// INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-// BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
-// OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-// NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
-// EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-/* istanbul ignore file */
-function encodeReserved(str) {
-  return str.split(/(%[0-9A-Fa-f]{2})/g).map(function (part) {
-    if (!/%[0-9A-Fa-f]/.test(part)) {
-      part = encodeURI(part).replace(/%5B/g, "[").replace(/%5D/g, "]");
-    }
-
-    return part;
-  }).join("");
-}
-
-function encodeUnreserved(str) {
-  return encodeURIComponent(str).replace(/[!'()*]/g, function (c) {
-    return "%" + c.charCodeAt(0).toString(16).toUpperCase();
-  });
-}
-
-function encodeValue(operator, value, key) {
-  value = operator === "+" || operator === "#" ? encodeReserved(value) : encodeUnreserved(value);
-
-  if (key) {
-    return encodeUnreserved(key) + "=" + value;
-  } else {
-    return value;
-  }
-}
-
-function isDefined(value) {
-  return value !== undefined && value !== null;
-}
-
-function isKeyOperator(operator) {
-  return operator === ";" || operator === "&" || operator === "?";
-}
-
-function getValues(context, operator, key, modifier) {
-  var value = context[key],
-      result = [];
-
-  if (isDefined(value) && value !== "") {
-    if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
-      value = value.toString();
-
-      if (modifier && modifier !== "*") {
-        value = value.substring(0, parseInt(modifier, 10));
-      }
-
-      result.push(encodeValue(operator, value, isKeyOperator(operator) ? key : ""));
-    } else {
-      if (modifier === "*") {
-        if (Array.isArray(value)) {
-          value.filter(isDefined).forEach(function (value) {
-            result.push(encodeValue(operator, value, isKeyOperator(operator) ? key : ""));
-          });
-        } else {
-          Object.keys(value).forEach(function (k) {
-            if (isDefined(value[k])) {
-              result.push(encodeValue(operator, value[k], k));
-            }
-          });
-        }
-      } else {
-        const tmp = [];
-
-        if (Array.isArray(value)) {
-          value.filter(isDefined).forEach(function (value) {
-            tmp.push(encodeValue(operator, value));
-          });
-        } else {
-          Object.keys(value).forEach(function (k) {
-            if (isDefined(value[k])) {
-              tmp.push(encodeUnreserved(k));
-              tmp.push(encodeValue(operator, value[k].toString()));
-            }
-          });
-        }
-
-        if (isKeyOperator(operator)) {
-          result.push(encodeUnreserved(key) + "=" + tmp.join(","));
-        } else if (tmp.length !== 0) {
-          result.push(tmp.join(","));
-        }
-      }
-    }
-  } else {
-    if (operator === ";") {
-      if (isDefined(value)) {
-        result.push(encodeUnreserved(key));
-      }
-    } else if (value === "" && (operator === "&" || operator === "?")) {
-      result.push(encodeUnreserved(key) + "=");
-    } else if (value === "") {
-      result.push("");
-    }
-  }
-
-  return result;
-}
-
-function parseUrl(template) {
-  return {
-    expand: expand.bind(null, template)
-  };
-}
-
-function expand(template, context) {
-  var operators = ["+", "#", ".", "/", ";", "?", "&"];
-  return template.replace(/\{([^\{\}]+)\}|([^\{\}]+)/g, function (_, expression, literal) {
-    if (expression) {
-      let operator = "";
-      const values = [];
-
-      if (operators.indexOf(expression.charAt(0)) !== -1) {
-        operator = expression.charAt(0);
-        expression = expression.substr(1);
-      }
-
-      expression.split(/,/g).forEach(function (variable) {
-        var tmp = /([^:\*]*)(?::(\d+)|(\*))?/.exec(variable);
-        values.push(getValues(context, operator, tmp[1], tmp[2] || tmp[3]));
-      });
-
-      if (operator && operator !== "+") {
-        var separator = ",";
-
-        if (operator === "?") {
-          separator = "&";
-        } else if (operator !== "#") {
-          separator = operator;
-        }
-
-        return (values.length !== 0 ? operator : "") + values.join(separator);
-      } else {
-        return values.join(",");
-      }
-    } else {
-      return encodeReserved(literal);
-    }
-  });
-}
-
-function parse(options) {
-  // https://fetch.spec.whatwg.org/#methods
-  let method = options.method.toUpperCase(); // replace :varname with {varname} to make it RFC 6570 compatible
-
-  let url = (options.url || "/").replace(/:([a-z]\w+)/g, "{$1}");
-  let headers = Object.assign({}, options.headers);
-  let body;
-  let parameters = omit(options, ["method", "baseUrl", "url", "headers", "request", "mediaType"]); // extract variable names from URL to calculate remaining variables later
-
-  const urlVariableNames = extractUrlVariableNames(url);
-  url = parseUrl(url).expand(parameters);
-
-  if (!/^http/.test(url)) {
-    url = options.baseUrl + url;
-  }
-
-  const omittedParameters = Object.keys(options).filter(option => urlVariableNames.includes(option)).concat("baseUrl");
-  const remainingParameters = omit(parameters, omittedParameters);
-  const isBinaryRequest = /application\/octet-stream/i.test(headers.accept);
-
-  if (!isBinaryRequest) {
-    if (options.mediaType.format) {
-      // e.g. application/vnd.github.v3+json => application/vnd.github.v3.raw
-      headers.accept = headers.accept.split(/,/).map(preview => preview.replace(/application\/vnd(\.\w+)(\.v3)?(\.\w+)?(\+json)?$/, `application/vnd$1$2.${options.mediaType.format}`)).join(",");
-    }
-
-    if (options.mediaType.previews.length) {
-      const previewsFromAcceptHeader = headers.accept.match(/[\w-]+(?=-preview)/g) || [];
-      headers.accept = previewsFromAcceptHeader.concat(options.mediaType.previews).map(preview => {
-        const format = options.mediaType.format ? `.${options.mediaType.format}` : "+json";
-        return `application/vnd.github.${preview}-preview${format}`;
-      }).join(",");
-    }
-  } // for GET/HEAD requests, set URL query parameters from remaining parameters
-  // for PATCH/POST/PUT/DELETE requests, set request body from remaining parameters
-
-
-  if (["GET", "HEAD"].includes(method)) {
-    url = addQueryParameters(url, remainingParameters);
-  } else {
-    if ("data" in remainingParameters) {
-      body = remainingParameters.data;
-    } else {
-      if (Object.keys(remainingParameters).length) {
-        body = remainingParameters;
-      } else {
-        headers["content-length"] = 0;
-      }
-    }
-  } // default content-type for JSON if body is set
-
-
-  if (!headers["content-type"] && typeof body !== "undefined") {
-    headers["content-type"] = "application/json; charset=utf-8";
-  } // GitHub expects 'content-length: 0' header for PUT/PATCH requests without body.
-  // fetch does not allow to set `content-length` header, but we can set body to an empty string
-
-
-  if (["PATCH", "PUT"].includes(method) && typeof body === "undefined") {
-    body = "";
-  } // Only return body/request keys if present
-
-
-  return Object.assign({
-    method,
-    url,
-    headers
-  }, typeof body !== "undefined" ? {
-    body
-  } : null, options.request ? {
-    request: options.request
-  } : null);
-}
-
-function endpointWithDefaults(defaults, route, options) {
-  return parse(merge(defaults, route, options));
-}
-
-function withDefaults(oldDefaults, newDefaults) {
-  const DEFAULTS = merge(oldDefaults, newDefaults);
-  const endpoint = endpointWithDefaults.bind(null, DEFAULTS);
-  return Object.assign(endpoint, {
-    DEFAULTS,
-    defaults: withDefaults.bind(null, DEFAULTS),
-    merge: merge.bind(null, DEFAULTS),
-    parse
-  });
-}
-
-const VERSION = "6.0.8";
-
-const userAgent = `octokit-endpoint.js/${VERSION} ${universalUserAgent.getUserAgent()}`; // DEFAULTS has all properties set that EndpointOptions has, except url.
-// So we use RequestParameters and add method as additional required property.
-
-const DEFAULTS = {
-  method: "GET",
-  baseUrl: "https://api.github.com",
-  headers: {
-    accept: "application/vnd.github.v3+json",
-    "user-agent": userAgent
-  },
-  mediaType: {
-    format: "",
-    previews: []
-  }
-};
-
-const endpoint = withDefaults(null, DEFAULTS);
-
-exports.endpoint = endpoint;
-//# sourceMappingURL=index.js.map
-
-
-/***/ }),
-
-/***/ 443:
-/***/ (function(__unusedmodule, exports) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-function getProxyUrl(reqUrl) {
-    let usingSsl = reqUrl.protocol === 'https:';
-    let proxyUrl;
-    if (checkBypass(reqUrl)) {
-        return proxyUrl;
-    }
-    let proxyVar;
-    if (usingSsl) {
-        proxyVar = process.env['https_proxy'] || process.env['HTTPS_PROXY'];
-    }
-    else {
-        proxyVar = process.env['http_proxy'] || process.env['HTTP_PROXY'];
-    }
-    if (proxyVar) {
-        proxyUrl = new URL(proxyVar);
-    }
-    return proxyUrl;
-}
-exports.getProxyUrl = getProxyUrl;
-function checkBypass(reqUrl) {
-    if (!reqUrl.hostname) {
-        return false;
-    }
-    let noProxy = process.env['no_proxy'] || process.env['NO_PROXY'] || '';
-    if (!noProxy) {
-        return false;
-    }
-    // Determine the request port
-    let reqPort;
-    if (reqUrl.port) {
-        reqPort = Number(reqUrl.port);
-    }
-    else if (reqUrl.protocol === 'http:') {
-        reqPort = 80;
-    }
-    else if (reqUrl.protocol === 'https:') {
-        reqPort = 443;
-    }
-    // Format the request hostname and hostname with port
-    let upperReqHosts = [reqUrl.hostname.toUpperCase()];
-    if (typeof reqPort === 'number') {
-        upperReqHosts.push(`${upperReqHosts[0]}:${reqPort}`);
-    }
-    // Compare request host against noproxy
-    for (let upperNoProxyItem of noProxy
-        .split(',')
-        .map(x => x.trim().toUpperCase())
-        .filter(x => x)) {
-        if (upperReqHosts.some(x => x === upperNoProxyItem)) {
-            return true;
-        }
-    }
-    return false;
-}
-exports.checkBypass = checkBypass;
-
-
-/***/ }),
-
-/***/ 449:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.emojiIcon = void 0;
-const ident_1 = __webpack_require__(468);
-exports.emojiIcon = (icon, title) => {
-    const iconString = `${icon}${ident_1.ident(1)}`;
-    if (!title) {
-        return iconString;
-    }
-    return `<i title="${title}">${iconString}</i>`;
-};
-
-
-/***/ }),
-
-/***/ 452:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.renderCard = void 0;
-const IIssueState_1 = __webpack_require__(145);
-const TColumnTypes_1 = __webpack_require__(187);
-const cardLink_1 = __webpack_require__(617);
-const notEmpty_1 = __webpack_require__(624);
-const isBugCard_1 = __webpack_require__(368);
-const isDoneColumn_1 = __webpack_require__(10);
-const emojiIcon_1 = __webpack_require__(449);
-const mapColumnToEmoji = (column, { projectConfig }) => {
-    switch (column) {
-        case TColumnTypes_1.TColumnTypes.Committed: {
-            return '';
-        }
-        case TColumnTypes_1.TColumnTypes.InProgress: {
-            return '';
-        }
-        case TColumnTypes_1.TColumnTypes.InReview: {
-            return emojiIcon_1.emojiIcon('👀', column);
-        }
-        case TColumnTypes_1.TColumnTypes.WaitingToDeploy: {
-            return emojiIcon_1.emojiIcon('🏗️', column);
-        }
-        case TColumnTypes_1.TColumnTypes.Blocked: {
-            return '';
-        }
-        case TColumnTypes_1.TColumnTypes.Done: {
-            // if list items not rendered as list items,
-            // show the check emoji
-            if (typeof projectConfig === 'number' ||
-                !projectConfig.isCheckListItems) {
-                return emojiIcon_1.emojiIcon('✅', column);
-            }
-            return '';
-        }
-        default:
-        case TColumnTypes_1.TColumnTypes.Backlog: {
-            throw new Error("Don't render the Backlog items.");
-        }
-    }
-};
-const mapIssueTypeToEmoji = (cardWithIssue) => {
-    const { issue } = cardWithIssue;
-    if (!issue) {
-        return emojiIcon_1.emojiIcon('🃏', 'Card');
-        ;
-    }
-    if (isBugCard_1.isBugCard(cardWithIssue)) {
-        return emojiIcon_1.emojiIcon('🐛', 'Bug');
-    }
-    return '';
-};
-const newToEmpoji = ({ isNew }) => {
-    if (isNew) {
-        return emojiIcon_1.emojiIcon('🆕', 'New');
-    }
-    return '';
-};
-const renderAssignees = (cardWithIssue) => {
-    const { issue, card } = cardWithIssue;
-    // if no issue linked - use creator of the card instead
-    if (!issue) {
-        return `@${card.creator.login}`;
-    }
-    const { assignees } = issue;
-    if (!assignees.length) {
-        return `🙋**free issue**`;
-    }
-    const users = assignees.map((user) => {
-        return `@${user.login}`;
-    });
-    return users.join(' ');
-};
-const renderItemIssueStatus = (cardWithIssue, column, asCheckList) => {
-    if (!asCheckList) {
-        return '';
-    }
-    const { issue } = cardWithIssue;
-    if (!issue) {
-        return !isDoneColumn_1.isDoneColumn(column) ? '[ ] ' : '[x] ';
-    }
-    return issue.state === IIssueState_1.IIssueState.Open ? '[ ] ' : '[x] ';
-};
-const renderLabelImage = (label) => {
-    const { name, color } = label;
-    const cleanColor = color.replace('#', '');
-    const encodedName = encodeURIComponent(name);
-    return `<img src="https://img.shields.io/badge/-${encodedName}-${cleanColor}" height="15" alt="label: ${name}" />`;
-};
-const renderIssueLabel = (label) => {
-    const { url, description } = label;
-    const uri = new URL(url);
-    uri.hostname = uri.hostname.replace('api.', '');
-    uri.pathname = uri.pathname.replace(/^\/repos/, '');
-    return `<a href="${uri}" title="${description}">${renderLabelImage(label)}</a>`;
-};
-const renderPriorityLabels = (cardWithIssue, projectWithConfig) => {
-    const { projectConfig } = projectWithConfig;
-    if (typeof projectConfig === 'number') {
-        return '';
-    }
-    const { priorityLabels } = projectConfig;
-    if (!priorityLabels) {
-        return '';
-    }
-    const { issue } = cardWithIssue;
-    if (!issue) {
-        return '';
-    }
-    const cardLabels = priorityLabels
-        .map((label) => {
-        const issueLabel = issue.labels.find((issueLabel) => {
-            return issueLabel.name === label;
-        });
-        return issueLabel;
-    })
-        .filter(notEmpty_1.notEmpty)
-        .map(renderIssueLabel);
-    const result = cardLabels.join('');
-    return (result)
-        ? `${result} `
-        : '';
-};
-exports.renderCard = (cardWithIssue, projectWithConfig, asCheckList = false) => {
-    const { column, issue, card } = cardWithIssue;
-    const title = (!issue)
-        ? card.note
-        : issue.title;
-    /**
-     * If no associated issue found, item `url` it the URL to the
-     * card itself, otherwise `url` is the link to the issue.
-     */
-    const url = (!issue)
-        ? `[#card-${card.id}](${cardLink_1.cardLink(card, projectWithConfig)})`
-        : issue.html_url;
-    const assignees = renderAssignees(cardWithIssue);
-    const labels = renderPriorityLabels(cardWithIssue, projectWithConfig);
-    const stateEmoji = mapColumnToEmoji(column, projectWithConfig);
-    const typeEmoji = mapIssueTypeToEmoji(cardWithIssue);
-    const newEmoji = newToEmpoji(cardWithIssue);
-    const issueStatus = renderItemIssueStatus(cardWithIssue, column, asCheckList);
-    return `- ${issueStatus}${labels}${newEmoji}${stateEmoji}${typeEmoji}${title} ${url} ${assignees}`;
-};
-
-
-/***/ }),
-
-/***/ 463:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.OctoKitBase = void 0;
-const github = __importStar(__webpack_require__(438));
-class OctoKitBase {
-    constructor(token) {
-        this.kit = github.getOctokit(token);
-    }
-}
-exports.OctoKitBase = OctoKitBase;
-
-
-/***/ }),
-
-/***/ 467:
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, '__esModule', { value: true });
-
-function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
-
-var Stream = _interopDefault(__webpack_require__(413));
-var http = _interopDefault(__webpack_require__(605));
-var Url = _interopDefault(__webpack_require__(835));
-var https = _interopDefault(__webpack_require__(211));
-var zlib = _interopDefault(__webpack_require__(761));
-
-// Based on https://github.com/tmpvar/jsdom/blob/aa85b2abf07766ff7bf5c1f6daafb3726f2f2db5/lib/jsdom/living/blob.js
-
-// fix for "Readable" isn't a named export issue
-const Readable = Stream.Readable;
-
-const BUFFER = Symbol('buffer');
-const TYPE = Symbol('type');
-
-class Blob {
-	constructor() {
-		this[TYPE] = '';
-
-		const blobParts = arguments[0];
-		const options = arguments[1];
-
-		const buffers = [];
-		let size = 0;
-
-		if (blobParts) {
-			const a = blobParts;
-			const length = Number(a.length);
-			for (let i = 0; i < length; i++) {
-				const element = a[i];
-				let buffer;
-				if (element instanceof Buffer) {
-					buffer = element;
-				} else if (ArrayBuffer.isView(element)) {
-					buffer = Buffer.from(element.buffer, element.byteOffset, element.byteLength);
-				} else if (element instanceof ArrayBuffer) {
-					buffer = Buffer.from(element);
-				} else if (element instanceof Blob) {
-					buffer = element[BUFFER];
-				} else {
-					buffer = Buffer.from(typeof element === 'string' ? element : String(element));
-				}
-				size += buffer.length;
-				buffers.push(buffer);
-			}
-		}
-
-		this[BUFFER] = Buffer.concat(buffers);
-
-		let type = options && options.type !== undefined && String(options.type).toLowerCase();
-		if (type && !/[^\u0020-\u007E]/.test(type)) {
-			this[TYPE] = type;
-		}
-	}
-	get size() {
-		return this[BUFFER].length;
-	}
-	get type() {
-		return this[TYPE];
-	}
-	text() {
-		return Promise.resolve(this[BUFFER].toString());
-	}
-	arrayBuffer() {
-		const buf = this[BUFFER];
-		const ab = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
-		return Promise.resolve(ab);
-	}
-	stream() {
-		const readable = new Readable();
-		readable._read = function () {};
-		readable.push(this[BUFFER]);
-		readable.push(null);
-		return readable;
-	}
-	toString() {
-		return '[object Blob]';
-	}
-	slice() {
-		const size = this.size;
-
-		const start = arguments[0];
-		const end = arguments[1];
-		let relativeStart, relativeEnd;
-		if (start === undefined) {
-			relativeStart = 0;
-		} else if (start < 0) {
-			relativeStart = Math.max(size + start, 0);
-		} else {
-			relativeStart = Math.min(start, size);
-		}
-		if (end === undefined) {
-			relativeEnd = size;
-		} else if (end < 0) {
-			relativeEnd = Math.max(size + end, 0);
-		} else {
-			relativeEnd = Math.min(end, size);
-		}
-		const span = Math.max(relativeEnd - relativeStart, 0);
-
-		const buffer = this[BUFFER];
-		const slicedBuffer = buffer.slice(relativeStart, relativeStart + span);
-		const blob = new Blob([], { type: arguments[2] });
-		blob[BUFFER] = slicedBuffer;
-		return blob;
-	}
-}
-
-Object.defineProperties(Blob.prototype, {
-	size: { enumerable: true },
-	type: { enumerable: true },
-	slice: { enumerable: true }
-});
-
-Object.defineProperty(Blob.prototype, Symbol.toStringTag, {
-	value: 'Blob',
-	writable: false,
-	enumerable: false,
-	configurable: true
-});
-
-/**
- * fetch-error.js
- *
- * FetchError interface for operational errors
- */
-
-/**
- * Create FetchError instance
- *
- * @param   String      message      Error message for human
- * @param   String      type         Error type for machine
- * @param   String      systemError  For Node.js system error
- * @return  FetchError
- */
-function FetchError(message, type, systemError) {
-  Error.call(this, message);
-
-  this.message = message;
-  this.type = type;
-
-  // when err.type is `system`, err.code contains system error code
-  if (systemError) {
-    this.code = this.errno = systemError.code;
-  }
-
-  // hide custom error implementation details from end-users
-  Error.captureStackTrace(this, this.constructor);
-}
-
-FetchError.prototype = Object.create(Error.prototype);
-FetchError.prototype.constructor = FetchError;
-FetchError.prototype.name = 'FetchError';
-
-let convert;
-try {
-	convert = __webpack_require__(877).convert;
-} catch (e) {}
-
-const INTERNALS = Symbol('Body internals');
-
-// fix an issue where "PassThrough" isn't a named export for node <10
-const PassThrough = Stream.PassThrough;
-
-/**
- * Body mixin
- *
- * Ref: https://fetch.spec.whatwg.org/#body
- *
- * @param   Stream  body  Readable stream
- * @param   Object  opts  Response options
- * @return  Void
- */
-function Body(body) {
-	var _this = this;
-
-	var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
-	    _ref$size = _ref.size;
-
-	let size = _ref$size === undefined ? 0 : _ref$size;
-	var _ref$timeout = _ref.timeout;
-	let timeout = _ref$timeout === undefined ? 0 : _ref$timeout;
-
-	if (body == null) {
-		// body is undefined or null
-		body = null;
-	} else if (isURLSearchParams(body)) {
-		// body is a URLSearchParams
-		body = Buffer.from(body.toString());
-	} else if (isBlob(body)) ; else if (Buffer.isBuffer(body)) ; else if (Object.prototype.toString.call(body) === '[object ArrayBuffer]') {
-		// body is ArrayBuffer
-		body = Buffer.from(body);
-	} else if (ArrayBuffer.isView(body)) {
-		// body is ArrayBufferView
-		body = Buffer.from(body.buffer, body.byteOffset, body.byteLength);
-	} else if (body instanceof Stream) ; else {
-		// none of the above
-		// coerce to string then buffer
-		body = Buffer.from(String(body));
-	}
-	this[INTERNALS] = {
-		body,
-		disturbed: false,
-		error: null
-	};
-	this.size = size;
-	this.timeout = timeout;
-
-	if (body instanceof Stream) {
-		body.on('error', function (err) {
-			const error = err.name === 'AbortError' ? err : new FetchError(`Invalid response body while trying to fetch ${_this.url}: ${err.message}`, 'system', err);
-			_this[INTERNALS].error = error;
-		});
-	}
-}
-
-Body.prototype = {
-	get body() {
-		return this[INTERNALS].body;
-	},
-
-	get bodyUsed() {
-		return this[INTERNALS].disturbed;
-	},
-
-	/**
-  * Decode response as ArrayBuffer
-  *
-  * @return  Promise
-  */
-	arrayBuffer() {
-		return consumeBody.call(this).then(function (buf) {
-			return buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
-		});
-	},
-
-	/**
-  * Return raw response as Blob
-  *
-  * @return Promise
-  */
-	blob() {
-		let ct = this.headers && this.headers.get('content-type') || '';
-		return consumeBody.call(this).then(function (buf) {
-			return Object.assign(
-			// Prevent copying
-			new Blob([], {
-				type: ct.toLowerCase()
-			}), {
-				[BUFFER]: buf
-			});
-		});
-	},
-
-	/**
-  * Decode response as json
-  *
-  * @return  Promise
-  */
-	json() {
-		var _this2 = this;
-
-		return consumeBody.call(this).then(function (buffer) {
-			try {
-				return JSON.parse(buffer.toString());
-			} catch (err) {
-				return Body.Promise.reject(new FetchError(`invalid json response body at ${_this2.url} reason: ${err.message}`, 'invalid-json'));
-			}
-		});
-	},
-
-	/**
-  * Decode response as text
-  *
-  * @return  Promise
-  */
-	text() {
-		return consumeBody.call(this).then(function (buffer) {
-			return buffer.toString();
-		});
-	},
-
-	/**
-  * Decode response as buffer (non-spec api)
-  *
-  * @return  Promise
-  */
-	buffer() {
-		return consumeBody.call(this);
-	},
-
-	/**
-  * Decode response as text, while automatically detecting the encoding and
-  * trying to decode to UTF-8 (non-spec api)
-  *
-  * @return  Promise
-  */
-	textConverted() {
-		var _this3 = this;
-
-		return consumeBody.call(this).then(function (buffer) {
-			return convertBody(buffer, _this3.headers);
-		});
-	}
-};
-
-// In browsers, all properties are enumerable.
-Object.defineProperties(Body.prototype, {
-	body: { enumerable: true },
-	bodyUsed: { enumerable: true },
-	arrayBuffer: { enumerable: true },
-	blob: { enumerable: true },
-	json: { enumerable: true },
-	text: { enumerable: true }
-});
-
-Body.mixIn = function (proto) {
-	for (const name of Object.getOwnPropertyNames(Body.prototype)) {
-		// istanbul ignore else: future proof
-		if (!(name in proto)) {
-			const desc = Object.getOwnPropertyDescriptor(Body.prototype, name);
-			Object.defineProperty(proto, name, desc);
-		}
-	}
-};
-
-/**
- * Consume and convert an entire Body to a Buffer.
- *
- * Ref: https://fetch.spec.whatwg.org/#concept-body-consume-body
- *
- * @return  Promise
- */
-function consumeBody() {
-	var _this4 = this;
-
-	if (this[INTERNALS].disturbed) {
-		return Body.Promise.reject(new TypeError(`body used already for: ${this.url}`));
-	}
-
-	this[INTERNALS].disturbed = true;
-
-	if (this[INTERNALS].error) {
-		return Body.Promise.reject(this[INTERNALS].error);
-	}
-
-	let body = this.body;
-
-	// body is null
-	if (body === null) {
-		return Body.Promise.resolve(Buffer.alloc(0));
-	}
-
-	// body is blob
-	if (isBlob(body)) {
-		body = body.stream();
-	}
-
-	// body is buffer
-	if (Buffer.isBuffer(body)) {
-		return Body.Promise.resolve(body);
-	}
-
-	// istanbul ignore if: should never happen
-	if (!(body instanceof Stream)) {
-		return Body.Promise.resolve(Buffer.alloc(0));
-	}
-
-	// body is stream
-	// get ready to actually consume the body
-	let accum = [];
-	let accumBytes = 0;
-	let abort = false;
-
-	return new Body.Promise(function (resolve, reject) {
-		let resTimeout;
-
-		// allow timeout on slow response body
-		if (_this4.timeout) {
-			resTimeout = setTimeout(function () {
-				abort = true;
-				reject(new FetchError(`Response timeout while trying to fetch ${_this4.url} (over ${_this4.timeout}ms)`, 'body-timeout'));
-			}, _this4.timeout);
-		}
-
-		// handle stream errors
-		body.on('error', function (err) {
-			if (err.name === 'AbortError') {
-				// if the request was aborted, reject with this Error
-				abort = true;
-				reject(err);
-			} else {
-				// other errors, such as incorrect content-encoding
-				reject(new FetchError(`Invalid response body while trying to fetch ${_this4.url}: ${err.message}`, 'system', err));
-			}
-		});
-
-		body.on('data', function (chunk) {
-			if (abort || chunk === null) {
-				return;
-			}
-
-			if (_this4.size && accumBytes + chunk.length > _this4.size) {
-				abort = true;
-				reject(new FetchError(`content size at ${_this4.url} over limit: ${_this4.size}`, 'max-size'));
-				return;
-			}
-
-			accumBytes += chunk.length;
-			accum.push(chunk);
-		});
-
-		body.on('end', function () {
-			if (abort) {
-				return;
-			}
-
-			clearTimeout(resTimeout);
-
-			try {
-				resolve(Buffer.concat(accum, accumBytes));
-			} catch (err) {
-				// handle streams that have accumulated too much data (issue #414)
-				reject(new FetchError(`Could not create Buffer from response body for ${_this4.url}: ${err.message}`, 'system', err));
-			}
-		});
-	});
-}
-
-/**
- * Detect buffer encoding and convert to target encoding
- * ref: http://www.w3.org/TR/2011/WD-html5-20110113/parsing.html#determining-the-character-encoding
- *
- * @param   Buffer  buffer    Incoming buffer
- * @param   String  encoding  Target encoding
- * @return  String
- */
-function convertBody(buffer, headers) {
-	if (typeof convert !== 'function') {
-		throw new Error('The package `encoding` must be installed to use the textConverted() function');
-	}
-
-	const ct = headers.get('content-type');
-	let charset = 'utf-8';
-	let res, str;
-
-	// header
-	if (ct) {
-		res = /charset=([^;]*)/i.exec(ct);
-	}
-
-	// no charset in content type, peek at response body for at most 1024 bytes
-	str = buffer.slice(0, 1024).toString();
-
-	// html5
-	if (!res && str) {
-		res = /<meta.+?charset=(['"])(.+?)\1/i.exec(str);
-	}
-
-	// html4
-	if (!res && str) {
-		res = /<meta[\s]+?http-equiv=(['"])content-type\1[\s]+?content=(['"])(.+?)\2/i.exec(str);
-		if (!res) {
-			res = /<meta[\s]+?content=(['"])(.+?)\1[\s]+?http-equiv=(['"])content-type\3/i.exec(str);
-			if (res) {
-				res.pop(); // drop last quote
-			}
-		}
-
-		if (res) {
-			res = /charset=(.*)/i.exec(res.pop());
-		}
-	}
-
-	// xml
-	if (!res && str) {
-		res = /<\?xml.+?encoding=(['"])(.+?)\1/i.exec(str);
-	}
-
-	// found charset
-	if (res) {
-		charset = res.pop();
-
-		// prevent decode issues when sites use incorrect encoding
-		// ref: https://hsivonen.fi/encoding-menu/
-		if (charset === 'gb2312' || charset === 'gbk') {
-			charset = 'gb18030';
-		}
-	}
-
-	// turn raw buffers into a single utf-8 buffer
-	return convert(buffer, 'UTF-8', charset).toString();
-}
-
-/**
- * Detect a URLSearchParams object
- * ref: https://github.com/bitinn/node-fetch/issues/296#issuecomment-307598143
- *
- * @param   Object  obj     Object to detect by type or brand
- * @return  String
- */
-function isURLSearchParams(obj) {
-	// Duck-typing as a necessary condition.
-	if (typeof obj !== 'object' || typeof obj.append !== 'function' || typeof obj.delete !== 'function' || typeof obj.get !== 'function' || typeof obj.getAll !== 'function' || typeof obj.has !== 'function' || typeof obj.set !== 'function') {
-		return false;
-	}
-
-	// Brand-checking and more duck-typing as optional condition.
-	return obj.constructor.name === 'URLSearchParams' || Object.prototype.toString.call(obj) === '[object URLSearchParams]' || typeof obj.sort === 'function';
-}
-
-/**
- * Check if `obj` is a W3C `Blob` object (which `File` inherits from)
- * @param  {*} obj
- * @return {boolean}
- */
-function isBlob(obj) {
-	return typeof obj === 'object' && typeof obj.arrayBuffer === 'function' && typeof obj.type === 'string' && typeof obj.stream === 'function' && typeof obj.constructor === 'function' && typeof obj.constructor.name === 'string' && /^(Blob|File)$/.test(obj.constructor.name) && /^(Blob|File)$/.test(obj[Symbol.toStringTag]);
-}
-
-/**
- * Clone body given Res/Req instance
- *
- * @param   Mixed  instance  Response or Request instance
- * @return  Mixed
- */
-function clone(instance) {
-	let p1, p2;
-	let body = instance.body;
-
-	// don't allow cloning a used body
-	if (instance.bodyUsed) {
-		throw new Error('cannot clone body after it is used');
-	}
-
-	// check that body is a stream and not form-data object
-	// note: we can't clone the form-data object without having it as a dependency
-	if (body instanceof Stream && typeof body.getBoundary !== 'function') {
-		// tee instance body
-		p1 = new PassThrough();
-		p2 = new PassThrough();
-		body.pipe(p1);
-		body.pipe(p2);
-		// set instance body to teed body and return the other teed body
-		instance[INTERNALS].body = p1;
-		body = p2;
-	}
-
-	return body;
-}
-
-/**
- * Performs the operation "extract a `Content-Type` value from |object|" as
- * specified in the specification:
- * https://fetch.spec.whatwg.org/#concept-bodyinit-extract
- *
- * This function assumes that instance.body is present.
- *
- * @param   Mixed  instance  Any options.body input
- */
-function extractContentType(body) {
-	if (body === null) {
-		// body is null
-		return null;
-	} else if (typeof body === 'string') {
-		// body is string
-		return 'text/plain;charset=UTF-8';
-	} else if (isURLSearchParams(body)) {
-		// body is a URLSearchParams
-		return 'application/x-www-form-urlencoded;charset=UTF-8';
-	} else if (isBlob(body)) {
-		// body is blob
-		return body.type || null;
-	} else if (Buffer.isBuffer(body)) {
-		// body is buffer
-		return null;
-	} else if (Object.prototype.toString.call(body) === '[object ArrayBuffer]') {
-		// body is ArrayBuffer
-		return null;
-	} else if (ArrayBuffer.isView(body)) {
-		// body is ArrayBufferView
-		return null;
-	} else if (typeof body.getBoundary === 'function') {
-		// detect form data input from form-data module
-		return `multipart/form-data;boundary=${body.getBoundary()}`;
-	} else if (body instanceof Stream) {
-		// body is stream
-		// can't really do much about this
-		return null;
-	} else {
-		// Body constructor defaults other things to string
-		return 'text/plain;charset=UTF-8';
-	}
-}
-
-/**
- * The Fetch Standard treats this as if "total bytes" is a property on the body.
- * For us, we have to explicitly get it with a function.
- *
- * ref: https://fetch.spec.whatwg.org/#concept-body-total-bytes
- *
- * @param   Body    instance   Instance of Body
- * @return  Number?            Number of bytes, or null if not possible
- */
-function getTotalBytes(instance) {
-	const body = instance.body;
-
-
-	if (body === null) {
-		// body is null
-		return 0;
-	} else if (isBlob(body)) {
-		return body.size;
-	} else if (Buffer.isBuffer(body)) {
-		// body is buffer
-		return body.length;
-	} else if (body && typeof body.getLengthSync === 'function') {
-		// detect form data input from form-data module
-		if (body._lengthRetrievers && body._lengthRetrievers.length == 0 || // 1.x
-		body.hasKnownLength && body.hasKnownLength()) {
-			// 2.x
-			return body.getLengthSync();
-		}
-		return null;
-	} else {
-		// body is stream
-		return null;
-	}
-}
-
-/**
- * Write a Body to a Node.js WritableStream (e.g. http.Request) object.
- *
- * @param   Body    instance   Instance of Body
- * @return  Void
- */
-function writeToStream(dest, instance) {
-	const body = instance.body;
-
-
-	if (body === null) {
-		// body is null
-		dest.end();
-	} else if (isBlob(body)) {
-		body.stream().pipe(dest);
-	} else if (Buffer.isBuffer(body)) {
-		// body is buffer
-		dest.write(body);
-		dest.end();
-	} else {
-		// body is stream
-		body.pipe(dest);
-	}
-}
-
-// expose Promise
-Body.Promise = global.Promise;
-
-/**
- * headers.js
- *
- * Headers class offers convenient helpers
- */
-
-const invalidTokenRegex = /[^\^_`a-zA-Z\-0-9!#$%&'*+.|~]/;
-const invalidHeaderCharRegex = /[^\t\x20-\x7e\x80-\xff]/;
-
-function validateName(name) {
-	name = `${name}`;
-	if (invalidTokenRegex.test(name) || name === '') {
-		throw new TypeError(`${name} is not a legal HTTP header name`);
-	}
-}
-
-function validateValue(value) {
-	value = `${value}`;
-	if (invalidHeaderCharRegex.test(value)) {
-		throw new TypeError(`${value} is not a legal HTTP header value`);
-	}
-}
-
-/**
- * Find the key in the map object given a header name.
- *
- * Returns undefined if not found.
- *
- * @param   String  name  Header name
- * @return  String|Undefined
- */
-function find(map, name) {
-	name = name.toLowerCase();
-	for (const key in map) {
-		if (key.toLowerCase() === name) {
-			return key;
-		}
-	}
-	return undefined;
-}
-
-const MAP = Symbol('map');
-class Headers {
-	/**
-  * Headers class
-  *
-  * @param   Object  headers  Response headers
-  * @return  Void
-  */
-	constructor() {
-		let init = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : undefined;
-
-		this[MAP] = Object.create(null);
-
-		if (init instanceof Headers) {
-			const rawHeaders = init.raw();
-			const headerNames = Object.keys(rawHeaders);
-
-			for (const headerName of headerNames) {
-				for (const value of rawHeaders[headerName]) {
-					this.append(headerName, value);
-				}
-			}
-
-			return;
-		}
-
-		// We don't worry about converting prop to ByteString here as append()
-		// will handle it.
-		if (init == null) ; else if (typeof init === 'object') {
-			const method = init[Symbol.iterator];
-			if (method != null) {
-				if (typeof method !== 'function') {
-					throw new TypeError('Header pairs must be iterable');
-				}
-
-				// sequence<sequence<ByteString>>
-				// Note: per spec we have to first exhaust the lists then process them
-				const pairs = [];
-				for (const pair of init) {
-					if (typeof pair !== 'object' || typeof pair[Symbol.iterator] !== 'function') {
-						throw new TypeError('Each header pair must be iterable');
-					}
-					pairs.push(Array.from(pair));
-				}
-
-				for (const pair of pairs) {
-					if (pair.length !== 2) {
-						throw new TypeError('Each header pair must be a name/value tuple');
-					}
-					this.append(pair[0], pair[1]);
-				}
-			} else {
-				// record<ByteString, ByteString>
-				for (const key of Object.keys(init)) {
-					const value = init[key];
-					this.append(key, value);
-				}
-			}
-		} else {
-			throw new TypeError('Provided initializer must be an object');
-		}
-	}
-
-	/**
-  * Return combined header value given name
-  *
-  * @param   String  name  Header name
-  * @return  Mixed
-  */
-	get(name) {
-		name = `${name}`;
-		validateName(name);
-		const key = find(this[MAP], name);
-		if (key === undefined) {
-			return null;
-		}
-
-		return this[MAP][key].join(', ');
-	}
-
-	/**
-  * Iterate over all headers
-  *
-  * @param   Function  callback  Executed for each item with parameters (value, name, thisArg)
-  * @param   Boolean   thisArg   `this` context for callback function
-  * @return  Void
-  */
-	forEach(callback) {
-		let thisArg = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : undefined;
-
-		let pairs = getHeaders(this);
-		let i = 0;
-		while (i < pairs.length) {
-			var _pairs$i = pairs[i];
-			const name = _pairs$i[0],
-			      value = _pairs$i[1];
-
-			callback.call(thisArg, value, name, this);
-			pairs = getHeaders(this);
-			i++;
-		}
-	}
-
-	/**
-  * Overwrite header values given name
-  *
-  * @param   String  name   Header name
-  * @param   String  value  Header value
-  * @return  Void
-  */
-	set(name, value) {
-		name = `${name}`;
-		value = `${value}`;
-		validateName(name);
-		validateValue(value);
-		const key = find(this[MAP], name);
-		this[MAP][key !== undefined ? key : name] = [value];
-	}
-
-	/**
-  * Append a value onto existing header
-  *
-  * @param   String  name   Header name
-  * @param   String  value  Header value
-  * @return  Void
-  */
-	append(name, value) {
-		name = `${name}`;
-		value = `${value}`;
-		validateName(name);
-		validateValue(value);
-		const key = find(this[MAP], name);
-		if (key !== undefined) {
-			this[MAP][key].push(value);
-		} else {
-			this[MAP][name] = [value];
-		}
-	}
-
-	/**
-  * Check for header name existence
-  *
-  * @param   String   name  Header name
-  * @return  Boolean
-  */
-	has(name) {
-		name = `${name}`;
-		validateName(name);
-		return find(this[MAP], name) !== undefined;
-	}
-
-	/**
-  * Delete all header values given name
-  *
-  * @param   String  name  Header name
-  * @return  Void
-  */
-	delete(name) {
-		name = `${name}`;
-		validateName(name);
-		const key = find(this[MAP], name);
-		if (key !== undefined) {
-			delete this[MAP][key];
-		}
-	}
-
-	/**
-  * Return raw headers (non-spec api)
-  *
-  * @return  Object
-  */
-	raw() {
-		return this[MAP];
-	}
-
-	/**
-  * Get an iterator on keys.
-  *
-  * @return  Iterator
-  */
-	keys() {
-		return createHeadersIterator(this, 'key');
-	}
-
-	/**
-  * Get an iterator on values.
-  *
-  * @return  Iterator
-  */
-	values() {
-		return createHeadersIterator(this, 'value');
-	}
-
-	/**
-  * Get an iterator on entries.
-  *
-  * This is the default iterator of the Headers object.
-  *
-  * @return  Iterator
-  */
-	[Symbol.iterator]() {
-		return createHeadersIterator(this, 'key+value');
-	}
-}
-Headers.prototype.entries = Headers.prototype[Symbol.iterator];
-
-Object.defineProperty(Headers.prototype, Symbol.toStringTag, {
-	value: 'Headers',
-	writable: false,
-	enumerable: false,
-	configurable: true
-});
-
-Object.defineProperties(Headers.prototype, {
-	get: { enumerable: true },
-	forEach: { enumerable: true },
-	set: { enumerable: true },
-	append: { enumerable: true },
-	has: { enumerable: true },
-	delete: { enumerable: true },
-	keys: { enumerable: true },
-	values: { enumerable: true },
-	entries: { enumerable: true }
-});
-
-function getHeaders(headers) {
-	let kind = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'key+value';
-
-	const keys = Object.keys(headers[MAP]).sort();
-	return keys.map(kind === 'key' ? function (k) {
-		return k.toLowerCase();
-	} : kind === 'value' ? function (k) {
-		return headers[MAP][k].join(', ');
-	} : function (k) {
-		return [k.toLowerCase(), headers[MAP][k].join(', ')];
-	});
-}
-
-const INTERNAL = Symbol('internal');
-
-function createHeadersIterator(target, kind) {
-	const iterator = Object.create(HeadersIteratorPrototype);
-	iterator[INTERNAL] = {
-		target,
-		kind,
-		index: 0
-	};
-	return iterator;
-}
-
-const HeadersIteratorPrototype = Object.setPrototypeOf({
-	next() {
-		// istanbul ignore if
-		if (!this || Object.getPrototypeOf(this) !== HeadersIteratorPrototype) {
-			throw new TypeError('Value of `this` is not a HeadersIterator');
-		}
-
-		var _INTERNAL = this[INTERNAL];
-		const target = _INTERNAL.target,
-		      kind = _INTERNAL.kind,
-		      index = _INTERNAL.index;
-
-		const values = getHeaders(target, kind);
-		const len = values.length;
-		if (index >= len) {
-			return {
-				value: undefined,
-				done: true
-			};
-		}
-
-		this[INTERNAL].index = index + 1;
-
-		return {
-			value: values[index],
-			done: false
-		};
-	}
-}, Object.getPrototypeOf(Object.getPrototypeOf([][Symbol.iterator]())));
-
-Object.defineProperty(HeadersIteratorPrototype, Symbol.toStringTag, {
-	value: 'HeadersIterator',
-	writable: false,
-	enumerable: false,
-	configurable: true
-});
-
-/**
- * Export the Headers object in a form that Node.js can consume.
- *
- * @param   Headers  headers
- * @return  Object
- */
-function exportNodeCompatibleHeaders(headers) {
-	const obj = Object.assign({ __proto__: null }, headers[MAP]);
-
-	// http.request() only supports string as Host header. This hack makes
-	// specifying custom Host header possible.
-	const hostHeaderKey = find(headers[MAP], 'Host');
-	if (hostHeaderKey !== undefined) {
-		obj[hostHeaderKey] = obj[hostHeaderKey][0];
-	}
-
-	return obj;
-}
-
-/**
- * Create a Headers object from an object of headers, ignoring those that do
- * not conform to HTTP grammar productions.
- *
- * @param   Object  obj  Object of headers
- * @return  Headers
- */
-function createHeadersLenient(obj) {
-	const headers = new Headers();
-	for (const name of Object.keys(obj)) {
-		if (invalidTokenRegex.test(name)) {
-			continue;
-		}
-		if (Array.isArray(obj[name])) {
-			for (const val of obj[name]) {
-				if (invalidHeaderCharRegex.test(val)) {
-					continue;
-				}
-				if (headers[MAP][name] === undefined) {
-					headers[MAP][name] = [val];
-				} else {
-					headers[MAP][name].push(val);
-				}
-			}
-		} else if (!invalidHeaderCharRegex.test(obj[name])) {
-			headers[MAP][name] = [obj[name]];
-		}
-	}
-	return headers;
-}
-
-const INTERNALS$1 = Symbol('Response internals');
-
-// fix an issue where "STATUS_CODES" aren't a named export for node <10
-const STATUS_CODES = http.STATUS_CODES;
-
-/**
- * Response class
- *
- * @param   Stream  body  Readable stream
- * @param   Object  opts  Response options
- * @return  Void
- */
-class Response {
-	constructor() {
-		let body = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
-		let opts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
-		Body.call(this, body, opts);
-
-		const status = opts.status || 200;
-		const headers = new Headers(opts.headers);
-
-		if (body != null && !headers.has('Content-Type')) {
-			const contentType = extractContentType(body);
-			if (contentType) {
-				headers.append('Content-Type', contentType);
-			}
-		}
-
-		this[INTERNALS$1] = {
-			url: opts.url,
-			status,
-			statusText: opts.statusText || STATUS_CODES[status],
-			headers,
-			counter: opts.counter
-		};
-	}
-
-	get url() {
-		return this[INTERNALS$1].url || '';
-	}
-
-	get status() {
-		return this[INTERNALS$1].status;
-	}
-
-	/**
-  * Convenience property representing if the request ended normally
-  */
-	get ok() {
-		return this[INTERNALS$1].status >= 200 && this[INTERNALS$1].status < 300;
-	}
-
-	get redirected() {
-		return this[INTERNALS$1].counter > 0;
-	}
-
-	get statusText() {
-		return this[INTERNALS$1].statusText;
-	}
-
-	get headers() {
-		return this[INTERNALS$1].headers;
-	}
-
-	/**
-  * Clone this response
-  *
-  * @return  Response
-  */
-	clone() {
-		return new Response(clone(this), {
-			url: this.url,
-			status: this.status,
-			statusText: this.statusText,
-			headers: this.headers,
-			ok: this.ok,
-			redirected: this.redirected
-		});
-	}
-}
-
-Body.mixIn(Response.prototype);
-
-Object.defineProperties(Response.prototype, {
-	url: { enumerable: true },
-	status: { enumerable: true },
-	ok: { enumerable: true },
-	redirected: { enumerable: true },
-	statusText: { enumerable: true },
-	headers: { enumerable: true },
-	clone: { enumerable: true }
-});
-
-Object.defineProperty(Response.prototype, Symbol.toStringTag, {
-	value: 'Response',
-	writable: false,
-	enumerable: false,
-	configurable: true
-});
-
-const INTERNALS$2 = Symbol('Request internals');
-
-// fix an issue where "format", "parse" aren't a named export for node <10
-const parse_url = Url.parse;
-const format_url = Url.format;
-
-const streamDestructionSupported = 'destroy' in Stream.Readable.prototype;
-
-/**
- * Check if a value is an instance of Request.
- *
- * @param   Mixed   input
- * @return  Boolean
- */
-function isRequest(input) {
-	return typeof input === 'object' && typeof input[INTERNALS$2] === 'object';
-}
-
-function isAbortSignal(signal) {
-	const proto = signal && typeof signal === 'object' && Object.getPrototypeOf(signal);
-	return !!(proto && proto.constructor.name === 'AbortSignal');
-}
-
-/**
- * Request class
- *
- * @param   Mixed   input  Url or Request instance
- * @param   Object  init   Custom options
- * @return  Void
- */
-class Request {
-	constructor(input) {
-		let init = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
-		let parsedURL;
-
-		// normalize input
-		if (!isRequest(input)) {
-			if (input && input.href) {
-				// in order to support Node.js' Url objects; though WHATWG's URL objects
-				// will fall into this branch also (since their `toString()` will return
-				// `href` property anyway)
-				parsedURL = parse_url(input.href);
-			} else {
-				// coerce input to a string before attempting to parse
-				parsedURL = parse_url(`${input}`);
-			}
-			input = {};
-		} else {
-			parsedURL = parse_url(input.url);
-		}
-
-		let method = init.method || input.method || 'GET';
-		method = method.toUpperCase();
-
-		if ((init.body != null || isRequest(input) && input.body !== null) && (method === 'GET' || method === 'HEAD')) {
-			throw new TypeError('Request with GET/HEAD method cannot have body');
-		}
-
-		let inputBody = init.body != null ? init.body : isRequest(input) && input.body !== null ? clone(input) : null;
-
-		Body.call(this, inputBody, {
-			timeout: init.timeout || input.timeout || 0,
-			size: init.size || input.size || 0
-		});
-
-		const headers = new Headers(init.headers || input.headers || {});
-
-		if (inputBody != null && !headers.has('Content-Type')) {
-			const contentType = extractContentType(inputBody);
-			if (contentType) {
-				headers.append('Content-Type', contentType);
-			}
-		}
-
-		let signal = isRequest(input) ? input.signal : null;
-		if ('signal' in init) signal = init.signal;
-
-		if (signal != null && !isAbortSignal(signal)) {
-			throw new TypeError('Expected signal to be an instanceof AbortSignal');
-		}
-
-		this[INTERNALS$2] = {
-			method,
-			redirect: init.redirect || input.redirect || 'follow',
-			headers,
-			parsedURL,
-			signal
-		};
-
-		// node-fetch-only options
-		this.follow = init.follow !== undefined ? init.follow : input.follow !== undefined ? input.follow : 20;
-		this.compress = init.compress !== undefined ? init.compress : input.compress !== undefined ? input.compress : true;
-		this.counter = init.counter || input.counter || 0;
-		this.agent = init.agent || input.agent;
-	}
-
-	get method() {
-		return this[INTERNALS$2].method;
-	}
-
-	get url() {
-		return format_url(this[INTERNALS$2].parsedURL);
-	}
-
-	get headers() {
-		return this[INTERNALS$2].headers;
-	}
-
-	get redirect() {
-		return this[INTERNALS$2].redirect;
-	}
-
-	get signal() {
-		return this[INTERNALS$2].signal;
-	}
-
-	/**
-  * Clone this request
-  *
-  * @return  Request
-  */
-	clone() {
-		return new Request(this);
-	}
-}
-
-Body.mixIn(Request.prototype);
-
-Object.defineProperty(Request.prototype, Symbol.toStringTag, {
-	value: 'Request',
-	writable: false,
-	enumerable: false,
-	configurable: true
-});
-
-Object.defineProperties(Request.prototype, {
-	method: { enumerable: true },
-	url: { enumerable: true },
-	headers: { enumerable: true },
-	redirect: { enumerable: true },
-	clone: { enumerable: true },
-	signal: { enumerable: true }
-});
-
-/**
- * Convert a Request to Node.js http request options.
- *
- * @param   Request  A Request instance
- * @return  Object   The options object to be passed to http.request
- */
-function getNodeRequestOptions(request) {
-	const parsedURL = request[INTERNALS$2].parsedURL;
-	const headers = new Headers(request[INTERNALS$2].headers);
-
-	// fetch step 1.3
-	if (!headers.has('Accept')) {
-		headers.set('Accept', '*/*');
-	}
-
-	// Basic fetch
-	if (!parsedURL.protocol || !parsedURL.hostname) {
-		throw new TypeError('Only absolute URLs are supported');
-	}
-
-	if (!/^https?:$/.test(parsedURL.protocol)) {
-		throw new TypeError('Only HTTP(S) protocols are supported');
-	}
-
-	if (request.signal && request.body instanceof Stream.Readable && !streamDestructionSupported) {
-		throw new Error('Cancellation of streamed requests with AbortSignal is not supported in node < 8');
-	}
-
-	// HTTP-network-or-cache fetch steps 2.4-2.7
-	let contentLengthValue = null;
-	if (request.body == null && /^(POST|PUT)$/i.test(request.method)) {
-		contentLengthValue = '0';
-	}
-	if (request.body != null) {
-		const totalBytes = getTotalBytes(request);
-		if (typeof totalBytes === 'number') {
-			contentLengthValue = String(totalBytes);
-		}
-	}
-	if (contentLengthValue) {
-		headers.set('Content-Length', contentLengthValue);
-	}
-
-	// HTTP-network-or-cache fetch step 2.11
-	if (!headers.has('User-Agent')) {
-		headers.set('User-Agent', 'node-fetch/1.0 (+https://github.com/bitinn/node-fetch)');
-	}
-
-	// HTTP-network-or-cache fetch step 2.15
-	if (request.compress && !headers.has('Accept-Encoding')) {
-		headers.set('Accept-Encoding', 'gzip,deflate');
-	}
-
-	let agent = request.agent;
-	if (typeof agent === 'function') {
-		agent = agent(parsedURL);
-	}
-
-	if (!headers.has('Connection') && !agent) {
-		headers.set('Connection', 'close');
-	}
-
-	// HTTP-network fetch step 4.2
-	// chunked encoding is handled by Node.js
-
-	return Object.assign({}, parsedURL, {
-		method: request.method,
-		headers: exportNodeCompatibleHeaders(headers),
-		agent
-	});
-}
-
-/**
- * abort-error.js
- *
- * AbortError interface for cancelled requests
- */
-
-/**
- * Create AbortError instance
- *
- * @param   String      message      Error message for human
- * @return  AbortError
- */
-function AbortError(message) {
-  Error.call(this, message);
-
-  this.type = 'aborted';
-  this.message = message;
-
-  // hide custom error implementation details from end-users
-  Error.captureStackTrace(this, this.constructor);
-}
-
-AbortError.prototype = Object.create(Error.prototype);
-AbortError.prototype.constructor = AbortError;
-AbortError.prototype.name = 'AbortError';
-
-// fix an issue where "PassThrough", "resolve" aren't a named export for node <10
-const PassThrough$1 = Stream.PassThrough;
-const resolve_url = Url.resolve;
-
-/**
- * Fetch function
- *
- * @param   Mixed    url   Absolute url or Request instance
- * @param   Object   opts  Fetch options
- * @return  Promise
- */
-function fetch(url, opts) {
-
-	// allow custom promise
-	if (!fetch.Promise) {
-		throw new Error('native promise missing, set fetch.Promise to your favorite alternative');
-	}
-
-	Body.Promise = fetch.Promise;
-
-	// wrap http.request into fetch
-	return new fetch.Promise(function (resolve, reject) {
-		// build request object
-		const request = new Request(url, opts);
-		const options = getNodeRequestOptions(request);
-
-		const send = (options.protocol === 'https:' ? https : http).request;
-		const signal = request.signal;
-
-		let response = null;
-
-		const abort = function abort() {
-			let error = new AbortError('The user aborted a request.');
-			reject(error);
-			if (request.body && request.body instanceof Stream.Readable) {
-				request.body.destroy(error);
-			}
-			if (!response || !response.body) return;
-			response.body.emit('error', error);
-		};
-
-		if (signal && signal.aborted) {
-			abort();
-			return;
-		}
-
-		const abortAndFinalize = function abortAndFinalize() {
-			abort();
-			finalize();
-		};
-
-		// send request
-		const req = send(options);
-		let reqTimeout;
-
-		if (signal) {
-			signal.addEventListener('abort', abortAndFinalize);
-		}
-
-		function finalize() {
-			req.abort();
-			if (signal) signal.removeEventListener('abort', abortAndFinalize);
-			clearTimeout(reqTimeout);
-		}
-
-		if (request.timeout) {
-			req.once('socket', function (socket) {
-				reqTimeout = setTimeout(function () {
-					reject(new FetchError(`network timeout at: ${request.url}`, 'request-timeout'));
-					finalize();
-				}, request.timeout);
-			});
-		}
-
-		req.on('error', function (err) {
-			reject(new FetchError(`request to ${request.url} failed, reason: ${err.message}`, 'system', err));
-			finalize();
-		});
-
-		req.on('response', function (res) {
-			clearTimeout(reqTimeout);
-
-			const headers = createHeadersLenient(res.headers);
-
-			// HTTP fetch step 5
-			if (fetch.isRedirect(res.statusCode)) {
-				// HTTP fetch step 5.2
-				const location = headers.get('Location');
-
-				// HTTP fetch step 5.3
-				const locationURL = location === null ? null : resolve_url(request.url, location);
-
-				// HTTP fetch step 5.5
-				switch (request.redirect) {
-					case 'error':
-						reject(new FetchError(`uri requested responds with a redirect, redirect mode is set to error: ${request.url}`, 'no-redirect'));
-						finalize();
-						return;
-					case 'manual':
-						// node-fetch-specific step: make manual redirect a bit easier to use by setting the Location header value to the resolved URL.
-						if (locationURL !== null) {
-							// handle corrupted header
-							try {
-								headers.set('Location', locationURL);
-							} catch (err) {
-								// istanbul ignore next: nodejs server prevent invalid response headers, we can't test this through normal request
-								reject(err);
-							}
-						}
-						break;
-					case 'follow':
-						// HTTP-redirect fetch step 2
-						if (locationURL === null) {
-							break;
-						}
-
-						// HTTP-redirect fetch step 5
-						if (request.counter >= request.follow) {
-							reject(new FetchError(`maximum redirect reached at: ${request.url}`, 'max-redirect'));
-							finalize();
-							return;
-						}
-
-						// HTTP-redirect fetch step 6 (counter increment)
-						// Create a new Request object.
-						const requestOpts = {
-							headers: new Headers(request.headers),
-							follow: request.follow,
-							counter: request.counter + 1,
-							agent: request.agent,
-							compress: request.compress,
-							method: request.method,
-							body: request.body,
-							signal: request.signal,
-							timeout: request.timeout,
-							size: request.size
-						};
-
-						// HTTP-redirect fetch step 9
-						if (res.statusCode !== 303 && request.body && getTotalBytes(request) === null) {
-							reject(new FetchError('Cannot follow redirect with body being a readable stream', 'unsupported-redirect'));
-							finalize();
-							return;
-						}
-
-						// HTTP-redirect fetch step 11
-						if (res.statusCode === 303 || (res.statusCode === 301 || res.statusCode === 302) && request.method === 'POST') {
-							requestOpts.method = 'GET';
-							requestOpts.body = undefined;
-							requestOpts.headers.delete('content-length');
-						}
-
-						// HTTP-redirect fetch step 15
-						resolve(fetch(new Request(locationURL, requestOpts)));
-						finalize();
-						return;
-				}
-			}
-
-			// prepare response
-			res.once('end', function () {
-				if (signal) signal.removeEventListener('abort', abortAndFinalize);
-			});
-			let body = res.pipe(new PassThrough$1());
-
-			const response_options = {
-				url: request.url,
-				status: res.statusCode,
-				statusText: res.statusMessage,
-				headers: headers,
-				size: request.size,
-				timeout: request.timeout,
-				counter: request.counter
-			};
-
-			// HTTP-network fetch step 12.1.1.3
-			const codings = headers.get('Content-Encoding');
-
-			// HTTP-network fetch step 12.1.1.4: handle content codings
-
-			// in following scenarios we ignore compression support
-			// 1. compression support is disabled
-			// 2. HEAD request
-			// 3. no Content-Encoding header
-			// 4. no content response (204)
-			// 5. content not modified response (304)
-			if (!request.compress || request.method === 'HEAD' || codings === null || res.statusCode === 204 || res.statusCode === 304) {
-				response = new Response(body, response_options);
-				resolve(response);
-				return;
-			}
-
-			// For Node v6+
-			// Be less strict when decoding compressed responses, since sometimes
-			// servers send slightly invalid responses that are still accepted
-			// by common browsers.
-			// Always using Z_SYNC_FLUSH is what cURL does.
-			const zlibOptions = {
-				flush: zlib.Z_SYNC_FLUSH,
-				finishFlush: zlib.Z_SYNC_FLUSH
-			};
-
-			// for gzip
-			if (codings == 'gzip' || codings == 'x-gzip') {
-				body = body.pipe(zlib.createGunzip(zlibOptions));
-				response = new Response(body, response_options);
-				resolve(response);
-				return;
-			}
-
-			// for deflate
-			if (codings == 'deflate' || codings == 'x-deflate') {
-				// handle the infamous raw deflate response from old servers
-				// a hack for old IIS and Apache servers
-				const raw = res.pipe(new PassThrough$1());
-				raw.once('data', function (chunk) {
-					// see http://stackoverflow.com/questions/37519828
-					if ((chunk[0] & 0x0F) === 0x08) {
-						body = body.pipe(zlib.createInflate());
-					} else {
-						body = body.pipe(zlib.createInflateRaw());
-					}
-					response = new Response(body, response_options);
-					resolve(response);
-				});
-				return;
-			}
-
-			// for br
-			if (codings == 'br' && typeof zlib.createBrotliDecompress === 'function') {
-				body = body.pipe(zlib.createBrotliDecompress());
-				response = new Response(body, response_options);
-				resolve(response);
-				return;
-			}
-
-			// otherwise, use response as-is
-			response = new Response(body, response_options);
-			resolve(response);
-		});
-
-		writeToStream(req, request);
-	});
-}
-/**
- * Redirect code matching
- *
- * @param   Number   code  Status code
- * @return  Boolean
- */
-fetch.isRedirect = function (code) {
-	return code === 301 || code === 302 || code === 303 || code === 307 || code === 308;
-};
-
-// expose Promise
-fetch.Promise = global.Promise;
-
-module.exports = exports = fetch;
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = exports;
-exports.Headers = Headers;
-exports.Request = Request;
-exports.Response = Response;
-exports.FetchError = FetchError;
-
-
-/***/ }),
-
-/***/ 468:
-/***/ (function(__unusedmodule, exports) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.ident = void 0;
-exports.ident = (steps) => {
-    const step = `  `;
-    const items = new Array(steps).fill(step);
-    return items.join();
-};
-
-
-/***/ }),
-
-/***/ 486:
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-"use strict";
-
-
-var urilib = __webpack_require__(835);
-
-var attribute = __webpack_require__(568);
-var helpers = __webpack_require__(801);
-var scanSchema = __webpack_require__(534).scan;
-var ValidatorResult = helpers.ValidatorResult;
-var SchemaError = helpers.SchemaError;
-var SchemaContext = helpers.SchemaContext;
-//var anonymousBase = 'vnd.jsonschema:///';
-var anonymousBase = '/';
-
-/**
- * Creates a new Validator object
- * @name Validator
- * @constructor
- */
-var Validator = function Validator () {
-  // Allow a validator instance to override global custom formats or to have their
-  // own custom formats.
-  this.customFormats = Object.create(Validator.prototype.customFormats);
-  this.schemas = {};
-  this.unresolvedRefs = [];
-
-  // Use Object.create to make this extensible without Validator instances stepping on each other's toes.
-  this.types = Object.create(types);
-  this.attributes = Object.create(attribute.validators);
-};
-
-// Allow formats to be registered globally.
-Validator.prototype.customFormats = {};
-
-// Hint at the presence of a property
-Validator.prototype.schemas = null;
-Validator.prototype.types = null;
-Validator.prototype.attributes = null;
-Validator.prototype.unresolvedRefs = null;
-
-/**
- * Adds a schema with a certain urn to the Validator instance.
- * @param schema
- * @param urn
- * @return {Object}
- */
-Validator.prototype.addSchema = function addSchema (schema, base) {
-  var self = this;
-  if (!schema) {
-    return null;
-  }
-  var scan = scanSchema(base||anonymousBase, schema);
-  var ourUri = base || schema.id;
-  for(var uri in scan.id){
-    this.schemas[uri] = scan.id[uri];
-  }
-  for(var uri in scan.ref){
-    this.unresolvedRefs.push(uri);
-  }
-  this.unresolvedRefs = this.unresolvedRefs.filter(function(uri){
-    return typeof self.schemas[uri]==='undefined';
-  });
-  return this.schemas[ourUri];
-};
-
-Validator.prototype.addSubSchemaArray = function addSubSchemaArray(baseuri, schemas) {
-  if(!Array.isArray(schemas)) return;
-  for(var i=0; i<schemas.length; i++){
-    this.addSubSchema(baseuri, schemas[i]);
-  }
-};
-
-Validator.prototype.addSubSchemaObject = function addSubSchemaArray(baseuri, schemas) {
-  if(!schemas || typeof schemas!='object') return;
-  for(var p in schemas){
-    this.addSubSchema(baseuri, schemas[p]);
-  }
-};
-
-
-
-/**
- * Sets all the schemas of the Validator instance.
- * @param schemas
- */
-Validator.prototype.setSchemas = function setSchemas (schemas) {
-  this.schemas = schemas;
-};
-
-/**
- * Returns the schema of a certain urn
- * @param urn
- */
-Validator.prototype.getSchema = function getSchema (urn) {
-  return this.schemas[urn];
-};
-
-/**
- * Validates instance against the provided schema
- * @param instance
- * @param schema
- * @param [options]
- * @param [ctx]
- * @return {Array}
- */
-Validator.prototype.validate = function validate (instance, schema, options, ctx) {
-  if((typeof schema !== 'boolean' && typeof schema !== 'object') || schema === null){
-    throw new SchemaError('Expected `schema` to be an object or boolean');
-  }
-  if (!options) {
-    options = {};
-  }
-  // This will work so long as the function at uri.resolve() will resolve a relative URI to a relative URI
-  var id = schema.$id || schema.id;
-  var base = urilib.resolve(options.base||anonymousBase, id||'');
-  if(!ctx){
-    ctx = new SchemaContext(schema, options, [], base, Object.create(this.schemas));
-    if (!ctx.schemas[base]) {
-      ctx.schemas[base] = schema;
-    }
-    var found = scanSchema(base, schema);
-    for(var n in found.id){
-      var sch = found.id[n];
-      ctx.schemas[n] = sch;
-    }
-  }
-  var result = this.validateSchema(instance, schema, options, ctx);
-  if (!result) {
-    throw new Error('Result undefined');
-  }
-  return result;
-};
-
-/**
-* @param Object schema
-* @return mixed schema uri or false
-*/
-function shouldResolve(schema) {
-  var ref = (typeof schema === 'string') ? schema : schema.$ref;
-  if (typeof ref=='string') return ref;
-  return false;
-}
-
-/**
- * Validates an instance against the schema (the actual work horse)
- * @param instance
- * @param schema
- * @param options
- * @param ctx
- * @private
- * @return {ValidatorResult}
- */
-Validator.prototype.validateSchema = function validateSchema (instance, schema, options, ctx) {
-  var result = new ValidatorResult(instance, schema, options, ctx);
-
-  // Support for the true/false schemas
-  if(typeof schema==='boolean') {
-    if(schema===true){
-      // `true` is always valid
-      schema = {};
-    }else if(schema===false){
-      // `false` is always invalid
-      schema = {type: []};
-    }
-  }else if(!schema){
-    // This might be a string
-    throw new Error("schema is undefined");
-  }
-
-  if (schema['extends']) {
-    if (Array.isArray(schema['extends'])) {
-      var schemaobj = {schema: schema, ctx: ctx};
-      schema['extends'].forEach(this.schemaTraverser.bind(this, schemaobj));
-      schema = schemaobj.schema;
-      schemaobj.schema = null;
-      schemaobj.ctx = null;
-      schemaobj = null;
-    } else {
-      schema = helpers.deepMerge(schema, this.superResolve(schema['extends'], ctx));
-    }
-  }
-
-  // If passed a string argument, load that schema URI
-  var switchSchema = shouldResolve(schema);
-  if (switchSchema) {
-    var resolved = this.resolve(schema, switchSchema, ctx);
-    var subctx = new SchemaContext(resolved.subschema, options, ctx.path, resolved.switchSchema, ctx.schemas);
-    return this.validateSchema(instance, resolved.subschema, options, subctx);
-  }
-
-  var skipAttributes = options && options.skipAttributes || [];
-  // Validate each schema attribute against the instance
-  for (var key in schema) {
-    if (!attribute.ignoreProperties[key] && skipAttributes.indexOf(key) < 0) {
-      var validatorErr = null;
-      var validator = this.attributes[key];
-      if (validator) {
-        validatorErr = validator.call(this, instance, schema, options, ctx);
-      } else if (options.allowUnknownAttributes === false) {
-        // This represents an error with the schema itself, not an invalid instance
-        throw new SchemaError("Unsupported attribute: " + key, schema);
-      }
-      if (validatorErr) {
-        result.importErrors(validatorErr);
-      }
-    }
-  }
-
-  if (typeof options.rewrite == 'function') {
-    var value = options.rewrite.call(this, instance, schema, options, ctx);
-    result.instance = value;
-  }
-  return result;
-};
-
-/**
-* @private
-* @param Object schema
-* @param SchemaContext ctx
-* @returns Object schema or resolved schema
-*/
-Validator.prototype.schemaTraverser = function schemaTraverser (schemaobj, s) {
-  schemaobj.schema = helpers.deepMerge(schemaobj.schema, this.superResolve(s, schemaobj.ctx));
-};
-
-/**
-* @private
-* @param Object schema
-* @param SchemaContext ctx
-* @returns Object schema or resolved schema
-*/
-Validator.prototype.superResolve = function superResolve (schema, ctx) {
-  var ref = shouldResolve(schema);
-  if(ref) {
-    return this.resolve(schema, ref, ctx).subschema;
-  }
-  return schema;
-};
-
-/**
-* @private
-* @param Object schema
-* @param Object switchSchema
-* @param SchemaContext ctx
-* @return Object resolved schemas {subschema:String, switchSchema: String}
-* @throws SchemaError
-*/
-Validator.prototype.resolve = function resolve (schema, switchSchema, ctx) {
-  switchSchema = ctx.resolve(switchSchema);
-  // First see if the schema exists under the provided URI
-  if (ctx.schemas[switchSchema]) {
-    return {subschema: ctx.schemas[switchSchema], switchSchema: switchSchema};
-  }
-  // Else try walking the property pointer
-  var parsed = urilib.parse(switchSchema);
-  var fragment = parsed && parsed.hash;
-  var document = fragment && fragment.length && switchSchema.substr(0, switchSchema.length - fragment.length);
-  if (!document || !ctx.schemas[document]) {
-    throw new SchemaError("no such schema <" + switchSchema + ">", schema);
-  }
-  var subschema = helpers.objectGetPath(ctx.schemas[document], fragment.substr(1));
-  if(subschema===undefined){
-    throw new SchemaError("no such schema " + fragment + " located in <" + document + ">", schema);
-  }
-  return {subschema: subschema, switchSchema: switchSchema};
-};
-
-/**
- * Tests whether the instance if of a certain type.
- * @private
- * @param instance
- * @param schema
- * @param options
- * @param ctx
- * @param type
- * @return {boolean}
- */
-Validator.prototype.testType = function validateType (instance, schema, options, ctx, type) {
-  if(type===undefined){
-    return;
-  }else if(type===null){
-    throw new SchemaError('Unexpected null in "type" keyword');
-  }
-  if (typeof this.types[type] == 'function') {
-    return this.types[type].call(this, instance);
-  }
-  if (type && typeof type == 'object') {
-    var res = this.validateSchema(instance, type, options, ctx);
-    return res === undefined || !(res && res.errors.length);
-  }
-  // Undefined or properties not on the list are acceptable, same as not being defined
-  return true;
-};
-
-var types = Validator.prototype.types = {};
-types.string = function testString (instance) {
-  return typeof instance == 'string';
-};
-types.number = function testNumber (instance) {
-  // isFinite returns false for NaN, Infinity, and -Infinity
-  return typeof instance == 'number' && isFinite(instance);
-};
-types.integer = function testInteger (instance) {
-  return (typeof instance == 'number') && instance % 1 === 0;
-};
-types.boolean = function testBoolean (instance) {
-  return typeof instance == 'boolean';
-};
-types.array = function testArray (instance) {
-  return Array.isArray(instance);
-};
-types['null'] = function testNull (instance) {
-  return instance === null;
-};
-types.date = function testDate (instance) {
-  return instance instanceof Date;
-};
-types.any = function testAny (instance) {
-  return true;
-};
-types.object = function testObject (instance) {
-  // TODO: fix this - see #15
-  return instance && (typeof instance === 'object') && !(Array.isArray(instance)) && !(instance instanceof Date);
-};
-
-module.exports = Validator;
-
-
-/***/ }),
-
-/***/ 501:
-/***/ (function(__unusedmodule, exports) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.rateToPercent = void 0;
-exports.rateToPercent = (rate) => {
-    return `${Math.round(100 * rate)}%`;
-};
-
-
-/***/ }),
-
-/***/ 520:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.projectLink = void 0;
-const repoUrl_1 = __webpack_require__(198);
-exports.projectLink = (projectWithConfig) => {
-    const { project, repo } = projectWithConfig;
-    return `${repoUrl_1.repoUrl(repo)}/projects/${project.number}`;
-};
-
-
-/***/ }),
-
-/***/ 534:
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-"use strict";
-
-
-var urilib = __webpack_require__(835);
-var helpers = __webpack_require__(801);
-
-module.exports.SchemaScanResult = SchemaScanResult;
-function SchemaScanResult(found, ref){
-  this.id = found;
-  this.ref = ref;
-}
-
-/**
- * Adds a schema with a certain urn to the Validator instance.
- * @param string uri
- * @param object schema
- * @return {Object}
- */
-module.exports.scan = function scan(base, schema){
-  function scanSchema(baseuri, schema){
-    if(!schema || typeof schema!='object') return;
-    // Mark all referenced schemas so we can tell later which schemas are referred to, but never defined
-    if(schema.$ref){
-      var resolvedUri = urilib.resolve(baseuri, schema.$ref);
-      ref[resolvedUri] = ref[resolvedUri] ? ref[resolvedUri]+1 : 0;
-      return;
-    }
-    var id = schema.$id || schema.id;
-    var ourBase = id ? urilib.resolve(baseuri, id) : baseuri;
-    if (ourBase) {
-      // If there's no fragment, append an empty one
-      if(ourBase.indexOf('#')<0) ourBase += '#';
-      if(found[ourBase]){
-        if(!helpers.deepCompareStrict(found[ourBase], schema)){
-          throw new Error('Schema <'+ourBase+'> already exists with different definition');
-        }
-        return found[ourBase];
-      }
-      found[ourBase] = schema;
-      // strip trailing fragment
-      if(ourBase[ourBase.length-1]=='#'){
-        found[ourBase.substring(0, ourBase.length-1)] = schema;
-      }
-    }
-    scanArray(ourBase+'/items', (Array.isArray(schema.items)?schema.items:[schema.items]));
-    scanArray(ourBase+'/extends', (Array.isArray(schema.extends)?schema.extends:[schema.extends]));
-    scanSchema(ourBase+'/additionalItems', schema.additionalItems);
-    scanObject(ourBase+'/properties', schema.properties);
-    scanSchema(ourBase+'/additionalProperties', schema.additionalProperties);
-    scanObject(ourBase+'/definitions', schema.definitions);
-    scanObject(ourBase+'/patternProperties', schema.patternProperties);
-    scanObject(ourBase+'/dependencies', schema.dependencies);
-    scanArray(ourBase+'/disallow', schema.disallow);
-    scanArray(ourBase+'/allOf', schema.allOf);
-    scanArray(ourBase+'/anyOf', schema.anyOf);
-    scanArray(ourBase+'/oneOf', schema.oneOf);
-    scanSchema(ourBase+'/not', schema.not);
-  }
-  function scanArray(baseuri, schemas){
-    if(!Array.isArray(schemas)) return;
-    for(var i=0; i<schemas.length; i++){
-      scanSchema(baseuri+'/'+i, schemas[i]);
-    }
-  }
-  function scanObject(baseuri, schemas){
-    if(!schemas || typeof schemas!='object') return;
-    for(var p in schemas){
-      scanSchema(baseuri+'/'+p, schemas[p]);
-    }
-  }
-
-  var found = {};
-  var ref = {};
-  scanSchema(base, schema);
-  return new SchemaScanResult(found, ref);
-};
-
-
-/***/ }),
-
-/***/ 536:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.sortCardsInPlace = void 0;
-const sortCardsByLabelPriorityInPlace_1 = __webpack_require__(769);
-const sortCardsByAssigneesInPlace_1 = __webpack_require__(733);
-/**
- * The Default way of sorting the cards. !IN PLACE!
- */
-exports.sortCardsInPlace = (cards, projectWithConfig) => {
-    sortCardsByLabelPriorityInPlace_1.sortCardsByLabelPriorityInPlace(cards, projectWithConfig, sortCardsByAssigneesInPlace_1.sortByAssigneesPredicate);
-    return cards;
-};
-
-
-/***/ }),
-
-/***/ 537:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, '__esModule', { value: true });
-
-function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
-
-var deprecation = __webpack_require__(932);
-var once = _interopDefault(__webpack_require__(223));
-
-const logOnce = once(deprecation => console.warn(deprecation));
-/**
- * Error with extra properties to help with debugging
- */
-
-class RequestError extends Error {
-  constructor(message, statusCode, options) {
-    super(message); // Maintains proper stack trace (only available on V8)
-
-    /* istanbul ignore next */
-
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, this.constructor);
-    }
-
-    this.name = "HttpError";
-    this.status = statusCode;
-    Object.defineProperty(this, "code", {
-      get() {
-        logOnce(new deprecation.Deprecation("[@octokit/request-error] `error.code` is deprecated, use `error.status`."));
-        return statusCode;
-      }
-
-    });
-    this.headers = options.headers || {}; // redact request credentials without mutating original request options
-
-    const requestCopy = Object.assign({}, options.request);
-
-    if (options.request.headers.authorization) {
-      requestCopy.headers = Object.assign({}, options.request.headers, {
-        authorization: options.request.headers.authorization.replace(/ .*$/, " [REDACTED]")
-      });
-    }
-
-    requestCopy.url = requestCopy.url // client_id & client_secret can be passed as URL query parameters to increase rate limit
-    // see https://developer.github.com/v3/#increasing-the-unauthenticated-rate-limit-for-oauth-applications
-    .replace(/\bclient_secret=\w+/g, "client_secret=[REDACTED]") // OAuth tokens can be passed as URL query parameters, although it is not recommended
-    // see https://developer.github.com/v3/#oauth2-token-sent-in-a-header
-    .replace(/\baccess_token=\w+/g, "access_token=[REDACTED]");
-    this.request = requestCopy;
-  }
-
-}
-
-exports.RequestError = RequestError;
-//# sourceMappingURL=index.js.map
-
-
-/***/ }),
-
-/***/ 549:
-/***/ (function(module) {
-
-module.exports = addHook
-
-function addHook (state, kind, name, hook) {
-  var orig = hook
-  if (!state.registry[name]) {
-    state.registry[name] = []
-  }
-
-  if (kind === 'before') {
-    hook = function (method, options) {
-      return Promise.resolve()
-        .then(orig.bind(null, options))
-        .then(method.bind(null, options))
-    }
-  }
-
-  if (kind === 'after') {
-    hook = function (method, options) {
-      var result
-      return Promise.resolve()
-        .then(method.bind(null, options))
-        .then(function (result_) {
-          result = result_
-          return orig(result, options)
-        })
-        .then(function () {
-          return result
-        })
-    }
-  }
-
-  if (kind === 'error') {
-    hook = function (method, options) {
-      return Promise.resolve()
-        .then(method.bind(null, options))
-        .catch(function (error) {
-          return orig(error, options)
-        })
-    }
-  }
-
-  state.registry[name].push({
-    hook: hook,
-    orig: orig
-  })
-}
-
-
-/***/ }),
-
-/***/ 558:
-/***/ (function(__unusedmodule, exports) {
-
-"use strict";
-
-
-Object.defineProperty(exports, '__esModule', { value: true });
-
-/*!
- * is-plain-object <https://github.com/jonschlinkert/is-plain-object>
- *
- * Copyright (c) 2014-2017, Jon Schlinkert.
- * Released under the MIT License.
- */
-
-function isObject(o) {
-  return Object.prototype.toString.call(o) === '[object Object]';
-}
-
-function isPlainObject(o) {
-  var ctor,prot;
-
-  if (isObject(o) === false) return false;
-
-  // If has modified constructor
-  ctor = o.constructor;
-  if (ctor === undefined) return true;
-
-  // If has modified prototype
-  prot = ctor.prototype;
-  if (isObject(prot) === false) return false;
-
-  // If constructor does not have an Object-specific method
-  if (prot.hasOwnProperty('isPrototypeOf') === false) {
-    return false;
-  }
-
-  // Most likely a plain Object
-  return true;
-}
-
-exports.isPlainObject = isPlainObject;
-
-
-/***/ }),
-
-/***/ 560:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.renderProjectOverview = void 0;
-const filterPlannedProjectData_1 = __webpack_require__(738);
-const getProjectStats_1 = __webpack_require__(686);
-const addParens_1 = __webpack_require__(864);
-const ident_1 = __webpack_require__(468);
-const renderDaysLeft_1 = __webpack_require__(342);
-const renderNewItemsSuffix_1 = __webpack_require__(296);
-const renderPerLine = (unit, leftRatio, totalRatio, identation = 0) => {
-    if (!leftRatio || !totalRatio) {
-        return;
-    }
-    const left = leftRatio.toFixed(1);
-    const was = totalRatio.toFixed(1);
-    return `${ident_1.ident(identation)}- ${unit}: **${left}** left / **${was}** total`;
-};
-// const renderDeveloper = (
-//   developer: IDeveloperWithIssuesCount,
-//   config: IConfig,
-//   identation = 0,
-// ) => {
-//   const { login, issuesCount } = developer
-//   const daysLeft = getWorkDays(config);
-//   const suffix = (daysLeft)
-//     ? ` / **${(issuesCount / Math.max(1, daysLeft.businessDaysLeft)).toFixed(1)} per day left**`
-//     : '';
-//   return `${ident(identation)}- 🥵 @${login}: **${issuesCount} issues**${suffix}`;
-// };
-const renderDeveloper = (developer, config, identation = 0) => {
-    return `${ident_1.ident(identation)}- @${developer}`;
-};
-const renderDevelopers = (developers, config, identation = 0) => {
-    const title = `${ident_1.ident(identation)}- 🧑‍💻 **${developers.length}** developers`;
-    // const devs = developers
-    //   .sort()
-    //   .map((developer) => {
-    //     return renderDeveloper(developer, config, identation + 1);
-    //   })
-    //   .join('\n');
-    return [
-        title,
-    ].join('\n');
-};
-const renderIssuesLoadSection = (stats, identation = 0) => {
-    const { issuesDeveloperLeftRatio, issuesDeveloperRatio, issuesDayLeftRatio, issuesDayRatio, issuesDeveloperDayRatio, issuesDeveloperDayLeftRatio, } = stats;
-    // Load - 🔥 <b>high</b>
-    return [
-        renderPerLine('issues per day', issuesDayLeftRatio, issuesDayRatio, identation),
-        renderPerLine('issues per developer', issuesDeveloperLeftRatio, issuesDeveloperRatio, identation),
-        renderPerLine('issues per developer/day', issuesDeveloperDayLeftRatio, issuesDeveloperDayRatio, identation),
-    ].join('\n');
-};
-const renderIssuesLoad = (allStats, plannedStats, config, identation = 0) => {
-    return [
-        '<details>',
-        '<summary>🌡️ <b>Load</b></summary>',
-        '',
-        `- **Planned:**`,
-        renderIssuesLoadSection(plannedStats, identation + 1),
-        `- **Including new issues:**`,
-        renderIssuesLoadSection(allStats, identation + 1),
-        '</details>',
-    ].join('\n');
-};
-/**
- * Render the `🔭 Overview` section with project stats.
- */
-exports.renderProjectOverview = (config, projectWithData) => {
-    const { data: allData } = projectWithData;
-    const plannedData = filterPlannedProjectData_1.filterPlannedProjectData(allData);
-    const { allPlannedIssues: allPlannedIssuesAdded } = allData;
-    const { issuesToSolve, allPlannedIssues } = plannedData;
-    const allStats = getProjectStats_1.getProjectStats(allData, config);
-    const plannedStats = getProjectStats_1.getProjectStats(plannedData, config);
-    const { developers, } = allStats;
-    const addedIssues = renderNewItemsSuffix_1.renderNewItemsSuffix(allPlannedIssuesAdded, allPlannedIssues);
-    return [
-        `- 📅 ${renderDaysLeft_1.renderDaysLeft(config)}`,
-        `- 🗒️ **${issuesToSolve.length}** issues left / **${allPlannedIssues.length}** total${addParens_1.addParens(addedIssues)}`,
-        renderDevelopers(developers, config),
-        renderIssuesLoad(allStats, plannedStats, config),
-    ].join('\n');
-};
-
-
-/***/ }),
-
-/***/ 568:
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-"use strict";
-
-
-var helpers = __webpack_require__(801);
+var helpers = __webpack_require__(4801);
 
 /** @type ValidatorResult */
 var ValidatorResult = helpers.ValidatorResult;
@@ -7718,75 +6926,799 @@ module.exports = attribute;
 
 /***/ }),
 
-/***/ 605:
-/***/ (function(module) {
-
-module.exports = require("http");
-
-/***/ }),
-
-/***/ 614:
-/***/ (function(module) {
-
-module.exports = require("events");
-
-/***/ }),
-
-/***/ 616:
-/***/ (function(__unusedmodule, exports) {
+/***/ 4801:
+/***/ ((module, exports, __webpack_require__) => {
 
 "use strict";
 
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.addTitle = void 0;
-exports.addTitle = (title, str) => {
-    if (!str) {
-        return str;
+
+var uri = __webpack_require__(8835);
+
+var ValidationError = exports.ValidationError = function ValidationError (message, instance, schema, path, name, argument) {
+  if(Array.isArray(path)){
+    this.path = path;
+    this.property = path.reduce(function(sum, item){
+      return sum + makeSuffix(item);
+    }, 'instance');
+  }else if(path !== undefined){
+    this.property = path;
+  }
+  if (message) {
+    this.message = message;
+  }
+  if (schema) {
+    var id = schema.$id || schema.id;
+    this.schema = id || schema;
+  }
+  if (instance !== undefined) {
+    this.instance = instance;
+  }
+  this.name = name;
+  this.argument = argument;
+  this.stack = this.toString();
+};
+
+ValidationError.prototype.toString = function toString() {
+  return this.property + ' ' + this.message;
+};
+
+var ValidatorResult = exports.ValidatorResult = function ValidatorResult(instance, schema, options, ctx) {
+  this.instance = instance;
+  this.schema = schema;
+  this.path = ctx.path;
+  this.propertyPath = ctx.propertyPath;
+  this.errors = [];
+  this.throwError = options && options.throwError;
+  this.disableFormat = options && options.disableFormat === true;
+};
+
+ValidatorResult.prototype.addError = function addError(detail) {
+  var err;
+  if (typeof detail == 'string') {
+    err = new ValidationError(detail, this.instance, this.schema, this.path);
+  } else {
+    if (!detail) throw new Error('Missing error detail');
+    if (!detail.message) throw new Error('Missing error message');
+    if (!detail.name) throw new Error('Missing validator type');
+    err = new ValidationError(detail.message, this.instance, this.schema, this.path, detail.name, detail.argument);
+  }
+
+  if (this.throwError) {
+    throw err;
+  }
+  this.errors.push(err);
+  return err;
+};
+
+ValidatorResult.prototype.importErrors = function importErrors(res) {
+  if (typeof res == 'string' || (res && res.validatorType)) {
+    this.addError(res);
+  } else if (res && res.errors) {
+    Array.prototype.push.apply(this.errors, res.errors);
+  }
+};
+
+function stringizer (v,i){
+  return i+': '+v.toString()+'\n';
+}
+ValidatorResult.prototype.toString = function toString(res) {
+  return this.errors.map(stringizer).join('');
+};
+
+Object.defineProperty(ValidatorResult.prototype, "valid", { get: function() {
+  return !this.errors.length;
+} });
+
+/**
+ * Describes a problem with a Schema which prevents validation of an instance
+ * @name SchemaError
+ * @constructor
+ */
+var SchemaError = exports.SchemaError = function SchemaError (msg, schema) {
+  this.message = msg;
+  this.schema = schema;
+  Error.call(this, msg);
+  Error.captureStackTrace(this, SchemaError);
+};
+SchemaError.prototype = Object.create(Error.prototype,
+  {
+    constructor: {value: SchemaError, enumerable: false},
+    name: {value: 'SchemaError', enumerable: false},
+  });
+
+var SchemaContext = exports.SchemaContext = function SchemaContext (schema, options, path, base, schemas) {
+  this.schema = schema;
+  this.options = options;
+  if(Array.isArray(path)){
+    this.path = path;
+    this.propertyPath = path.reduce(function(sum, item){
+      return sum + makeSuffix(item);
+    }, 'instance');
+  }else{
+    this.propertyPath = path;
+  }
+  this.base = base;
+  this.schemas = schemas;
+};
+
+SchemaContext.prototype.resolve = function resolve (target) {
+  return uri.resolve(this.base, target);
+};
+
+SchemaContext.prototype.makeChild = function makeChild(schema, propertyName){
+  var path = (propertyName===undefined) ? this.path : this.path.concat([propertyName]);
+  var id = schema.$id || schema.id;
+  var base = uri.resolve(this.base, id||'');
+  var ctx = new SchemaContext(schema, this.options, path, base, Object.create(this.schemas));
+  if(id && !ctx.schemas[base]){
+    ctx.schemas[base] = schema;
+  }
+  return ctx;
+};
+
+var FORMAT_REGEXPS = exports.FORMAT_REGEXPS = {
+  'date-time': /^\d{4}-(?:0[0-9]{1}|1[0-2]{1})-(3[01]|0[1-9]|[12][0-9])[tT ](2[0-4]|[01][0-9]):([0-5][0-9]):(60|[0-5][0-9])(\.\d+)?([zZ]|[+-]([0-5][0-9]):(60|[0-5][0-9]))$/,
+  'date': /^\d{4}-(?:0[0-9]{1}|1[0-2]{1})-(3[01]|0[1-9]|[12][0-9])$/,
+  'time': /^(2[0-4]|[01][0-9]):([0-5][0-9]):(60|[0-5][0-9])$/,
+
+  'email': /^(?:[\w\!\#\$\%\&\'\*\+\-\/\=\?\^\`\{\|\}\~]+\.)*[\w\!\#\$\%\&\'\*\+\-\/\=\?\^\`\{\|\}\~]+@(?:(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9\-](?!\.)){0,61}[a-zA-Z0-9]?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9\-](?!$)){0,61}[a-zA-Z0-9]?)|(?:\[(?:(?:[01]?\d{1,2}|2[0-4]\d|25[0-5])\.){3}(?:[01]?\d{1,2}|2[0-4]\d|25[0-5])\]))$/,
+  'ip-address': /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/,
+  'ipv6': /^\s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))(%.+)?\s*$/,
+
+  // TODO: A more accurate regular expression for "uri" goes:
+  // [A-Za-z][+\-.0-9A-Za-z]*:((/(/((%[0-9A-Fa-f]{2}|[!$&-.0-9;=A-Z_a-z~])+|(\[(([Vv][0-9A-Fa-f]+\.[!$&-.0-;=A-Z_a-z~]+)?|[.0-:A-Fa-f]+)\])?)(:\d*)?)?)?#(%[0-9A-Fa-f]{2}|[!$&-;=?-Z_a-z~])*|(/(/((%[0-9A-Fa-f]{2}|[!$&-.0-9;=A-Z_a-z~])+|(\[(([Vv][0-9A-Fa-f]+\.[!$&-.0-;=A-Z_a-z~]+)?|[.0-:A-Fa-f]+)\])?)(:\d*)?[/?]|[!$&-.0-;=?-Z_a-z~])|/?%[0-9A-Fa-f]{2}|[!$&-.0-;=?-Z_a-z~])(%[0-9A-Fa-f]{2}|[!$&-;=?-Z_a-z~])*(#(%[0-9A-Fa-f]{2}|[!$&-;=?-Z_a-z~])*)?|/(/((%[0-9A-Fa-f]{2}|[!$&-.0-9;=A-Z_a-z~])+(:\d*)?|(\[(([Vv][0-9A-Fa-f]+\.[!$&-.0-;=A-Z_a-z~]+)?|[.0-:A-Fa-f]+)\])?:\d*|\[(([Vv][0-9A-Fa-f]+\.[!$&-.0-;=A-Z_a-z~]+)?|[.0-:A-Fa-f]+)\])?)?)?
+  'uri': /^[a-zA-Z][a-zA-Z0-9+-.]*:[^\s]*$/,
+  'uri-reference': /^(((([A-Za-z][+\-.0-9A-Za-z]*(:%[0-9A-Fa-f]{2}|:[!$&-.0-;=?-Z_a-z~]|[/?])|\?)(%[0-9A-Fa-f]{2}|[!$&-;=?-Z_a-z~])*|([A-Za-z][+\-.0-9A-Za-z]*:?)?)|([A-Za-z][+\-.0-9A-Za-z]*:)?\/((%[0-9A-Fa-f]{2}|\/((%[0-9A-Fa-f]{2}|[!$&-.0-9;=A-Z_a-z~])+|(\[(([Vv][0-9A-Fa-f]+\.[!$&-.0-;=A-Z_a-z~]+)?|[.0-:A-Fa-f]+)\])?)(:\d*)?[/?]|[!$&-.0-;=?-Z_a-z~])(%[0-9A-Fa-f]{2}|[!$&-;=?-Z_a-z~])*|(\/((%[0-9A-Fa-f]{2}|[!$&-.0-9;=A-Z_a-z~])+|(\[(([Vv][0-9A-Fa-f]+\.[!$&-.0-;=A-Z_a-z~]+)?|[.0-:A-Fa-f]+)\])?)(:\d*)?)?))#(%[0-9A-Fa-f]{2}|[!$&-;=?-Z_a-z~])*|(([A-Za-z][+\-.0-9A-Za-z]*)?%[0-9A-Fa-f]{2}|[!$&-.0-9;=@_~]|[A-Za-z][+\-.0-9A-Za-z]*[!$&-*,;=@_~])(%[0-9A-Fa-f]{2}|[!$&-.0-9;=@-Z_a-z~])*((([/?](%[0-9A-Fa-f]{2}|[!$&-;=?-Z_a-z~])*)?#|[/?])(%[0-9A-Fa-f]{2}|[!$&-;=?-Z_a-z~])*)?|([A-Za-z][+\-.0-9A-Za-z]*(:%[0-9A-Fa-f]{2}|:[!$&-.0-;=?-Z_a-z~]|[/?])|\?)(%[0-9A-Fa-f]{2}|[!$&-;=?-Z_a-z~])*|([A-Za-z][+\-.0-9A-Za-z]*:)?\/((%[0-9A-Fa-f]{2}|\/((%[0-9A-Fa-f]{2}|[!$&-.0-9;=A-Z_a-z~])+|(\[(([Vv][0-9A-Fa-f]+\.[!$&-.0-;=A-Z_a-z~]+)?|[.0-:A-Fa-f]+)\])?)(:\d*)?[/?]|[!$&-.0-;=?-Z_a-z~])(%[0-9A-Fa-f]{2}|[!$&-;=?-Z_a-z~])*|\/((%[0-9A-Fa-f]{2}|[!$&-.0-9;=A-Z_a-z~])+(:\d*)?|(\[(([Vv][0-9A-Fa-f]+\.[!$&-.0-;=A-Z_a-z~]+)?|[.0-:A-Fa-f]+)\])?:\d*|\[(([Vv][0-9A-Fa-f]+\.[!$&-.0-;=A-Z_a-z~]+)?|[.0-:A-Fa-f]+)\])?)?|[A-Za-z][+\-.0-9A-Za-z]*:?)?$/,
+
+  'color': /^(#?([0-9A-Fa-f]{3}){1,2}\b|aqua|black|blue|fuchsia|gray|green|lime|maroon|navy|olive|orange|purple|red|silver|teal|white|yellow|(rgb\(\s*\b([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\b\s*,\s*\b([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\b\s*,\s*\b([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\b\s*\))|(rgb\(\s*(\d?\d%|100%)+\s*,\s*(\d?\d%|100%)+\s*,\s*(\d?\d%|100%)+\s*\)))$/,
+
+  // hostname regex from: http://stackoverflow.com/a/1420225/5628
+  'hostname': /^(?=.{1,255}$)[0-9A-Za-z](?:(?:[0-9A-Za-z]|-){0,61}[0-9A-Za-z])?(?:\.[0-9A-Za-z](?:(?:[0-9A-Za-z]|-){0,61}[0-9A-Za-z])?)*\.?$/,
+  'host-name': /^(?=.{1,255}$)[0-9A-Za-z](?:(?:[0-9A-Za-z]|-){0,61}[0-9A-Za-z])?(?:\.[0-9A-Za-z](?:(?:[0-9A-Za-z]|-){0,61}[0-9A-Za-z])?)*\.?$/,
+
+  'alpha': /^[a-zA-Z]+$/,
+  'alphanumeric': /^[a-zA-Z0-9]+$/,
+  'utc-millisec': function (input) {
+    return (typeof input === 'string') && parseFloat(input) === parseInt(input, 10) && !isNaN(input);
+  },
+  'regex': function (input) {
+    var result = true;
+    try {
+      new RegExp(input);
+    } catch (e) {
+      result = false;
     }
-    return `<i title="${title}">${str}</i>`;
+    return result;
+  },
+  'style': /\s*(.+?):\s*([^;]+);?/,
+  'phone': /^\+(?:[0-9] ?){6,14}[0-9]$/,
 };
+
+FORMAT_REGEXPS.regexp = FORMAT_REGEXPS.regex;
+FORMAT_REGEXPS.pattern = FORMAT_REGEXPS.regex;
+FORMAT_REGEXPS.ipv4 = FORMAT_REGEXPS['ip-address'];
+
+exports.isFormat = function isFormat (input, format, validator) {
+  if (typeof input === 'string' && FORMAT_REGEXPS[format] !== undefined) {
+    if (FORMAT_REGEXPS[format] instanceof RegExp) {
+      return FORMAT_REGEXPS[format].test(input);
+    }
+    if (typeof FORMAT_REGEXPS[format] === 'function') {
+      return FORMAT_REGEXPS[format](input);
+    }
+  } else if (validator && validator.customFormats &&
+      typeof validator.customFormats[format] === 'function') {
+    return validator.customFormats[format](input);
+  }
+  return true;
+};
+
+var makeSuffix = exports.makeSuffix = function makeSuffix (key) {
+  key = key.toString();
+  // This function could be capable of outputting valid a ECMAScript string, but the
+  // resulting code for testing which form to use would be tens of thousands of characters long
+  // That means this will use the name form for some illegal forms
+  if (!key.match(/[.\s\[\]]/) && !key.match(/^[\d]/)) {
+    return '.' + key;
+  }
+  if (key.match(/^\d+$/)) {
+    return '[' + key + ']';
+  }
+  return '[' + JSON.stringify(key) + ']';
+};
+
+exports.deepCompareStrict = function deepCompareStrict (a, b) {
+  if (typeof a !== typeof b) {
+    return false;
+  }
+  if (Array.isArray(a)) {
+    if (!Array.isArray(b)) {
+      return false;
+    }
+    if (a.length !== b.length) {
+      return false;
+    }
+    return a.every(function (v, i) {
+      return deepCompareStrict(a[i], b[i]);
+    });
+  }
+  if (typeof a === 'object') {
+    if (!a || !b) {
+      return a === b;
+    }
+    var aKeys = Object.keys(a);
+    var bKeys = Object.keys(b);
+    if (aKeys.length !== bKeys.length) {
+      return false;
+    }
+    return aKeys.every(function (v) {
+      return deepCompareStrict(a[v], b[v]);
+    });
+  }
+  return a === b;
+};
+
+function deepMerger (target, dst, e, i) {
+  if (typeof e === 'object') {
+    dst[i] = deepMerge(target[i], e);
+  } else {
+    if (target.indexOf(e) === -1) {
+      dst.push(e);
+    }
+  }
+}
+
+function copyist (src, dst, key) {
+  dst[key] = src[key];
+}
+
+function copyistWithDeepMerge (target, src, dst, key) {
+  if (typeof src[key] !== 'object' || !src[key]) {
+    dst[key] = src[key];
+  }
+  else {
+    if (!target[key]) {
+      dst[key] = src[key];
+    } else {
+      dst[key] = deepMerge(target[key], src[key]);
+    }
+  }
+}
+
+function deepMerge (target, src) {
+  var array = Array.isArray(src);
+  var dst = array && [] || {};
+
+  if (array) {
+    target = target || [];
+    dst = dst.concat(target);
+    src.forEach(deepMerger.bind(null, target, dst));
+  } else {
+    if (target && typeof target === 'object') {
+      Object.keys(target).forEach(copyist.bind(null, target, dst));
+    }
+    Object.keys(src).forEach(copyistWithDeepMerge.bind(null, target, src, dst));
+  }
+
+  return dst;
+}
+
+module.exports.deepMerge = deepMerge;
+
+/**
+ * Validates instance against the provided schema
+ * Implements URI+JSON Pointer encoding, e.g. "%7e"="~0"=>"~", "~1"="%2f"=>"/"
+ * @param o
+ * @param s The path to walk o along
+ * @return any
+ */
+exports.objectGetPath = function objectGetPath(o, s) {
+  var parts = s.split('/').slice(1);
+  var k;
+  while (typeof (k=parts.shift()) == 'string') {
+    var n = decodeURIComponent(k.replace(/~0/,'~').replace(/~1/g,'/'));
+    if (!(n in o)) return;
+    o = o[n];
+  }
+  return o;
+};
+
+function pathEncoder (v) {
+  return '/'+encodeURIComponent(v).replace(/~/g,'%7E');
+}
+/**
+ * Accept an Array of property names and return a JSON Pointer URI fragment
+ * @param Array a
+ * @return {String}
+ */
+exports.encodePath = function encodePointer(a){
+  // ~ must be encoded explicitly because hacks
+  // the slash is encoded by encodeURIComponent
+  return a.map(pathEncoder).join('');
+};
+
+
+/**
+ * Calculate the number of decimal places a number uses
+ * We need this to get correct results out of multipleOf and divisibleBy
+ * when either figure is has decimal places, due to IEEE-754 float issues.
+ * @param number
+ * @returns {number}
+ */
+exports.getDecimalPlaces = function getDecimalPlaces(number) {
+
+  var decimalPlaces = 0;
+  if (isNaN(number)) return decimalPlaces;
+
+  if (typeof number !== 'number') {
+    number = Number(number);
+  }
+
+  var parts = number.toString().split('e');
+  if (parts.length === 2) {
+    if (parts[1][0] !== '-') {
+      return decimalPlaces;
+    } else {
+      decimalPlaces = Number(parts[1].slice(1));
+    }
+  }
+
+  var decimalParts = parts[0].split('.');
+  if (decimalParts.length === 2) {
+    decimalPlaces += decimalParts[1].length;
+  }
+
+  return decimalPlaces;
+};
+
+exports.isSchema = function isSchema(val){
+  return (typeof val === 'object' && val) || (typeof val === 'boolean');
+};
+
 
 
 /***/ }),
 
-/***/ 617:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ 3978:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
 
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.cardLink = void 0;
-const projectLink_1 = __webpack_require__(520);
-exports.cardLink = (card, projectWithConfig) => {
-    return `${projectLink_1.projectLink(projectWithConfig)}#card-${card.id}`;
+
+var Validator = module.exports.Validator = __webpack_require__(8669);
+
+module.exports.ValidatorResult = __webpack_require__(4801).ValidatorResult;
+module.exports.ValidationError = __webpack_require__(4801).ValidationError;
+module.exports.SchemaError = __webpack_require__(4801).SchemaError;
+module.exports.SchemaScanResult = __webpack_require__(9534).SchemaScanResult;
+module.exports.scan = __webpack_require__(9534).scan;
+
+module.exports.validate = function (instance, schema, options) {
+  var v = new Validator();
+  return v.validate(instance, schema, options);
 };
 
 
 /***/ }),
 
-/***/ 618:
-/***/ (function(__unusedmodule, exports) {
+/***/ 9534:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
 
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.toLowerCase = void 0;
-exports.toLowerCase = (str) => {
-    return str.toLowerCase();
+
+var urilib = __webpack_require__(8835);
+var helpers = __webpack_require__(4801);
+
+module.exports.SchemaScanResult = SchemaScanResult;
+function SchemaScanResult(found, ref){
+  this.id = found;
+  this.ref = ref;
+}
+
+/**
+ * Adds a schema with a certain urn to the Validator instance.
+ * @param string uri
+ * @param object schema
+ * @return {Object}
+ */
+module.exports.scan = function scan(base, schema){
+  function scanSchema(baseuri, schema){
+    if(!schema || typeof schema!='object') return;
+    // Mark all referenced schemas so we can tell later which schemas are referred to, but never defined
+    if(schema.$ref){
+      var resolvedUri = urilib.resolve(baseuri, schema.$ref);
+      ref[resolvedUri] = ref[resolvedUri] ? ref[resolvedUri]+1 : 0;
+      return;
+    }
+    var id = schema.$id || schema.id;
+    var ourBase = id ? urilib.resolve(baseuri, id) : baseuri;
+    if (ourBase) {
+      // If there's no fragment, append an empty one
+      if(ourBase.indexOf('#')<0) ourBase += '#';
+      if(found[ourBase]){
+        if(!helpers.deepCompareStrict(found[ourBase], schema)){
+          throw new Error('Schema <'+ourBase+'> already exists with different definition');
+        }
+        return found[ourBase];
+      }
+      found[ourBase] = schema;
+      // strip trailing fragment
+      if(ourBase[ourBase.length-1]=='#'){
+        found[ourBase.substring(0, ourBase.length-1)] = schema;
+      }
+    }
+    scanArray(ourBase+'/items', (Array.isArray(schema.items)?schema.items:[schema.items]));
+    scanArray(ourBase+'/extends', (Array.isArray(schema.extends)?schema.extends:[schema.extends]));
+    scanSchema(ourBase+'/additionalItems', schema.additionalItems);
+    scanObject(ourBase+'/properties', schema.properties);
+    scanSchema(ourBase+'/additionalProperties', schema.additionalProperties);
+    scanObject(ourBase+'/definitions', schema.definitions);
+    scanObject(ourBase+'/patternProperties', schema.patternProperties);
+    scanObject(ourBase+'/dependencies', schema.dependencies);
+    scanArray(ourBase+'/disallow', schema.disallow);
+    scanArray(ourBase+'/allOf', schema.allOf);
+    scanArray(ourBase+'/anyOf', schema.anyOf);
+    scanArray(ourBase+'/oneOf', schema.oneOf);
+    scanSchema(ourBase+'/not', schema.not);
+  }
+  function scanArray(baseuri, schemas){
+    if(!Array.isArray(schemas)) return;
+    for(var i=0; i<schemas.length; i++){
+      scanSchema(baseuri+'/'+i, schemas[i]);
+    }
+  }
+  function scanObject(baseuri, schemas){
+    if(!schemas || typeof schemas!='object') return;
+    for(var p in schemas){
+      scanSchema(baseuri+'/'+p, schemas[p]);
+    }
+  }
+
+  var found = {};
+  var ref = {};
+  scanSchema(base, schema);
+  return new SchemaScanResult(found, ref);
 };
 
 
 /***/ }),
 
-/***/ 622:
-/***/ (function(module) {
+/***/ 8669:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-module.exports = require("path");
+"use strict";
+
+
+var urilib = __webpack_require__(8835);
+
+var attribute = __webpack_require__(1568);
+var helpers = __webpack_require__(4801);
+var scanSchema = __webpack_require__(9534).scan;
+var ValidatorResult = helpers.ValidatorResult;
+var SchemaError = helpers.SchemaError;
+var SchemaContext = helpers.SchemaContext;
+//var anonymousBase = 'vnd.jsonschema:///';
+var anonymousBase = '/';
+
+/**
+ * Creates a new Validator object
+ * @name Validator
+ * @constructor
+ */
+var Validator = function Validator () {
+  // Allow a validator instance to override global custom formats or to have their
+  // own custom formats.
+  this.customFormats = Object.create(Validator.prototype.customFormats);
+  this.schemas = {};
+  this.unresolvedRefs = [];
+
+  // Use Object.create to make this extensible without Validator instances stepping on each other's toes.
+  this.types = Object.create(types);
+  this.attributes = Object.create(attribute.validators);
+};
+
+// Allow formats to be registered globally.
+Validator.prototype.customFormats = {};
+
+// Hint at the presence of a property
+Validator.prototype.schemas = null;
+Validator.prototype.types = null;
+Validator.prototype.attributes = null;
+Validator.prototype.unresolvedRefs = null;
+
+/**
+ * Adds a schema with a certain urn to the Validator instance.
+ * @param schema
+ * @param urn
+ * @return {Object}
+ */
+Validator.prototype.addSchema = function addSchema (schema, base) {
+  var self = this;
+  if (!schema) {
+    return null;
+  }
+  var scan = scanSchema(base||anonymousBase, schema);
+  var ourUri = base || schema.id;
+  for(var uri in scan.id){
+    this.schemas[uri] = scan.id[uri];
+  }
+  for(var uri in scan.ref){
+    this.unresolvedRefs.push(uri);
+  }
+  this.unresolvedRefs = this.unresolvedRefs.filter(function(uri){
+    return typeof self.schemas[uri]==='undefined';
+  });
+  return this.schemas[ourUri];
+};
+
+Validator.prototype.addSubSchemaArray = function addSubSchemaArray(baseuri, schemas) {
+  if(!Array.isArray(schemas)) return;
+  for(var i=0; i<schemas.length; i++){
+    this.addSubSchema(baseuri, schemas[i]);
+  }
+};
+
+Validator.prototype.addSubSchemaObject = function addSubSchemaArray(baseuri, schemas) {
+  if(!schemas || typeof schemas!='object') return;
+  for(var p in schemas){
+    this.addSubSchema(baseuri, schemas[p]);
+  }
+};
+
+
+
+/**
+ * Sets all the schemas of the Validator instance.
+ * @param schemas
+ */
+Validator.prototype.setSchemas = function setSchemas (schemas) {
+  this.schemas = schemas;
+};
+
+/**
+ * Returns the schema of a certain urn
+ * @param urn
+ */
+Validator.prototype.getSchema = function getSchema (urn) {
+  return this.schemas[urn];
+};
+
+/**
+ * Validates instance against the provided schema
+ * @param instance
+ * @param schema
+ * @param [options]
+ * @param [ctx]
+ * @return {Array}
+ */
+Validator.prototype.validate = function validate (instance, schema, options, ctx) {
+  if((typeof schema !== 'boolean' && typeof schema !== 'object') || schema === null){
+    throw new SchemaError('Expected `schema` to be an object or boolean');
+  }
+  if (!options) {
+    options = {};
+  }
+  // This will work so long as the function at uri.resolve() will resolve a relative URI to a relative URI
+  var id = schema.$id || schema.id;
+  var base = urilib.resolve(options.base||anonymousBase, id||'');
+  if(!ctx){
+    ctx = new SchemaContext(schema, options, [], base, Object.create(this.schemas));
+    if (!ctx.schemas[base]) {
+      ctx.schemas[base] = schema;
+    }
+    var found = scanSchema(base, schema);
+    for(var n in found.id){
+      var sch = found.id[n];
+      ctx.schemas[n] = sch;
+    }
+  }
+  var result = this.validateSchema(instance, schema, options, ctx);
+  if (!result) {
+    throw new Error('Result undefined');
+  }
+  return result;
+};
+
+/**
+* @param Object schema
+* @return mixed schema uri or false
+*/
+function shouldResolve(schema) {
+  var ref = (typeof schema === 'string') ? schema : schema.$ref;
+  if (typeof ref=='string') return ref;
+  return false;
+}
+
+/**
+ * Validates an instance against the schema (the actual work horse)
+ * @param instance
+ * @param schema
+ * @param options
+ * @param ctx
+ * @private
+ * @return {ValidatorResult}
+ */
+Validator.prototype.validateSchema = function validateSchema (instance, schema, options, ctx) {
+  var result = new ValidatorResult(instance, schema, options, ctx);
+
+  // Support for the true/false schemas
+  if(typeof schema==='boolean') {
+    if(schema===true){
+      // `true` is always valid
+      schema = {};
+    }else if(schema===false){
+      // `false` is always invalid
+      schema = {type: []};
+    }
+  }else if(!schema){
+    // This might be a string
+    throw new Error("schema is undefined");
+  }
+
+  if (schema['extends']) {
+    if (Array.isArray(schema['extends'])) {
+      var schemaobj = {schema: schema, ctx: ctx};
+      schema['extends'].forEach(this.schemaTraverser.bind(this, schemaobj));
+      schema = schemaobj.schema;
+      schemaobj.schema = null;
+      schemaobj.ctx = null;
+      schemaobj = null;
+    } else {
+      schema = helpers.deepMerge(schema, this.superResolve(schema['extends'], ctx));
+    }
+  }
+
+  // If passed a string argument, load that schema URI
+  var switchSchema = shouldResolve(schema);
+  if (switchSchema) {
+    var resolved = this.resolve(schema, switchSchema, ctx);
+    var subctx = new SchemaContext(resolved.subschema, options, ctx.path, resolved.switchSchema, ctx.schemas);
+    return this.validateSchema(instance, resolved.subschema, options, subctx);
+  }
+
+  var skipAttributes = options && options.skipAttributes || [];
+  // Validate each schema attribute against the instance
+  for (var key in schema) {
+    if (!attribute.ignoreProperties[key] && skipAttributes.indexOf(key) < 0) {
+      var validatorErr = null;
+      var validator = this.attributes[key];
+      if (validator) {
+        validatorErr = validator.call(this, instance, schema, options, ctx);
+      } else if (options.allowUnknownAttributes === false) {
+        // This represents an error with the schema itself, not an invalid instance
+        throw new SchemaError("Unsupported attribute: " + key, schema);
+      }
+      if (validatorErr) {
+        result.importErrors(validatorErr);
+      }
+    }
+  }
+
+  if (typeof options.rewrite == 'function') {
+    var value = options.rewrite.call(this, instance, schema, options, ctx);
+    result.instance = value;
+  }
+  return result;
+};
+
+/**
+* @private
+* @param Object schema
+* @param SchemaContext ctx
+* @returns Object schema or resolved schema
+*/
+Validator.prototype.schemaTraverser = function schemaTraverser (schemaobj, s) {
+  schemaobj.schema = helpers.deepMerge(schemaobj.schema, this.superResolve(s, schemaobj.ctx));
+};
+
+/**
+* @private
+* @param Object schema
+* @param SchemaContext ctx
+* @returns Object schema or resolved schema
+*/
+Validator.prototype.superResolve = function superResolve (schema, ctx) {
+  var ref = shouldResolve(schema);
+  if(ref) {
+    return this.resolve(schema, ref, ctx).subschema;
+  }
+  return schema;
+};
+
+/**
+* @private
+* @param Object schema
+* @param Object switchSchema
+* @param SchemaContext ctx
+* @return Object resolved schemas {subschema:String, switchSchema: String}
+* @throws SchemaError
+*/
+Validator.prototype.resolve = function resolve (schema, switchSchema, ctx) {
+  switchSchema = ctx.resolve(switchSchema);
+  // First see if the schema exists under the provided URI
+  if (ctx.schemas[switchSchema]) {
+    return {subschema: ctx.schemas[switchSchema], switchSchema: switchSchema};
+  }
+  // Else try walking the property pointer
+  var parsed = urilib.parse(switchSchema);
+  var fragment = parsed && parsed.hash;
+  var document = fragment && fragment.length && switchSchema.substr(0, switchSchema.length - fragment.length);
+  if (!document || !ctx.schemas[document]) {
+    throw new SchemaError("no such schema <" + switchSchema + ">", schema);
+  }
+  var subschema = helpers.objectGetPath(ctx.schemas[document], fragment.substr(1));
+  if(subschema===undefined){
+    throw new SchemaError("no such schema " + fragment + " located in <" + document + ">", schema);
+  }
+  return {subschema: subschema, switchSchema: switchSchema};
+};
+
+/**
+ * Tests whether the instance if of a certain type.
+ * @private
+ * @param instance
+ * @param schema
+ * @param options
+ * @param ctx
+ * @param type
+ * @return {boolean}
+ */
+Validator.prototype.testType = function validateType (instance, schema, options, ctx, type) {
+  if(type===undefined){
+    return;
+  }else if(type===null){
+    throw new SchemaError('Unexpected null in "type" keyword');
+  }
+  if (typeof this.types[type] == 'function') {
+    return this.types[type].call(this, instance);
+  }
+  if (type && typeof type == 'object') {
+    var res = this.validateSchema(instance, type, options, ctx);
+    return res === undefined || !(res && res.errors.length);
+  }
+  // Undefined or properties not on the list are acceptable, same as not being defined
+  return true;
+};
+
+var types = Validator.prototype.types = {};
+types.string = function testString (instance) {
+  return typeof instance == 'string';
+};
+types.number = function testNumber (instance) {
+  // isFinite returns false for NaN, Infinity, and -Infinity
+  return typeof instance == 'number' && isFinite(instance);
+};
+types.integer = function testInteger (instance) {
+  return (typeof instance == 'number') && instance % 1 === 0;
+};
+types.boolean = function testBoolean (instance) {
+  return typeof instance == 'boolean';
+};
+types.array = function testArray (instance) {
+  return Array.isArray(instance);
+};
+types['null'] = function testNull (instance) {
+  return instance === null;
+};
+types.date = function testDate (instance) {
+  return instance instanceof Date;
+};
+types.any = function testAny (instance) {
+  return true;
+};
+types.object = function testObject (instance) {
+  // TODO: fix this - see #15
+  return instance && (typeof instance === 'object') && !(Array.isArray(instance)) && !(instance instanceof Date);
+};
+
+module.exports = Validator;
+
 
 /***/ }),
 
-/***/ 623:
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ 9623:
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 /* module decorator */ module = __webpack_require__.nmd(module);
 //! moment.js
@@ -7797,7 +7729,7 @@ module.exports = require("path");
 
 ;(function (global, factory) {
      true ? module.exports = factory() :
-    undefined
+    0
 }(this, (function () { 'use strict';
 
     var hookCallback;
@@ -13462,1866 +13394,2020 @@ module.exports = require("path");
 
 /***/ }),
 
-/***/ 624:
-/***/ (function(__unusedmodule, exports) {
+/***/ 467:
+/***/ ((module, exports, __webpack_require__) => {
 
 "use strict";
 
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.notEmpty = void 0;
-exports.notEmpty = (value) => {
-    return value !== null && value !== undefined;
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+
+function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
+
+var Stream = _interopDefault(__webpack_require__(2413));
+var http = _interopDefault(__webpack_require__(8605));
+var Url = _interopDefault(__webpack_require__(8835));
+var https = _interopDefault(__webpack_require__(7211));
+var zlib = _interopDefault(__webpack_require__(8761));
+
+// Based on https://github.com/tmpvar/jsdom/blob/aa85b2abf07766ff7bf5c1f6daafb3726f2f2db5/lib/jsdom/living/blob.js
+
+// fix for "Readable" isn't a named export issue
+const Readable = Stream.Readable;
+
+const BUFFER = Symbol('buffer');
+const TYPE = Symbol('type');
+
+class Blob {
+	constructor() {
+		this[TYPE] = '';
+
+		const blobParts = arguments[0];
+		const options = arguments[1];
+
+		const buffers = [];
+		let size = 0;
+
+		if (blobParts) {
+			const a = blobParts;
+			const length = Number(a.length);
+			for (let i = 0; i < length; i++) {
+				const element = a[i];
+				let buffer;
+				if (element instanceof Buffer) {
+					buffer = element;
+				} else if (ArrayBuffer.isView(element)) {
+					buffer = Buffer.from(element.buffer, element.byteOffset, element.byteLength);
+				} else if (element instanceof ArrayBuffer) {
+					buffer = Buffer.from(element);
+				} else if (element instanceof Blob) {
+					buffer = element[BUFFER];
+				} else {
+					buffer = Buffer.from(typeof element === 'string' ? element : String(element));
+				}
+				size += buffer.length;
+				buffers.push(buffer);
+			}
+		}
+
+		this[BUFFER] = Buffer.concat(buffers);
+
+		let type = options && options.type !== undefined && String(options.type).toLowerCase();
+		if (type && !/[^\u0020-\u007E]/.test(type)) {
+			this[TYPE] = type;
+		}
+	}
+	get size() {
+		return this[BUFFER].length;
+	}
+	get type() {
+		return this[TYPE];
+	}
+	text() {
+		return Promise.resolve(this[BUFFER].toString());
+	}
+	arrayBuffer() {
+		const buf = this[BUFFER];
+		const ab = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
+		return Promise.resolve(ab);
+	}
+	stream() {
+		const readable = new Readable();
+		readable._read = function () {};
+		readable.push(this[BUFFER]);
+		readable.push(null);
+		return readable;
+	}
+	toString() {
+		return '[object Blob]';
+	}
+	slice() {
+		const size = this.size;
+
+		const start = arguments[0];
+		const end = arguments[1];
+		let relativeStart, relativeEnd;
+		if (start === undefined) {
+			relativeStart = 0;
+		} else if (start < 0) {
+			relativeStart = Math.max(size + start, 0);
+		} else {
+			relativeStart = Math.min(start, size);
+		}
+		if (end === undefined) {
+			relativeEnd = size;
+		} else if (end < 0) {
+			relativeEnd = Math.max(size + end, 0);
+		} else {
+			relativeEnd = Math.min(end, size);
+		}
+		const span = Math.max(relativeEnd - relativeStart, 0);
+
+		const buffer = this[BUFFER];
+		const slicedBuffer = buffer.slice(relativeStart, relativeStart + span);
+		const blob = new Blob([], { type: arguments[2] });
+		blob[BUFFER] = slicedBuffer;
+		return blob;
+	}
+}
+
+Object.defineProperties(Blob.prototype, {
+	size: { enumerable: true },
+	type: { enumerable: true },
+	slice: { enumerable: true }
+});
+
+Object.defineProperty(Blob.prototype, Symbol.toStringTag, {
+	value: 'Blob',
+	writable: false,
+	enumerable: false,
+	configurable: true
+});
+
+/**
+ * fetch-error.js
+ *
+ * FetchError interface for operational errors
+ */
+
+/**
+ * Create FetchError instance
+ *
+ * @param   String      message      Error message for human
+ * @param   String      type         Error type for machine
+ * @param   String      systemError  For Node.js system error
+ * @return  FetchError
+ */
+function FetchError(message, type, systemError) {
+  Error.call(this, message);
+
+  this.message = message;
+  this.type = type;
+
+  // when err.type is `system`, err.code contains system error code
+  if (systemError) {
+    this.code = this.errno = systemError.code;
+  }
+
+  // hide custom error implementation details from end-users
+  Error.captureStackTrace(this, this.constructor);
+}
+
+FetchError.prototype = Object.create(Error.prototype);
+FetchError.prototype.constructor = FetchError;
+FetchError.prototype.name = 'FetchError';
+
+let convert;
+try {
+	convert = __webpack_require__(2877).convert;
+} catch (e) {}
+
+const INTERNALS = Symbol('Body internals');
+
+// fix an issue where "PassThrough" isn't a named export for node <10
+const PassThrough = Stream.PassThrough;
+
+/**
+ * Body mixin
+ *
+ * Ref: https://fetch.spec.whatwg.org/#body
+ *
+ * @param   Stream  body  Readable stream
+ * @param   Object  opts  Response options
+ * @return  Void
+ */
+function Body(body) {
+	var _this = this;
+
+	var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+	    _ref$size = _ref.size;
+
+	let size = _ref$size === undefined ? 0 : _ref$size;
+	var _ref$timeout = _ref.timeout;
+	let timeout = _ref$timeout === undefined ? 0 : _ref$timeout;
+
+	if (body == null) {
+		// body is undefined or null
+		body = null;
+	} else if (isURLSearchParams(body)) {
+		// body is a URLSearchParams
+		body = Buffer.from(body.toString());
+	} else if (isBlob(body)) ; else if (Buffer.isBuffer(body)) ; else if (Object.prototype.toString.call(body) === '[object ArrayBuffer]') {
+		// body is ArrayBuffer
+		body = Buffer.from(body);
+	} else if (ArrayBuffer.isView(body)) {
+		// body is ArrayBufferView
+		body = Buffer.from(body.buffer, body.byteOffset, body.byteLength);
+	} else if (body instanceof Stream) ; else {
+		// none of the above
+		// coerce to string then buffer
+		body = Buffer.from(String(body));
+	}
+	this[INTERNALS] = {
+		body,
+		disturbed: false,
+		error: null
+	};
+	this.size = size;
+	this.timeout = timeout;
+
+	if (body instanceof Stream) {
+		body.on('error', function (err) {
+			const error = err.name === 'AbortError' ? err : new FetchError(`Invalid response body while trying to fetch ${_this.url}: ${err.message}`, 'system', err);
+			_this[INTERNALS].error = error;
+		});
+	}
+}
+
+Body.prototype = {
+	get body() {
+		return this[INTERNALS].body;
+	},
+
+	get bodyUsed() {
+		return this[INTERNALS].disturbed;
+	},
+
+	/**
+  * Decode response as ArrayBuffer
+  *
+  * @return  Promise
+  */
+	arrayBuffer() {
+		return consumeBody.call(this).then(function (buf) {
+			return buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
+		});
+	},
+
+	/**
+  * Return raw response as Blob
+  *
+  * @return Promise
+  */
+	blob() {
+		let ct = this.headers && this.headers.get('content-type') || '';
+		return consumeBody.call(this).then(function (buf) {
+			return Object.assign(
+			// Prevent copying
+			new Blob([], {
+				type: ct.toLowerCase()
+			}), {
+				[BUFFER]: buf
+			});
+		});
+	},
+
+	/**
+  * Decode response as json
+  *
+  * @return  Promise
+  */
+	json() {
+		var _this2 = this;
+
+		return consumeBody.call(this).then(function (buffer) {
+			try {
+				return JSON.parse(buffer.toString());
+			} catch (err) {
+				return Body.Promise.reject(new FetchError(`invalid json response body at ${_this2.url} reason: ${err.message}`, 'invalid-json'));
+			}
+		});
+	},
+
+	/**
+  * Decode response as text
+  *
+  * @return  Promise
+  */
+	text() {
+		return consumeBody.call(this).then(function (buffer) {
+			return buffer.toString();
+		});
+	},
+
+	/**
+  * Decode response as buffer (non-spec api)
+  *
+  * @return  Promise
+  */
+	buffer() {
+		return consumeBody.call(this);
+	},
+
+	/**
+  * Decode response as text, while automatically detecting the encoding and
+  * trying to decode to UTF-8 (non-spec api)
+  *
+  * @return  Promise
+  */
+	textConverted() {
+		var _this3 = this;
+
+		return consumeBody.call(this).then(function (buffer) {
+			return convertBody(buffer, _this3.headers);
+		});
+	}
 };
 
-
-/***/ }),
-
-/***/ 631:
-/***/ (function(module) {
-
-module.exports = require("net");
-
-/***/ }),
-
-/***/ 668:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, '__esModule', { value: true });
-
-var request = __webpack_require__(234);
-var universalUserAgent = __webpack_require__(429);
-
-const VERSION = "4.5.6";
-
-class GraphqlError extends Error {
-  constructor(request, response) {
-    const message = response.data.errors[0].message;
-    super(message);
-    Object.assign(this, response.data);
-    Object.assign(this, {
-      headers: response.headers
-    });
-    this.name = "GraphqlError";
-    this.request = request; // Maintains proper stack trace (only available on V8)
-
-    /* istanbul ignore next */
-
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, this.constructor);
-    }
-  }
-
-}
-
-const NON_VARIABLE_OPTIONS = ["method", "baseUrl", "url", "headers", "request", "query", "mediaType"];
-const GHES_V3_SUFFIX_REGEX = /\/api\/v3\/?$/;
-function graphql(request, query, options) {
-  if (typeof query === "string" && options && "query" in options) {
-    return Promise.reject(new Error(`[@octokit/graphql] "query" cannot be used as variable name`));
-  }
-
-  const parsedOptions = typeof query === "string" ? Object.assign({
-    query
-  }, options) : query;
-  const requestOptions = Object.keys(parsedOptions).reduce((result, key) => {
-    if (NON_VARIABLE_OPTIONS.includes(key)) {
-      result[key] = parsedOptions[key];
-      return result;
-    }
-
-    if (!result.variables) {
-      result.variables = {};
-    }
-
-    result.variables[key] = parsedOptions[key];
-    return result;
-  }, {}); // workaround for GitHub Enterprise baseUrl set with /api/v3 suffix
-  // https://github.com/octokit/auth-app.js/issues/111#issuecomment-657610451
-
-  const baseUrl = parsedOptions.baseUrl || request.endpoint.DEFAULTS.baseUrl;
-
-  if (GHES_V3_SUFFIX_REGEX.test(baseUrl)) {
-    requestOptions.url = baseUrl.replace(GHES_V3_SUFFIX_REGEX, "/api/graphql");
-  }
-
-  return request(requestOptions).then(response => {
-    if (response.data.errors) {
-      const headers = {};
-
-      for (const key of Object.keys(response.headers)) {
-        headers[key] = response.headers[key];
-      }
-
-      throw new GraphqlError(requestOptions, {
-        headers,
-        data: response.data
-      });
-    }
-
-    return response.data.data;
-  });
-}
-
-function withDefaults(request$1, newDefaults) {
-  const newRequest = request$1.defaults(newDefaults);
-
-  const newApi = (query, options) => {
-    return graphql(newRequest, query, options);
-  };
-
-  return Object.assign(newApi, {
-    defaults: withDefaults.bind(null, newRequest),
-    endpoint: request.request.endpoint
-  });
-}
-
-const graphql$1 = withDefaults(request.request, {
-  headers: {
-    "user-agent": `octokit-graphql.js/${VERSION} ${universalUserAgent.getUserAgent()}`
-  },
-  method: "POST",
-  url: "/graphql"
+// In browsers, all properties are enumerable.
+Object.defineProperties(Body.prototype, {
+	body: { enumerable: true },
+	bodyUsed: { enumerable: true },
+	arrayBuffer: { enumerable: true },
+	blob: { enumerable: true },
+	json: { enumerable: true },
+	text: { enumerable: true }
 });
-function withCustomRequest(customRequest) {
-  return withDefaults(customRequest, {
-    method: "POST",
-    url: "/graphql"
-  });
+
+Body.mixIn = function (proto) {
+	for (const name of Object.getOwnPropertyNames(Body.prototype)) {
+		// istanbul ignore else: future proof
+		if (!(name in proto)) {
+			const desc = Object.getOwnPropertyDescriptor(Body.prototype, name);
+			Object.defineProperty(proto, name, desc);
+		}
+	}
+};
+
+/**
+ * Consume and convert an entire Body to a Buffer.
+ *
+ * Ref: https://fetch.spec.whatwg.org/#concept-body-consume-body
+ *
+ * @return  Promise
+ */
+function consumeBody() {
+	var _this4 = this;
+
+	if (this[INTERNALS].disturbed) {
+		return Body.Promise.reject(new TypeError(`body used already for: ${this.url}`));
+	}
+
+	this[INTERNALS].disturbed = true;
+
+	if (this[INTERNALS].error) {
+		return Body.Promise.reject(this[INTERNALS].error);
+	}
+
+	let body = this.body;
+
+	// body is null
+	if (body === null) {
+		return Body.Promise.resolve(Buffer.alloc(0));
+	}
+
+	// body is blob
+	if (isBlob(body)) {
+		body = body.stream();
+	}
+
+	// body is buffer
+	if (Buffer.isBuffer(body)) {
+		return Body.Promise.resolve(body);
+	}
+
+	// istanbul ignore if: should never happen
+	if (!(body instanceof Stream)) {
+		return Body.Promise.resolve(Buffer.alloc(0));
+	}
+
+	// body is stream
+	// get ready to actually consume the body
+	let accum = [];
+	let accumBytes = 0;
+	let abort = false;
+
+	return new Body.Promise(function (resolve, reject) {
+		let resTimeout;
+
+		// allow timeout on slow response body
+		if (_this4.timeout) {
+			resTimeout = setTimeout(function () {
+				abort = true;
+				reject(new FetchError(`Response timeout while trying to fetch ${_this4.url} (over ${_this4.timeout}ms)`, 'body-timeout'));
+			}, _this4.timeout);
+		}
+
+		// handle stream errors
+		body.on('error', function (err) {
+			if (err.name === 'AbortError') {
+				// if the request was aborted, reject with this Error
+				abort = true;
+				reject(err);
+			} else {
+				// other errors, such as incorrect content-encoding
+				reject(new FetchError(`Invalid response body while trying to fetch ${_this4.url}: ${err.message}`, 'system', err));
+			}
+		});
+
+		body.on('data', function (chunk) {
+			if (abort || chunk === null) {
+				return;
+			}
+
+			if (_this4.size && accumBytes + chunk.length > _this4.size) {
+				abort = true;
+				reject(new FetchError(`content size at ${_this4.url} over limit: ${_this4.size}`, 'max-size'));
+				return;
+			}
+
+			accumBytes += chunk.length;
+			accum.push(chunk);
+		});
+
+		body.on('end', function () {
+			if (abort) {
+				return;
+			}
+
+			clearTimeout(resTimeout);
+
+			try {
+				resolve(Buffer.concat(accum, accumBytes));
+			} catch (err) {
+				// handle streams that have accumulated too much data (issue #414)
+				reject(new FetchError(`Could not create Buffer from response body for ${_this4.url}: ${err.message}`, 'system', err));
+			}
+		});
+	});
 }
 
-exports.graphql = graphql$1;
-exports.withCustomRequest = withCustomRequest;
-//# sourceMappingURL=index.js.map
+/**
+ * Detect buffer encoding and convert to target encoding
+ * ref: http://www.w3.org/TR/2011/WD-html5-20110113/parsing.html#determining-the-character-encoding
+ *
+ * @param   Buffer  buffer    Incoming buffer
+ * @param   String  encoding  Target encoding
+ * @return  String
+ */
+function convertBody(buffer, headers) {
+	if (typeof convert !== 'function') {
+		throw new Error('The package `encoding` must be installed to use the textConverted() function');
+	}
 
+	const ct = headers.get('content-type');
+	let charset = 'utf-8';
+	let res, str;
 
-/***/ }),
+	// header
+	if (ct) {
+		res = /charset=([^;]*)/i.exec(ct);
+	}
 
-/***/ 669:
-/***/ (function(module) {
+	// no charset in content type, peek at response body for at most 1024 bytes
+	str = buffer.slice(0, 1024).toString();
 
-module.exports = require("util");
+	// html5
+	if (!res && str) {
+		res = /<meta.+?charset=(['"])(.+?)\1/i.exec(str);
+	}
 
-/***/ }),
+	// html4
+	if (!res && str) {
+		res = /<meta[\s]+?http-equiv=(['"])content-type\1[\s]+?content=(['"])(.+?)\2/i.exec(str);
+		if (!res) {
+			res = /<meta[\s]+?content=(['"])(.+?)\1[\s]+?http-equiv=(['"])content-type\3/i.exec(str);
+			if (res) {
+				res.pop(); // drop last quote
+			}
+		}
 
-/***/ 670:
-/***/ (function(module) {
+		if (res) {
+			res = /charset=(.*)/i.exec(res.pop());
+		}
+	}
 
-module.exports = register
+	// xml
+	if (!res && str) {
+		res = /<\?xml.+?encoding=(['"])(.+?)\1/i.exec(str);
+	}
 
-function register (state, name, method, options) {
-  if (typeof method !== 'function') {
-    throw new Error('method for before hook must be a function')
-  }
+	// found charset
+	if (res) {
+		charset = res.pop();
 
-  if (!options) {
-    options = {}
-  }
+		// prevent decode issues when sites use incorrect encoding
+		// ref: https://hsivonen.fi/encoding-menu/
+		if (charset === 'gb2312' || charset === 'gbk') {
+			charset = 'gb18030';
+		}
+	}
 
-  if (Array.isArray(name)) {
-    return name.reverse().reduce(function (callback, name) {
-      return register.bind(null, state, name, callback, options)
-    }, method)()
-  }
-
-  return Promise.resolve()
-    .then(function () {
-      if (!state.registry[name]) {
-        return method(options)
-      }
-
-      return (state.registry[name]).reduce(function (method, registered) {
-        return registered.hook.bind(null, method, options)
-      }, method)()
-    })
+	// turn raw buffers into a single utf-8 buffer
+	return convert(buffer, 'UTF-8', charset).toString();
 }
 
+/**
+ * Detect a URLSearchParams object
+ * ref: https://github.com/bitinn/node-fetch/issues/296#issuecomment-307598143
+ *
+ * @param   Object  obj     Object to detect by type or brand
+ * @return  String
+ */
+function isURLSearchParams(obj) {
+	// Duck-typing as a necessary condition.
+	if (typeof obj !== 'object' || typeof obj.append !== 'function' || typeof obj.delete !== 'function' || typeof obj.get !== 'function' || typeof obj.getAll !== 'function' || typeof obj.has !== 'function' || typeof obj.set !== 'function') {
+		return false;
+	}
+
+	// Brand-checking and more duck-typing as optional condition.
+	return obj.constructor.name === 'URLSearchParams' || Object.prototype.toString.call(obj) === '[object URLSearchParams]' || typeof obj.sort === 'function';
+}
+
+/**
+ * Check if `obj` is a W3C `Blob` object (which `File` inherits from)
+ * @param  {*} obj
+ * @return {boolean}
+ */
+function isBlob(obj) {
+	return typeof obj === 'object' && typeof obj.arrayBuffer === 'function' && typeof obj.type === 'string' && typeof obj.stream === 'function' && typeof obj.constructor === 'function' && typeof obj.constructor.name === 'string' && /^(Blob|File)$/.test(obj.constructor.name) && /^(Blob|File)$/.test(obj[Symbol.toStringTag]);
+}
+
+/**
+ * Clone body given Res/Req instance
+ *
+ * @param   Mixed  instance  Response or Request instance
+ * @return  Mixed
+ */
+function clone(instance) {
+	let p1, p2;
+	let body = instance.body;
+
+	// don't allow cloning a used body
+	if (instance.bodyUsed) {
+		throw new Error('cannot clone body after it is used');
+	}
+
+	// check that body is a stream and not form-data object
+	// note: we can't clone the form-data object without having it as a dependency
+	if (body instanceof Stream && typeof body.getBoundary !== 'function') {
+		// tee instance body
+		p1 = new PassThrough();
+		p2 = new PassThrough();
+		body.pipe(p1);
+		body.pipe(p2);
+		// set instance body to teed body and return the other teed body
+		instance[INTERNALS].body = p1;
+		body = p2;
+	}
+
+	return body;
+}
+
+/**
+ * Performs the operation "extract a `Content-Type` value from |object|" as
+ * specified in the specification:
+ * https://fetch.spec.whatwg.org/#concept-bodyinit-extract
+ *
+ * This function assumes that instance.body is present.
+ *
+ * @param   Mixed  instance  Any options.body input
+ */
+function extractContentType(body) {
+	if (body === null) {
+		// body is null
+		return null;
+	} else if (typeof body === 'string') {
+		// body is string
+		return 'text/plain;charset=UTF-8';
+	} else if (isURLSearchParams(body)) {
+		// body is a URLSearchParams
+		return 'application/x-www-form-urlencoded;charset=UTF-8';
+	} else if (isBlob(body)) {
+		// body is blob
+		return body.type || null;
+	} else if (Buffer.isBuffer(body)) {
+		// body is buffer
+		return null;
+	} else if (Object.prototype.toString.call(body) === '[object ArrayBuffer]') {
+		// body is ArrayBuffer
+		return null;
+	} else if (ArrayBuffer.isView(body)) {
+		// body is ArrayBufferView
+		return null;
+	} else if (typeof body.getBoundary === 'function') {
+		// detect form data input from form-data module
+		return `multipart/form-data;boundary=${body.getBoundary()}`;
+	} else if (body instanceof Stream) {
+		// body is stream
+		// can't really do much about this
+		return null;
+	} else {
+		// Body constructor defaults other things to string
+		return 'text/plain;charset=UTF-8';
+	}
+}
+
+/**
+ * The Fetch Standard treats this as if "total bytes" is a property on the body.
+ * For us, we have to explicitly get it with a function.
+ *
+ * ref: https://fetch.spec.whatwg.org/#concept-body-total-bytes
+ *
+ * @param   Body    instance   Instance of Body
+ * @return  Number?            Number of bytes, or null if not possible
+ */
+function getTotalBytes(instance) {
+	const body = instance.body;
+
+
+	if (body === null) {
+		// body is null
+		return 0;
+	} else if (isBlob(body)) {
+		return body.size;
+	} else if (Buffer.isBuffer(body)) {
+		// body is buffer
+		return body.length;
+	} else if (body && typeof body.getLengthSync === 'function') {
+		// detect form data input from form-data module
+		if (body._lengthRetrievers && body._lengthRetrievers.length == 0 || // 1.x
+		body.hasKnownLength && body.hasKnownLength()) {
+			// 2.x
+			return body.getLengthSync();
+		}
+		return null;
+	} else {
+		// body is stream
+		return null;
+	}
+}
+
+/**
+ * Write a Body to a Node.js WritableStream (e.g. http.Request) object.
+ *
+ * @param   Body    instance   Instance of Body
+ * @return  Void
+ */
+function writeToStream(dest, instance) {
+	const body = instance.body;
+
+
+	if (body === null) {
+		// body is null
+		dest.end();
+	} else if (isBlob(body)) {
+		body.stream().pipe(dest);
+	} else if (Buffer.isBuffer(body)) {
+		// body is buffer
+		dest.write(body);
+		dest.end();
+	} else {
+		// body is stream
+		body.pipe(dest);
+	}
+}
+
+// expose Promise
+Body.Promise = global.Promise;
+
+/**
+ * headers.js
+ *
+ * Headers class offers convenient helpers
+ */
+
+const invalidTokenRegex = /[^\^_`a-zA-Z\-0-9!#$%&'*+.|~]/;
+const invalidHeaderCharRegex = /[^\t\x20-\x7e\x80-\xff]/;
+
+function validateName(name) {
+	name = `${name}`;
+	if (invalidTokenRegex.test(name) || name === '') {
+		throw new TypeError(`${name} is not a legal HTTP header name`);
+	}
+}
+
+function validateValue(value) {
+	value = `${value}`;
+	if (invalidHeaderCharRegex.test(value)) {
+		throw new TypeError(`${value} is not a legal HTTP header value`);
+	}
+}
+
+/**
+ * Find the key in the map object given a header name.
+ *
+ * Returns undefined if not found.
+ *
+ * @param   String  name  Header name
+ * @return  String|Undefined
+ */
+function find(map, name) {
+	name = name.toLowerCase();
+	for (const key in map) {
+		if (key.toLowerCase() === name) {
+			return key;
+		}
+	}
+	return undefined;
+}
+
+const MAP = Symbol('map');
+class Headers {
+	/**
+  * Headers class
+  *
+  * @param   Object  headers  Response headers
+  * @return  Void
+  */
+	constructor() {
+		let init = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : undefined;
+
+		this[MAP] = Object.create(null);
+
+		if (init instanceof Headers) {
+			const rawHeaders = init.raw();
+			const headerNames = Object.keys(rawHeaders);
+
+			for (const headerName of headerNames) {
+				for (const value of rawHeaders[headerName]) {
+					this.append(headerName, value);
+				}
+			}
+
+			return;
+		}
+
+		// We don't worry about converting prop to ByteString here as append()
+		// will handle it.
+		if (init == null) ; else if (typeof init === 'object') {
+			const method = init[Symbol.iterator];
+			if (method != null) {
+				if (typeof method !== 'function') {
+					throw new TypeError('Header pairs must be iterable');
+				}
+
+				// sequence<sequence<ByteString>>
+				// Note: per spec we have to first exhaust the lists then process them
+				const pairs = [];
+				for (const pair of init) {
+					if (typeof pair !== 'object' || typeof pair[Symbol.iterator] !== 'function') {
+						throw new TypeError('Each header pair must be iterable');
+					}
+					pairs.push(Array.from(pair));
+				}
+
+				for (const pair of pairs) {
+					if (pair.length !== 2) {
+						throw new TypeError('Each header pair must be a name/value tuple');
+					}
+					this.append(pair[0], pair[1]);
+				}
+			} else {
+				// record<ByteString, ByteString>
+				for (const key of Object.keys(init)) {
+					const value = init[key];
+					this.append(key, value);
+				}
+			}
+		} else {
+			throw new TypeError('Provided initializer must be an object');
+		}
+	}
+
+	/**
+  * Return combined header value given name
+  *
+  * @param   String  name  Header name
+  * @return  Mixed
+  */
+	get(name) {
+		name = `${name}`;
+		validateName(name);
+		const key = find(this[MAP], name);
+		if (key === undefined) {
+			return null;
+		}
+
+		return this[MAP][key].join(', ');
+	}
+
+	/**
+  * Iterate over all headers
+  *
+  * @param   Function  callback  Executed for each item with parameters (value, name, thisArg)
+  * @param   Boolean   thisArg   `this` context for callback function
+  * @return  Void
+  */
+	forEach(callback) {
+		let thisArg = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : undefined;
+
+		let pairs = getHeaders(this);
+		let i = 0;
+		while (i < pairs.length) {
+			var _pairs$i = pairs[i];
+			const name = _pairs$i[0],
+			      value = _pairs$i[1];
+
+			callback.call(thisArg, value, name, this);
+			pairs = getHeaders(this);
+			i++;
+		}
+	}
+
+	/**
+  * Overwrite header values given name
+  *
+  * @param   String  name   Header name
+  * @param   String  value  Header value
+  * @return  Void
+  */
+	set(name, value) {
+		name = `${name}`;
+		value = `${value}`;
+		validateName(name);
+		validateValue(value);
+		const key = find(this[MAP], name);
+		this[MAP][key !== undefined ? key : name] = [value];
+	}
+
+	/**
+  * Append a value onto existing header
+  *
+  * @param   String  name   Header name
+  * @param   String  value  Header value
+  * @return  Void
+  */
+	append(name, value) {
+		name = `${name}`;
+		value = `${value}`;
+		validateName(name);
+		validateValue(value);
+		const key = find(this[MAP], name);
+		if (key !== undefined) {
+			this[MAP][key].push(value);
+		} else {
+			this[MAP][name] = [value];
+		}
+	}
+
+	/**
+  * Check for header name existence
+  *
+  * @param   String   name  Header name
+  * @return  Boolean
+  */
+	has(name) {
+		name = `${name}`;
+		validateName(name);
+		return find(this[MAP], name) !== undefined;
+	}
+
+	/**
+  * Delete all header values given name
+  *
+  * @param   String  name  Header name
+  * @return  Void
+  */
+	delete(name) {
+		name = `${name}`;
+		validateName(name);
+		const key = find(this[MAP], name);
+		if (key !== undefined) {
+			delete this[MAP][key];
+		}
+	}
+
+	/**
+  * Return raw headers (non-spec api)
+  *
+  * @return  Object
+  */
+	raw() {
+		return this[MAP];
+	}
+
+	/**
+  * Get an iterator on keys.
+  *
+  * @return  Iterator
+  */
+	keys() {
+		return createHeadersIterator(this, 'key');
+	}
+
+	/**
+  * Get an iterator on values.
+  *
+  * @return  Iterator
+  */
+	values() {
+		return createHeadersIterator(this, 'value');
+	}
+
+	/**
+  * Get an iterator on entries.
+  *
+  * This is the default iterator of the Headers object.
+  *
+  * @return  Iterator
+  */
+	[Symbol.iterator]() {
+		return createHeadersIterator(this, 'key+value');
+	}
+}
+Headers.prototype.entries = Headers.prototype[Symbol.iterator];
+
+Object.defineProperty(Headers.prototype, Symbol.toStringTag, {
+	value: 'Headers',
+	writable: false,
+	enumerable: false,
+	configurable: true
+});
+
+Object.defineProperties(Headers.prototype, {
+	get: { enumerable: true },
+	forEach: { enumerable: true },
+	set: { enumerable: true },
+	append: { enumerable: true },
+	has: { enumerable: true },
+	delete: { enumerable: true },
+	keys: { enumerable: true },
+	values: { enumerable: true },
+	entries: { enumerable: true }
+});
+
+function getHeaders(headers) {
+	let kind = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'key+value';
+
+	const keys = Object.keys(headers[MAP]).sort();
+	return keys.map(kind === 'key' ? function (k) {
+		return k.toLowerCase();
+	} : kind === 'value' ? function (k) {
+		return headers[MAP][k].join(', ');
+	} : function (k) {
+		return [k.toLowerCase(), headers[MAP][k].join(', ')];
+	});
+}
+
+const INTERNAL = Symbol('internal');
+
+function createHeadersIterator(target, kind) {
+	const iterator = Object.create(HeadersIteratorPrototype);
+	iterator[INTERNAL] = {
+		target,
+		kind,
+		index: 0
+	};
+	return iterator;
+}
+
+const HeadersIteratorPrototype = Object.setPrototypeOf({
+	next() {
+		// istanbul ignore if
+		if (!this || Object.getPrototypeOf(this) !== HeadersIteratorPrototype) {
+			throw new TypeError('Value of `this` is not a HeadersIterator');
+		}
+
+		var _INTERNAL = this[INTERNAL];
+		const target = _INTERNAL.target,
+		      kind = _INTERNAL.kind,
+		      index = _INTERNAL.index;
+
+		const values = getHeaders(target, kind);
+		const len = values.length;
+		if (index >= len) {
+			return {
+				value: undefined,
+				done: true
+			};
+		}
+
+		this[INTERNAL].index = index + 1;
+
+		return {
+			value: values[index],
+			done: false
+		};
+	}
+}, Object.getPrototypeOf(Object.getPrototypeOf([][Symbol.iterator]())));
+
+Object.defineProperty(HeadersIteratorPrototype, Symbol.toStringTag, {
+	value: 'HeadersIterator',
+	writable: false,
+	enumerable: false,
+	configurable: true
+});
+
+/**
+ * Export the Headers object in a form that Node.js can consume.
+ *
+ * @param   Headers  headers
+ * @return  Object
+ */
+function exportNodeCompatibleHeaders(headers) {
+	const obj = Object.assign({ __proto__: null }, headers[MAP]);
+
+	// http.request() only supports string as Host header. This hack makes
+	// specifying custom Host header possible.
+	const hostHeaderKey = find(headers[MAP], 'Host');
+	if (hostHeaderKey !== undefined) {
+		obj[hostHeaderKey] = obj[hostHeaderKey][0];
+	}
+
+	return obj;
+}
+
+/**
+ * Create a Headers object from an object of headers, ignoring those that do
+ * not conform to HTTP grammar productions.
+ *
+ * @param   Object  obj  Object of headers
+ * @return  Headers
+ */
+function createHeadersLenient(obj) {
+	const headers = new Headers();
+	for (const name of Object.keys(obj)) {
+		if (invalidTokenRegex.test(name)) {
+			continue;
+		}
+		if (Array.isArray(obj[name])) {
+			for (const val of obj[name]) {
+				if (invalidHeaderCharRegex.test(val)) {
+					continue;
+				}
+				if (headers[MAP][name] === undefined) {
+					headers[MAP][name] = [val];
+				} else {
+					headers[MAP][name].push(val);
+				}
+			}
+		} else if (!invalidHeaderCharRegex.test(obj[name])) {
+			headers[MAP][name] = [obj[name]];
+		}
+	}
+	return headers;
+}
+
+const INTERNALS$1 = Symbol('Response internals');
+
+// fix an issue where "STATUS_CODES" aren't a named export for node <10
+const STATUS_CODES = http.STATUS_CODES;
+
+/**
+ * Response class
+ *
+ * @param   Stream  body  Readable stream
+ * @param   Object  opts  Response options
+ * @return  Void
+ */
+class Response {
+	constructor() {
+		let body = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+		let opts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+		Body.call(this, body, opts);
+
+		const status = opts.status || 200;
+		const headers = new Headers(opts.headers);
+
+		if (body != null && !headers.has('Content-Type')) {
+			const contentType = extractContentType(body);
+			if (contentType) {
+				headers.append('Content-Type', contentType);
+			}
+		}
+
+		this[INTERNALS$1] = {
+			url: opts.url,
+			status,
+			statusText: opts.statusText || STATUS_CODES[status],
+			headers,
+			counter: opts.counter
+		};
+	}
+
+	get url() {
+		return this[INTERNALS$1].url || '';
+	}
+
+	get status() {
+		return this[INTERNALS$1].status;
+	}
+
+	/**
+  * Convenience property representing if the request ended normally
+  */
+	get ok() {
+		return this[INTERNALS$1].status >= 200 && this[INTERNALS$1].status < 300;
+	}
+
+	get redirected() {
+		return this[INTERNALS$1].counter > 0;
+	}
+
+	get statusText() {
+		return this[INTERNALS$1].statusText;
+	}
+
+	get headers() {
+		return this[INTERNALS$1].headers;
+	}
+
+	/**
+  * Clone this response
+  *
+  * @return  Response
+  */
+	clone() {
+		return new Response(clone(this), {
+			url: this.url,
+			status: this.status,
+			statusText: this.statusText,
+			headers: this.headers,
+			ok: this.ok,
+			redirected: this.redirected
+		});
+	}
+}
+
+Body.mixIn(Response.prototype);
+
+Object.defineProperties(Response.prototype, {
+	url: { enumerable: true },
+	status: { enumerable: true },
+	ok: { enumerable: true },
+	redirected: { enumerable: true },
+	statusText: { enumerable: true },
+	headers: { enumerable: true },
+	clone: { enumerable: true }
+});
+
+Object.defineProperty(Response.prototype, Symbol.toStringTag, {
+	value: 'Response',
+	writable: false,
+	enumerable: false,
+	configurable: true
+});
+
+const INTERNALS$2 = Symbol('Request internals');
+
+// fix an issue where "format", "parse" aren't a named export for node <10
+const parse_url = Url.parse;
+const format_url = Url.format;
+
+const streamDestructionSupported = 'destroy' in Stream.Readable.prototype;
+
+/**
+ * Check if a value is an instance of Request.
+ *
+ * @param   Mixed   input
+ * @return  Boolean
+ */
+function isRequest(input) {
+	return typeof input === 'object' && typeof input[INTERNALS$2] === 'object';
+}
+
+function isAbortSignal(signal) {
+	const proto = signal && typeof signal === 'object' && Object.getPrototypeOf(signal);
+	return !!(proto && proto.constructor.name === 'AbortSignal');
+}
+
+/**
+ * Request class
+ *
+ * @param   Mixed   input  Url or Request instance
+ * @param   Object  init   Custom options
+ * @return  Void
+ */
+class Request {
+	constructor(input) {
+		let init = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+		let parsedURL;
+
+		// normalize input
+		if (!isRequest(input)) {
+			if (input && input.href) {
+				// in order to support Node.js' Url objects; though WHATWG's URL objects
+				// will fall into this branch also (since their `toString()` will return
+				// `href` property anyway)
+				parsedURL = parse_url(input.href);
+			} else {
+				// coerce input to a string before attempting to parse
+				parsedURL = parse_url(`${input}`);
+			}
+			input = {};
+		} else {
+			parsedURL = parse_url(input.url);
+		}
+
+		let method = init.method || input.method || 'GET';
+		method = method.toUpperCase();
+
+		if ((init.body != null || isRequest(input) && input.body !== null) && (method === 'GET' || method === 'HEAD')) {
+			throw new TypeError('Request with GET/HEAD method cannot have body');
+		}
+
+		let inputBody = init.body != null ? init.body : isRequest(input) && input.body !== null ? clone(input) : null;
+
+		Body.call(this, inputBody, {
+			timeout: init.timeout || input.timeout || 0,
+			size: init.size || input.size || 0
+		});
+
+		const headers = new Headers(init.headers || input.headers || {});
+
+		if (inputBody != null && !headers.has('Content-Type')) {
+			const contentType = extractContentType(inputBody);
+			if (contentType) {
+				headers.append('Content-Type', contentType);
+			}
+		}
+
+		let signal = isRequest(input) ? input.signal : null;
+		if ('signal' in init) signal = init.signal;
+
+		if (signal != null && !isAbortSignal(signal)) {
+			throw new TypeError('Expected signal to be an instanceof AbortSignal');
+		}
+
+		this[INTERNALS$2] = {
+			method,
+			redirect: init.redirect || input.redirect || 'follow',
+			headers,
+			parsedURL,
+			signal
+		};
+
+		// node-fetch-only options
+		this.follow = init.follow !== undefined ? init.follow : input.follow !== undefined ? input.follow : 20;
+		this.compress = init.compress !== undefined ? init.compress : input.compress !== undefined ? input.compress : true;
+		this.counter = init.counter || input.counter || 0;
+		this.agent = init.agent || input.agent;
+	}
+
+	get method() {
+		return this[INTERNALS$2].method;
+	}
+
+	get url() {
+		return format_url(this[INTERNALS$2].parsedURL);
+	}
+
+	get headers() {
+		return this[INTERNALS$2].headers;
+	}
+
+	get redirect() {
+		return this[INTERNALS$2].redirect;
+	}
+
+	get signal() {
+		return this[INTERNALS$2].signal;
+	}
+
+	/**
+  * Clone this request
+  *
+  * @return  Request
+  */
+	clone() {
+		return new Request(this);
+	}
+}
+
+Body.mixIn(Request.prototype);
+
+Object.defineProperty(Request.prototype, Symbol.toStringTag, {
+	value: 'Request',
+	writable: false,
+	enumerable: false,
+	configurable: true
+});
+
+Object.defineProperties(Request.prototype, {
+	method: { enumerable: true },
+	url: { enumerable: true },
+	headers: { enumerable: true },
+	redirect: { enumerable: true },
+	clone: { enumerable: true },
+	signal: { enumerable: true }
+});
+
+/**
+ * Convert a Request to Node.js http request options.
+ *
+ * @param   Request  A Request instance
+ * @return  Object   The options object to be passed to http.request
+ */
+function getNodeRequestOptions(request) {
+	const parsedURL = request[INTERNALS$2].parsedURL;
+	const headers = new Headers(request[INTERNALS$2].headers);
+
+	// fetch step 1.3
+	if (!headers.has('Accept')) {
+		headers.set('Accept', '*/*');
+	}
+
+	// Basic fetch
+	if (!parsedURL.protocol || !parsedURL.hostname) {
+		throw new TypeError('Only absolute URLs are supported');
+	}
+
+	if (!/^https?:$/.test(parsedURL.protocol)) {
+		throw new TypeError('Only HTTP(S) protocols are supported');
+	}
+
+	if (request.signal && request.body instanceof Stream.Readable && !streamDestructionSupported) {
+		throw new Error('Cancellation of streamed requests with AbortSignal is not supported in node < 8');
+	}
+
+	// HTTP-network-or-cache fetch steps 2.4-2.7
+	let contentLengthValue = null;
+	if (request.body == null && /^(POST|PUT)$/i.test(request.method)) {
+		contentLengthValue = '0';
+	}
+	if (request.body != null) {
+		const totalBytes = getTotalBytes(request);
+		if (typeof totalBytes === 'number') {
+			contentLengthValue = String(totalBytes);
+		}
+	}
+	if (contentLengthValue) {
+		headers.set('Content-Length', contentLengthValue);
+	}
+
+	// HTTP-network-or-cache fetch step 2.11
+	if (!headers.has('User-Agent')) {
+		headers.set('User-Agent', 'node-fetch/1.0 (+https://github.com/bitinn/node-fetch)');
+	}
+
+	// HTTP-network-or-cache fetch step 2.15
+	if (request.compress && !headers.has('Accept-Encoding')) {
+		headers.set('Accept-Encoding', 'gzip,deflate');
+	}
+
+	let agent = request.agent;
+	if (typeof agent === 'function') {
+		agent = agent(parsedURL);
+	}
+
+	if (!headers.has('Connection') && !agent) {
+		headers.set('Connection', 'close');
+	}
+
+	// HTTP-network fetch step 4.2
+	// chunked encoding is handled by Node.js
+
+	return Object.assign({}, parsedURL, {
+		method: request.method,
+		headers: exportNodeCompatibleHeaders(headers),
+		agent
+	});
+}
+
+/**
+ * abort-error.js
+ *
+ * AbortError interface for cancelled requests
+ */
+
+/**
+ * Create AbortError instance
+ *
+ * @param   String      message      Error message for human
+ * @return  AbortError
+ */
+function AbortError(message) {
+  Error.call(this, message);
+
+  this.type = 'aborted';
+  this.message = message;
+
+  // hide custom error implementation details from end-users
+  Error.captureStackTrace(this, this.constructor);
+}
+
+AbortError.prototype = Object.create(Error.prototype);
+AbortError.prototype.constructor = AbortError;
+AbortError.prototype.name = 'AbortError';
+
+// fix an issue where "PassThrough", "resolve" aren't a named export for node <10
+const PassThrough$1 = Stream.PassThrough;
+const resolve_url = Url.resolve;
+
+/**
+ * Fetch function
+ *
+ * @param   Mixed    url   Absolute url or Request instance
+ * @param   Object   opts  Fetch options
+ * @return  Promise
+ */
+function fetch(url, opts) {
+
+	// allow custom promise
+	if (!fetch.Promise) {
+		throw new Error('native promise missing, set fetch.Promise to your favorite alternative');
+	}
+
+	Body.Promise = fetch.Promise;
+
+	// wrap http.request into fetch
+	return new fetch.Promise(function (resolve, reject) {
+		// build request object
+		const request = new Request(url, opts);
+		const options = getNodeRequestOptions(request);
+
+		const send = (options.protocol === 'https:' ? https : http).request;
+		const signal = request.signal;
+
+		let response = null;
+
+		const abort = function abort() {
+			let error = new AbortError('The user aborted a request.');
+			reject(error);
+			if (request.body && request.body instanceof Stream.Readable) {
+				request.body.destroy(error);
+			}
+			if (!response || !response.body) return;
+			response.body.emit('error', error);
+		};
+
+		if (signal && signal.aborted) {
+			abort();
+			return;
+		}
+
+		const abortAndFinalize = function abortAndFinalize() {
+			abort();
+			finalize();
+		};
+
+		// send request
+		const req = send(options);
+		let reqTimeout;
+
+		if (signal) {
+			signal.addEventListener('abort', abortAndFinalize);
+		}
+
+		function finalize() {
+			req.abort();
+			if (signal) signal.removeEventListener('abort', abortAndFinalize);
+			clearTimeout(reqTimeout);
+		}
+
+		if (request.timeout) {
+			req.once('socket', function (socket) {
+				reqTimeout = setTimeout(function () {
+					reject(new FetchError(`network timeout at: ${request.url}`, 'request-timeout'));
+					finalize();
+				}, request.timeout);
+			});
+		}
+
+		req.on('error', function (err) {
+			reject(new FetchError(`request to ${request.url} failed, reason: ${err.message}`, 'system', err));
+			finalize();
+		});
+
+		req.on('response', function (res) {
+			clearTimeout(reqTimeout);
+
+			const headers = createHeadersLenient(res.headers);
+
+			// HTTP fetch step 5
+			if (fetch.isRedirect(res.statusCode)) {
+				// HTTP fetch step 5.2
+				const location = headers.get('Location');
+
+				// HTTP fetch step 5.3
+				const locationURL = location === null ? null : resolve_url(request.url, location);
+
+				// HTTP fetch step 5.5
+				switch (request.redirect) {
+					case 'error':
+						reject(new FetchError(`uri requested responds with a redirect, redirect mode is set to error: ${request.url}`, 'no-redirect'));
+						finalize();
+						return;
+					case 'manual':
+						// node-fetch-specific step: make manual redirect a bit easier to use by setting the Location header value to the resolved URL.
+						if (locationURL !== null) {
+							// handle corrupted header
+							try {
+								headers.set('Location', locationURL);
+							} catch (err) {
+								// istanbul ignore next: nodejs server prevent invalid response headers, we can't test this through normal request
+								reject(err);
+							}
+						}
+						break;
+					case 'follow':
+						// HTTP-redirect fetch step 2
+						if (locationURL === null) {
+							break;
+						}
+
+						// HTTP-redirect fetch step 5
+						if (request.counter >= request.follow) {
+							reject(new FetchError(`maximum redirect reached at: ${request.url}`, 'max-redirect'));
+							finalize();
+							return;
+						}
+
+						// HTTP-redirect fetch step 6 (counter increment)
+						// Create a new Request object.
+						const requestOpts = {
+							headers: new Headers(request.headers),
+							follow: request.follow,
+							counter: request.counter + 1,
+							agent: request.agent,
+							compress: request.compress,
+							method: request.method,
+							body: request.body,
+							signal: request.signal,
+							timeout: request.timeout,
+							size: request.size
+						};
+
+						// HTTP-redirect fetch step 9
+						if (res.statusCode !== 303 && request.body && getTotalBytes(request) === null) {
+							reject(new FetchError('Cannot follow redirect with body being a readable stream', 'unsupported-redirect'));
+							finalize();
+							return;
+						}
+
+						// HTTP-redirect fetch step 11
+						if (res.statusCode === 303 || (res.statusCode === 301 || res.statusCode === 302) && request.method === 'POST') {
+							requestOpts.method = 'GET';
+							requestOpts.body = undefined;
+							requestOpts.headers.delete('content-length');
+						}
+
+						// HTTP-redirect fetch step 15
+						resolve(fetch(new Request(locationURL, requestOpts)));
+						finalize();
+						return;
+				}
+			}
+
+			// prepare response
+			res.once('end', function () {
+				if (signal) signal.removeEventListener('abort', abortAndFinalize);
+			});
+			let body = res.pipe(new PassThrough$1());
+
+			const response_options = {
+				url: request.url,
+				status: res.statusCode,
+				statusText: res.statusMessage,
+				headers: headers,
+				size: request.size,
+				timeout: request.timeout,
+				counter: request.counter
+			};
+
+			// HTTP-network fetch step 12.1.1.3
+			const codings = headers.get('Content-Encoding');
+
+			// HTTP-network fetch step 12.1.1.4: handle content codings
+
+			// in following scenarios we ignore compression support
+			// 1. compression support is disabled
+			// 2. HEAD request
+			// 3. no Content-Encoding header
+			// 4. no content response (204)
+			// 5. content not modified response (304)
+			if (!request.compress || request.method === 'HEAD' || codings === null || res.statusCode === 204 || res.statusCode === 304) {
+				response = new Response(body, response_options);
+				resolve(response);
+				return;
+			}
+
+			// For Node v6+
+			// Be less strict when decoding compressed responses, since sometimes
+			// servers send slightly invalid responses that are still accepted
+			// by common browsers.
+			// Always using Z_SYNC_FLUSH is what cURL does.
+			const zlibOptions = {
+				flush: zlib.Z_SYNC_FLUSH,
+				finishFlush: zlib.Z_SYNC_FLUSH
+			};
+
+			// for gzip
+			if (codings == 'gzip' || codings == 'x-gzip') {
+				body = body.pipe(zlib.createGunzip(zlibOptions));
+				response = new Response(body, response_options);
+				resolve(response);
+				return;
+			}
+
+			// for deflate
+			if (codings == 'deflate' || codings == 'x-deflate') {
+				// handle the infamous raw deflate response from old servers
+				// a hack for old IIS and Apache servers
+				const raw = res.pipe(new PassThrough$1());
+				raw.once('data', function (chunk) {
+					// see http://stackoverflow.com/questions/37519828
+					if ((chunk[0] & 0x0F) === 0x08) {
+						body = body.pipe(zlib.createInflate());
+					} else {
+						body = body.pipe(zlib.createInflateRaw());
+					}
+					response = new Response(body, response_options);
+					resolve(response);
+				});
+				return;
+			}
+
+			// for br
+			if (codings == 'br' && typeof zlib.createBrotliDecompress === 'function') {
+				body = body.pipe(zlib.createBrotliDecompress());
+				response = new Response(body, response_options);
+				resolve(response);
+				return;
+			}
+
+			// otherwise, use response as-is
+			response = new Response(body, response_options);
+			resolve(response);
+		});
+
+		writeToStream(req, request);
+	});
+}
+/**
+ * Redirect code matching
+ *
+ * @param   Number   code  Status code
+ * @return  Boolean
+ */
+fetch.isRedirect = function (code) {
+	return code === 301 || code === 302 || code === 303 || code === 307 || code === 308;
+};
+
+// expose Promise
+fetch.Promise = global.Promise;
+
+module.exports = exports = fetch;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.default = exports;
+exports.Headers = Headers;
+exports.Request = Request;
+exports.Response = Response;
+exports.FetchError = FetchError;
+
 
 /***/ }),
 
-/***/ 682:
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ 1223:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-var register = __webpack_require__(670)
-var addHook = __webpack_require__(549)
-var removeHook = __webpack_require__(819)
+var wrappy = __webpack_require__(2940)
+module.exports = wrappy(once)
+module.exports.strict = wrappy(onceStrict)
 
-// bind with array of arguments: https://stackoverflow.com/a/21792913
-var bind = Function.bind
-var bindable = bind.bind(bind)
-
-function bindApi (hook, state, name) {
-  var removeHookRef = bindable(removeHook, null).apply(null, name ? [state, name] : [state])
-  hook.api = { remove: removeHookRef }
-  hook.remove = removeHookRef
-
-  ;['before', 'error', 'after', 'wrap'].forEach(function (kind) {
-    var args = name ? [state, kind, name] : [state, kind]
-    hook[kind] = hook.api[kind] = bindable(addHook, null).apply(null, args)
+once.proto = once(function () {
+  Object.defineProperty(Function.prototype, 'once', {
+    value: function () {
+      return once(this)
+    },
+    configurable: true
   })
-}
 
-function HookSingular () {
-  var singularHookName = 'h'
-  var singularHookState = {
-    registry: {}
+  Object.defineProperty(Function.prototype, 'onceStrict', {
+    value: function () {
+      return onceStrict(this)
+    },
+    configurable: true
+  })
+})
+
+function once (fn) {
+  var f = function () {
+    if (f.called) return f.value
+    f.called = true
+    return f.value = fn.apply(this, arguments)
   }
-  var singularHook = register.bind(null, singularHookState, singularHookName)
-  bindApi(singularHook, singularHookState, singularHookName)
-  return singularHook
+  f.called = false
+  return f
 }
 
-function HookCollection () {
-  var state = {
-    registry: {}
+function onceStrict (fn) {
+  var f = function () {
+    if (f.called)
+      throw new Error(f.onceError)
+    f.called = true
+    return f.value = fn.apply(this, arguments)
   }
-
-  var hook = register.bind(null, state)
-  bindApi(hook, state)
-
-  return hook
+  var name = fn.name || 'Function wrapped with `once`'
+  f.onceError = name + " shouldn't be called more than once"
+  f.called = false
+  return f
 }
 
-var collectionHookDeprecationMessageDisplayed = false
-function Hook () {
-  if (!collectionHookDeprecationMessageDisplayed) {
-    console.warn('[before-after-hook]: "Hook()" repurposing warning, use "Hook.Collection()". Read more: https://git.io/upgrade-before-after-hook-to-1.4')
-    collectionHookDeprecationMessageDisplayed = true
-  }
-  return HookCollection()
+
+/***/ }),
+
+/***/ 4294:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+module.exports = __webpack_require__(4219);
+
+
+/***/ }),
+
+/***/ 4219:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+var net = __webpack_require__(1631);
+var tls = __webpack_require__(4016);
+var http = __webpack_require__(8605);
+var https = __webpack_require__(7211);
+var events = __webpack_require__(8614);
+var assert = __webpack_require__(2357);
+var util = __webpack_require__(1669);
+
+
+exports.httpOverHttp = httpOverHttp;
+exports.httpsOverHttp = httpsOverHttp;
+exports.httpOverHttps = httpOverHttps;
+exports.httpsOverHttps = httpsOverHttps;
+
+
+function httpOverHttp(options) {
+  var agent = new TunnelingAgent(options);
+  agent.request = http.request;
+  return agent;
 }
 
-Hook.Singular = HookSingular.bind()
-Hook.Collection = HookCollection.bind()
-
-module.exports = Hook
-// expose constructors as a named property for TypeScript
-module.exports.Hook = Hook
-module.exports.Singular = Hook.Singular
-module.exports.Collection = Hook.Collection
-
-
-/***/ }),
-
-/***/ 686:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.getProjectStats = void 0;
-const renderDaysLeft_1 = __webpack_require__(342);
-const arrayUnique_1 = __webpack_require__(406);
-const flatternArray_1 = __webpack_require__(65);
-const notEmpty_1 = __webpack_require__(624);
-const pluck_1 = __webpack_require__(881);
-const getDevelopers = (cardsWithIssue, projectWithConfig) => {
-    /**
-     * If `developers` list set on the Project config, use the list,
-     * otherwise infer the developers list from the assigned issues.
-     */
-    const { projectConfig } = projectWithConfig;
-    if (typeof projectConfig !== 'number' && projectConfig.developers) {
-        return projectConfig.developers;
-    }
-    const developersWithDuplicates = cardsWithIssue
-        .map(({ issue }) => {
-        if (!issue) {
-            return;
-        }
-        return issue.assignees.map(pluck_1.pluck('login'));
-    })
-        .filter(notEmpty_1.notEmpty);
-    const developers = arrayUnique_1.arrayUnique(flatternArray_1.flattenArray(developersWithDuplicates));
-    return developers;
-};
-// const asigneesToDevelopers = (assignees: TRepoIssue['assignees']) => {
-//   return assignees.map((as) => {
-//     return as.login;
-//   });
-// };
-// const countAssignedIssues = (
-//   developer: string,
-//   cardsWithIssue: ICardWithIssue[],
-// ) => {
-//   const result = cardsWithIssue.reduce((current, { issue }) => {
-//     if (!issue) {
-//       return current;
-//     }
-//     const { assignees } = issue;
-//     if (!assignees || !assignees.length) {
-//       return current;
-//     }
-//     const developers = asigneesToDevelopers(assignees);
-//     return developers.includes(developer) ? current + 1 : current;
-//   }, 0);
-//   return result;
-// };
-// const getBusiestDeveloper = (cardsWithIssue: ICardWithIssue[]): IDeveloperWithIssuesCount => {
-//   const developers = getDevelopers(cardsWithIssue)
-//     .map<IDeveloperWithIssuesCount>((developer) => {
-//       return {
-//         login: developer,
-//         issuesCount: countAssignedIssues(developer, cardsWithIssue),
-//         issueType: 'assigned',
-//       }
-//     })
-//     .sort((dev1, dev2) => {
-//       return dev2.issuesCount - dev1.issuesCount;
-//     });
-//   return developers[0];
-// };
-exports.getProjectStats = (data, config) => {
-    const { 
-    // combined
-    inWorkIssues, doneOrDeployIssues, allPlannedIssues, issuesToSolve: toSolveIssues, 
-    // plain
-    committedIssues, } = data;
-    const daysLeft = renderDaysLeft_1.getWorkDays(config);
-    const doneRate = doneOrDeployIssues.length / allPlannedIssues.length;
-    const inWorkRate = inWorkIssues.length / allPlannedIssues.length;
-    const committedRate = committedIssues.length / allPlannedIssues.length;
-    const developers = getDevelopers(allPlannedIssues, data.project);
-    const issuesDeveloperLeftRatio = toSolveIssues.length / developers.length;
-    const issuesDeveloperRatio = toSolveIssues.length / developers.length;
-    const issuesDayLeftRatio = daysLeft
-        ? toSolveIssues.length / Math.max(daysLeft.businessDaysLeft, 1)
-        : undefined;
-    const issuesDayRatio = daysLeft
-        ? allPlannedIssues.length / daysLeft.totalBusinessDaysInSprint
-        : undefined;
-    const issuesDeveloperDayLeftRatio = issuesDayLeftRatio
-        ? issuesDayLeftRatio / developers.length
-        : undefined;
-    const issuesDeveloperDayRatio = issuesDayRatio
-        ? issuesDayRatio / developers.length
-        : undefined;
-    return {
-        doneRate,
-        inWorkRate,
-        committedRate,
-        // number of developers on the board
-        developers,
-        // inital issues per developer load
-        issuesDeveloperRatio,
-        // how many issues per developer left to solve
-        issuesDeveloperLeftRatio,
-        // inital issues per day load
-        issuesDayRatio,
-        // how many issues per day left to solve
-        issuesDayLeftRatio,
-        // inital per day per developer ratio
-        issuesDeveloperDayRatio,
-        // how many issues per day per developer left to solve
-        issuesDeveloperDayLeftRatio,
-    };
-};
-
-
-/***/ }),
-
-/***/ 707:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.getSortResultByIssuePresence = void 0;
-const TArraySortResult_1 = __webpack_require__(147);
-exports.getSortResultByIssuePresence = (cardWithIssue1, cardWithIssue2) => {
-    const { issue: issue1 } = cardWithIssue1;
-    const { issue: issue2 } = cardWithIssue2;
-    if (!issue1 && !issue2) {
-        return null;
-    }
-    if (!issue1) {
-        return TArraySortResult_1.TArraySortResult.SecondEarlier;
-    }
-    if (!issue2) {
-        return TArraySortResult_1.TArraySortResult.FirstEarlier;
-    }
-    return null;
-};
-
-
-/***/ }),
-
-/***/ 715:
-/***/ (function(__unusedmodule, exports) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.measure = void 0;
-exports.measure = (blockName, callback) => __awaiter(void 0, void 0, void 0, function* () {
-    // const labelSuffix = `__${shortId().substr(0, 4).toLowerCase()}`;
-    const label = `${blockName}`;
-    console.log(`> ${label}`);
-    const timingLabel = `- ${label}`;
-    console.time(timingLabel);
-    const result = yield callback();
-    console.timeEnd(timingLabel);
-    const suffix = (Array.isArray(result))
-        ? ` [${result.length} items]`
-        : '';
-    console.log(`< ${label}${suffix}`);
-    return result;
-});
-
-
-/***/ }),
-
-/***/ 717:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-// For internal use, subject to change.
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-    result["default"] = mod;
-    return result;
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-// We use any as a valid input type
-/* eslint-disable @typescript-eslint/no-explicit-any */
-const fs = __importStar(__webpack_require__(747));
-const os = __importStar(__webpack_require__(87));
-const utils_1 = __webpack_require__(278);
-function issueCommand(command, message) {
-    const filePath = process.env[`GITHUB_${command}`];
-    if (!filePath) {
-        throw new Error(`Unable to find environment variable for file command ${command}`);
-    }
-    if (!fs.existsSync(filePath)) {
-        throw new Error(`Missing file at path: ${filePath}`);
-    }
-    fs.appendFileSync(filePath, `${utils_1.toCommandValue(message)}${os.EOL}`, {
-        encoding: 'utf8'
-    });
+function httpsOverHttp(options) {
+  var agent = new TunnelingAgent(options);
+  agent.request = http.request;
+  agent.createSocket = createSecureSocket;
+  agent.defaultPort = 443;
+  return agent;
 }
-exports.issueCommand = issueCommand;
-//# sourceMappingURL=file-command.js.map
 
-/***/ }),
+function httpOverHttps(options) {
+  var agent = new TunnelingAgent(options);
+  agent.request = https.request;
+  return agent;
+}
 
-/***/ 733:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+function httpsOverHttps(options) {
+  var agent = new TunnelingAgent(options);
+  agent.request = https.request;
+  agent.createSocket = createSecureSocket;
+  agent.defaultPort = 443;
+  return agent;
+}
 
-"use strict";
 
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.sortCardsByAssigneesInPlace = exports.sortByAssigneesPredicate = void 0;
-const TArraySortResult_1 = __webpack_require__(147);
-exports.sortByAssigneesPredicate = (cardWithIssue1, cardWithIssue2) => {
-    const { issue: issue1 } = cardWithIssue1;
-    const { issue: issue2 } = cardWithIssue2;
-    if (!issue1 && !issue2) {
+function TunnelingAgent(options) {
+  var self = this;
+  self.options = options || {};
+  self.proxyOptions = self.options.proxy || {};
+  self.maxSockets = self.options.maxSockets || http.Agent.defaultMaxSockets;
+  self.requests = [];
+  self.sockets = [];
+
+  self.on('free', function onFree(socket, host, port, localAddress) {
+    var options = toOptions(host, port, localAddress);
+    for (var i = 0, len = self.requests.length; i < len; ++i) {
+      var pending = self.requests[i];
+      if (pending.host === options.host && pending.port === options.port) {
+        // Detect the request to connect same origin server,
+        // reuse the connection.
+        self.requests.splice(i, 1);
+        pending.request.onSocket(socket);
         return;
+      }
     }
-    if (!issue1 || !issue1.assignees.length) {
-        return TArraySortResult_1.TArraySortResult.SecondEarlier;
+    socket.destroy();
+    self.removeSocket(socket);
+  });
+}
+util.inherits(TunnelingAgent, events.EventEmitter);
+
+TunnelingAgent.prototype.addRequest = function addRequest(req, host, port, localAddress) {
+  var self = this;
+  var options = mergeOptions({request: req}, self.options, toOptions(host, port, localAddress));
+
+  if (self.sockets.length >= this.maxSockets) {
+    // We are over limit so we'll add it to the queue.
+    self.requests.push(options);
+    return;
+  }
+
+  // If we are under maxSockets create a new one.
+  self.createSocket(options, function(socket) {
+    socket.on('free', onFree);
+    socket.on('close', onCloseOrRemove);
+    socket.on('agentRemove', onCloseOrRemove);
+    req.onSocket(socket);
+
+    function onFree() {
+      self.emit('free', socket, options);
     }
-    if (!issue2 || !issue2.assignees.length) {
-        return TArraySortResult_1.TArraySortResult.FirstEarlier;
+
+    function onCloseOrRemove(err) {
+      self.removeSocket(socket);
+      socket.removeListener('free', onFree);
+      socket.removeListener('close', onCloseOrRemove);
+      socket.removeListener('agentRemove', onCloseOrRemove);
     }
-    if (issue1.assignees[0].login < issue2.assignees[0].login) {
-        return TArraySortResult_1.TArraySortResult.FirstEarlier;
-    }
-    if (issue1.assignees[0].login > issue2.assignees[0].login) {
-        return TArraySortResult_1.TArraySortResult.SecondEarlier;
-    }
-    return TArraySortResult_1.TArraySortResult.Equal;
+  });
 };
-exports.sortCardsByAssigneesInPlace = (cardsWithIssue) => {
-    const result = cardsWithIssue.sort((card1, card2) => {
-        var _a;
-        return (_a = exports.sortByAssigneesPredicate(card1, card2)) !== null && _a !== void 0 ? _a : TArraySortResult_1.TArraySortResult.Equal;
+
+TunnelingAgent.prototype.createSocket = function createSocket(options, cb) {
+  var self = this;
+  var placeholder = {};
+  self.sockets.push(placeholder);
+
+  var connectOptions = mergeOptions({}, self.proxyOptions, {
+    method: 'CONNECT',
+    path: options.host + ':' + options.port,
+    agent: false,
+    headers: {
+      host: options.host + ':' + options.port
+    }
+  });
+  if (options.localAddress) {
+    connectOptions.localAddress = options.localAddress;
+  }
+  if (connectOptions.proxyAuth) {
+    connectOptions.headers = connectOptions.headers || {};
+    connectOptions.headers['Proxy-Authorization'] = 'Basic ' +
+        new Buffer(connectOptions.proxyAuth).toString('base64');
+  }
+
+  debug('making CONNECT request');
+  var connectReq = self.request(connectOptions);
+  connectReq.useChunkedEncodingByDefault = false; // for v0.6
+  connectReq.once('response', onResponse); // for v0.6
+  connectReq.once('upgrade', onUpgrade);   // for v0.6
+  connectReq.once('connect', onConnect);   // for v0.7 or later
+  connectReq.once('error', onError);
+  connectReq.end();
+
+  function onResponse(res) {
+    // Very hacky. This is necessary to avoid http-parser leaks.
+    res.upgrade = true;
+  }
+
+  function onUpgrade(res, socket, head) {
+    // Hacky.
+    process.nextTick(function() {
+      onConnect(res, socket, head);
     });
-    return result;
+  }
+
+  function onConnect(res, socket, head) {
+    connectReq.removeAllListeners();
+    socket.removeAllListeners();
+
+    if (res.statusCode !== 200) {
+      debug('tunneling socket could not be established, statusCode=%d',
+        res.statusCode);
+      socket.destroy();
+      var error = new Error('tunneling socket could not be established, ' +
+        'statusCode=' + res.statusCode);
+      error.code = 'ECONNRESET';
+      options.request.emit('error', error);
+      self.removeSocket(placeholder);
+      return;
+    }
+    if (head.length > 0) {
+      debug('got illegal response body from proxy');
+      socket.destroy();
+      var error = new Error('got illegal response body from proxy');
+      error.code = 'ECONNRESET';
+      options.request.emit('error', error);
+      self.removeSocket(placeholder);
+      return;
+    }
+    debug('tunneling connection has established');
+    self.sockets[self.sockets.indexOf(placeholder)] = socket;
+    return cb(socket);
+  }
+
+  function onError(cause) {
+    connectReq.removeAllListeners();
+
+    debug('tunneling socket could not be established, cause=%s\n',
+          cause.message, cause.stack);
+    var error = new Error('tunneling socket could not be established, ' +
+                          'cause=' + cause.message);
+    error.code = 'ECONNRESET';
+    options.request.emit('error', error);
+    self.removeSocket(placeholder);
+  }
 };
 
+TunnelingAgent.prototype.removeSocket = function removeSocket(socket) {
+  var pos = this.sockets.indexOf(socket)
+  if (pos === -1) {
+    return;
+  }
+  this.sockets.splice(pos, 1);
 
-/***/ }),
+  var pending = this.requests.shift();
+  if (pending) {
+    // If we have pending requests and a socket gets closed a new one
+    // needs to be created to take over in the pool for the one that closed.
+    this.createSocket(pending, function(socket) {
+      pending.request.onSocket(socket);
+    });
+  }
+};
 
-/***/ 738:
-/***/ (function(__unusedmodule, exports) {
+function createSecureSocket(options, cb) {
+  var self = this;
+  TunnelingAgent.prototype.createSocket.call(self, options, function(socket) {
+    var hostHeader = options.request.getHeader('host');
+    var tlsOptions = mergeOptions({}, self.options, {
+      socket: socket,
+      servername: hostHeader ? hostHeader.replace(/:.*$/, '') : options.host
+    });
 
-"use strict";
+    // 0 is dummy port for v0.6
+    var secureSocket = tls.connect(0, tlsOptions);
+    self.sockets[self.sockets.indexOf(socket)] = secureSocket;
+    cb(secureSocket);
+  });
+}
 
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.filterPlannedProjectData = exports.filterUnassignedIssues = void 0;
-// const filterUnplannedCards = (cardsWithIssue: ICardWithIssue[]): ICardWithIssue[] => {
-//   const cards = filterNewCards(cardsWithIssue);
-//   return filterUnassignedIssues(cards);
-// };
-exports.filterUnassignedIssues = (cardsWithIssue) => {
-    const cards = cardsWithIssue.filter(({ issue }) => {
-        if (!issue) {
-            return true;
+
+function toOptions(host, port, localAddress) {
+  if (typeof host === 'string') { // since v0.10
+    return {
+      host: host,
+      port: port,
+      localAddress: localAddress
+    };
+  }
+  return host; // for v0.11 or later
+}
+
+function mergeOptions(target) {
+  for (var i = 1, len = arguments.length; i < len; ++i) {
+    var overrides = arguments[i];
+    if (typeof overrides === 'object') {
+      var keys = Object.keys(overrides);
+      for (var j = 0, keyLen = keys.length; j < keyLen; ++j) {
+        var k = keys[j];
+        if (overrides[k] !== undefined) {
+          target[k] = overrides[k];
         }
-        return (issue.assignees.length > 0);
-    });
-    return cards;
-};
-const filterNewCards = (cardsWithIssue) => {
-    const cards = cardsWithIssue.filter((card) => {
-        return !card.isNew;
-    });
-    return cards;
-};
-exports.filterPlannedProjectData = (data) => {
-    return Object.assign(Object.assign({}, data), { 
-        // combined
-        inWorkIssues: filterNewCards(data.inWorkIssues), doneOrDeployIssues: filterNewCards(data.doneOrDeployIssues), allPlannedIssues: filterNewCards(data.allPlannedIssues), issuesToSolve: filterNewCards(data.issuesToSolve), 
-        // plain
-        backlogIssues: filterNewCards(data.backlogIssues), committedIssues: filterNewCards(data.committedIssues), progressIssues: filterNewCards(data.progressIssues), inReviewIssues: filterNewCards(data.inReviewIssues), blockedIssues: filterNewCards(data.blockedIssues), waitingToDeployIssues: filterNewCards(data.waitingToDeployIssues), doneIssues: filterNewCards(data.doneIssues) });
-};
-
-
-/***/ }),
-
-/***/ 747:
-/***/ (function(module) {
-
-module.exports = require("fs");
-
-/***/ }),
-
-/***/ 752:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.renderProjectTitle = void 0;
-const rateToPercent_1 = __webpack_require__(501);
-const getProjectStats_1 = __webpack_require__(686);
-const filterPlannedProjectData_1 = __webpack_require__(738);
-const addTitle_1 = __webpack_require__(616);
-exports.renderProjectTitle = (project, allData, config) => {
-    const plannedData = filterPlannedProjectData_1.filterPlannedProjectData(allData);
-    const { doneRate, } = getProjectStats_1.getProjectStats(plannedData, config);
-    const { allPlannedIssues } = allData;
-    const { allPlannedIssues: plannedAllPlannedIssues } = plannedData;
-    const surgeRate = (allPlannedIssues.length - plannedAllPlannedIssues.length) / plannedAllPlannedIssues.length;
-    const surgeEmoji = (surgeRate >= .1)
-        ? '💥'
-        : '';
-    const surgeString = (surgeRate > 0)
-        ? ` (**+${rateToPercent_1.rateToPercent(surgeRate)} flood**${surgeEmoji})`
-        : '';
-    const suffix = addTitle_1.addTitle('Items added after sprint start date', surgeString);
-    const projectTitle = `## ${project.name} - ${rateToPercent_1.rateToPercent(doneRate)} done${suffix}`;
-    return projectTitle;
-};
-
-
-/***/ }),
-
-/***/ 761:
-/***/ (function(module) {
-
-module.exports = require("zlib");
-
-/***/ }),
-
-/***/ 762:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, '__esModule', { value: true });
-
-var universalUserAgent = __webpack_require__(429);
-var beforeAfterHook = __webpack_require__(682);
-var request = __webpack_require__(234);
-var graphql = __webpack_require__(668);
-var authToken = __webpack_require__(334);
-
-function _defineProperty(obj, key, value) {
-  if (key in obj) {
-    Object.defineProperty(obj, key, {
-      value: value,
-      enumerable: true,
-      configurable: true,
-      writable: true
-    });
-  } else {
-    obj[key] = value;
-  }
-
-  return obj;
-}
-
-function ownKeys(object, enumerableOnly) {
-  var keys = Object.keys(object);
-
-  if (Object.getOwnPropertySymbols) {
-    var symbols = Object.getOwnPropertySymbols(object);
-    if (enumerableOnly) symbols = symbols.filter(function (sym) {
-      return Object.getOwnPropertyDescriptor(object, sym).enumerable;
-    });
-    keys.push.apply(keys, symbols);
-  }
-
-  return keys;
-}
-
-function _objectSpread2(target) {
-  for (var i = 1; i < arguments.length; i++) {
-    var source = arguments[i] != null ? arguments[i] : {};
-
-    if (i % 2) {
-      ownKeys(Object(source), true).forEach(function (key) {
-        _defineProperty(target, key, source[key]);
-      });
-    } else if (Object.getOwnPropertyDescriptors) {
-      Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
-    } else {
-      ownKeys(Object(source)).forEach(function (key) {
-        Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
-      });
+      }
     }
   }
-
   return target;
 }
 
-const VERSION = "3.1.2";
 
-class Octokit {
-  constructor(options = {}) {
-    const hook = new beforeAfterHook.Collection();
-    const requestDefaults = {
-      baseUrl: request.request.endpoint.DEFAULTS.baseUrl,
-      headers: {},
-      request: Object.assign({}, options.request, {
-        hook: hook.bind(null, "request")
-      }),
-      mediaType: {
-        previews: [],
-        format: ""
-      }
-    }; // prepend default user agent with `options.userAgent` if set
-
-    requestDefaults.headers["user-agent"] = [options.userAgent, `octokit-core.js/${VERSION} ${universalUserAgent.getUserAgent()}`].filter(Boolean).join(" ");
-
-    if (options.baseUrl) {
-      requestDefaults.baseUrl = options.baseUrl;
-    }
-
-    if (options.previews) {
-      requestDefaults.mediaType.previews = options.previews;
-    }
-
-    if (options.timeZone) {
-      requestDefaults.headers["time-zone"] = options.timeZone;
-    }
-
-    this.request = request.request.defaults(requestDefaults);
-    this.graphql = graphql.withCustomRequest(this.request).defaults(_objectSpread2(_objectSpread2({}, requestDefaults), {}, {
-      baseUrl: requestDefaults.baseUrl.replace(/\/api\/v3$/, "/api")
-    }));
-    this.log = Object.assign({
-      debug: () => {},
-      info: () => {},
-      warn: console.warn.bind(console),
-      error: console.error.bind(console)
-    }, options.log);
-    this.hook = hook; // (1) If neither `options.authStrategy` nor `options.auth` are set, the `octokit` instance
-    //     is unauthenticated. The `this.auth()` method is a no-op and no request hook is registred.
-    // (2) If only `options.auth` is set, use the default token authentication strategy.
-    // (3) If `options.authStrategy` is set then use it and pass in `options.auth`. Always pass own request as many strategies accept a custom request instance.
-    // TODO: type `options.auth` based on `options.authStrategy`.
-
-    if (!options.authStrategy) {
-      if (!options.auth) {
-        // (1)
-        this.auth = async () => ({
-          type: "unauthenticated"
-        });
-      } else {
-        // (2)
-        const auth = authToken.createTokenAuth(options.auth); // @ts-ignore  ¯\_(ツ)_/¯
-
-        hook.wrap("request", auth.hook);
-        this.auth = auth;
-      }
+var debug;
+if (process.env.NODE_DEBUG && /\btunnel\b/.test(process.env.NODE_DEBUG)) {
+  debug = function() {
+    var args = Array.prototype.slice.call(arguments);
+    if (typeof args[0] === 'string') {
+      args[0] = 'TUNNEL: ' + args[0];
     } else {
-      const auth = options.authStrategy(Object.assign({
-        request: this.request
-      }, options.auth)); // @ts-ignore  ¯\_(ツ)_/¯
-
-      hook.wrap("request", auth.hook);
-      this.auth = auth;
-    } // apply plugins
-    // https://stackoverflow.com/a/16345172
-
-
-    const classConstructor = this.constructor;
-    classConstructor.plugins.forEach(plugin => {
-      Object.assign(this, plugin(this, options));
-    });
+      args.unshift('TUNNEL:');
+    }
+    console.error.apply(console, args);
   }
-
-  static defaults(defaults) {
-    const OctokitWithDefaults = class extends this {
-      constructor(...args) {
-        const options = args[0] || {};
-
-        if (typeof defaults === "function") {
-          super(defaults(options));
-          return;
-        }
-
-        super(Object.assign({}, defaults, options, options.userAgent && defaults.userAgent ? {
-          userAgent: `${options.userAgent} ${defaults.userAgent}`
-        } : null));
-      }
-
-    };
-    return OctokitWithDefaults;
-  }
-  /**
-   * Attach a plugin (or many) to your Octokit instance.
-   *
-   * @example
-   * const API = Octokit.plugin(plugin1, plugin2, plugin3, ...)
-   */
-
-
-  static plugin(...newPlugins) {
-    var _a;
-
-    const currentPlugins = this.plugins;
-    const NewOctokit = (_a = class extends this {}, _a.plugins = currentPlugins.concat(newPlugins.filter(plugin => !currentPlugins.includes(plugin))), _a);
-    return NewOctokit;
-  }
-
+} else {
+  debug = function() {};
 }
-Octokit.VERSION = VERSION;
-Octokit.plugins = [];
+exports.debug = debug; // for test
 
-exports.Octokit = Octokit;
+
+/***/ }),
+
+/***/ 5030:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+
+function getUserAgent() {
+  if (typeof navigator === "object" && "userAgent" in navigator) {
+    return navigator.userAgent;
+  }
+
+  if (typeof process === "object" && "version" in process) {
+    return `Node.js/${process.version.substr(1)} (${process.platform}; ${process.arch})`;
+  }
+
+  return "<environment undetectable>";
+}
+
+exports.getUserAgent = getUserAgent;
 //# sourceMappingURL=index.js.map
 
 
 /***/ }),
 
-/***/ 769:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.sortCardsByLabelPriorityInPlace = void 0;
-const getCardPriority_1 = __webpack_require__(192);
-const TArraySortResult_1 = __webpack_require__(147);
-const getSortResultByIssuePresence_1 = __webpack_require__(707);
-// const sortCardsByPriorityLabelsPredicateFactory = (
-//   projectWithConfig: IProjectWithConfig,
-//   predicate?: TSortPredicate,
-// ) => {
-//   return
-// };
-exports.sortCardsByLabelPriorityInPlace = (cardsWithIssue, projectWithConfig, predicate) => {
-    const result = cardsWithIssue.sort((cardWithIssue1, cardWithIssue2) => {
-        var _a;
-        const baseSort = getSortResultByIssuePresence_1.getSortResultByIssuePresence(cardWithIssue1, cardWithIssue2);
-        if (baseSort !== null) {
-            return baseSort;
-        }
-        const defaultPriority = (predicate)
-            ? null
-            : undefined;
-        const cardPriority1 = getCardPriority_1.getCardPriority(cardWithIssue1, projectWithConfig, defaultPriority);
-        const cardPriority2 = getCardPriority_1.getCardPriority(cardWithIssue2, projectWithConfig, defaultPriority);
-        if (cardPriority1 === null && cardPriority2 === null && predicate) {
-            return (_a = predicate(cardWithIssue1, cardWithIssue2)) !== null && _a !== void 0 ? _a : TArraySortResult_1.TArraySortResult.Equal;
-        }
-        if (cardPriority1 === null) {
-            return TArraySortResult_1.TArraySortResult.SecondEarlier;
-        }
-        if (cardPriority2 === null) {
-            return TArraySortResult_1.TArraySortResult.FirstEarlier;
-        }
-        if (cardPriority1 > cardPriority2) {
-            return TArraySortResult_1.TArraySortResult.FirstEarlier;
-        }
-        if (cardPriority1 < cardPriority2) {
-            return TArraySortResult_1.TArraySortResult.SecondEarlier;
-        }
-        return TArraySortResult_1.TArraySortResult.Equal;
-    });
-    return result;
-};
-
-
-/***/ }),
-
-/***/ 801:
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var uri = __webpack_require__(835);
-
-var ValidationError = exports.ValidationError = function ValidationError (message, instance, schema, path, name, argument) {
-  if(Array.isArray(path)){
-    this.path = path;
-    this.property = path.reduce(function(sum, item){
-      return sum + makeSuffix(item);
-    }, 'instance');
-  }else if(path !== undefined){
-    this.property = path;
-  }
-  if (message) {
-    this.message = message;
-  }
-  if (schema) {
-    var id = schema.$id || schema.id;
-    this.schema = id || schema;
-  }
-  if (instance !== undefined) {
-    this.instance = instance;
-  }
-  this.name = name;
-  this.argument = argument;
-  this.stack = this.toString();
-};
-
-ValidationError.prototype.toString = function toString() {
-  return this.property + ' ' + this.message;
-};
-
-var ValidatorResult = exports.ValidatorResult = function ValidatorResult(instance, schema, options, ctx) {
-  this.instance = instance;
-  this.schema = schema;
-  this.path = ctx.path;
-  this.propertyPath = ctx.propertyPath;
-  this.errors = [];
-  this.throwError = options && options.throwError;
-  this.disableFormat = options && options.disableFormat === true;
-};
-
-ValidatorResult.prototype.addError = function addError(detail) {
-  var err;
-  if (typeof detail == 'string') {
-    err = new ValidationError(detail, this.instance, this.schema, this.path);
-  } else {
-    if (!detail) throw new Error('Missing error detail');
-    if (!detail.message) throw new Error('Missing error message');
-    if (!detail.name) throw new Error('Missing validator type');
-    err = new ValidationError(detail.message, this.instance, this.schema, this.path, detail.name, detail.argument);
-  }
-
-  if (this.throwError) {
-    throw err;
-  }
-  this.errors.push(err);
-  return err;
-};
-
-ValidatorResult.prototype.importErrors = function importErrors(res) {
-  if (typeof res == 'string' || (res && res.validatorType)) {
-    this.addError(res);
-  } else if (res && res.errors) {
-    Array.prototype.push.apply(this.errors, res.errors);
-  }
-};
-
-function stringizer (v,i){
-  return i+': '+v.toString()+'\n';
-}
-ValidatorResult.prototype.toString = function toString(res) {
-  return this.errors.map(stringizer).join('');
-};
-
-Object.defineProperty(ValidatorResult.prototype, "valid", { get: function() {
-  return !this.errors.length;
-} });
-
-/**
- * Describes a problem with a Schema which prevents validation of an instance
- * @name SchemaError
- * @constructor
- */
-var SchemaError = exports.SchemaError = function SchemaError (msg, schema) {
-  this.message = msg;
-  this.schema = schema;
-  Error.call(this, msg);
-  Error.captureStackTrace(this, SchemaError);
-};
-SchemaError.prototype = Object.create(Error.prototype,
-  {
-    constructor: {value: SchemaError, enumerable: false},
-    name: {value: 'SchemaError', enumerable: false},
-  });
-
-var SchemaContext = exports.SchemaContext = function SchemaContext (schema, options, path, base, schemas) {
-  this.schema = schema;
-  this.options = options;
-  if(Array.isArray(path)){
-    this.path = path;
-    this.propertyPath = path.reduce(function(sum, item){
-      return sum + makeSuffix(item);
-    }, 'instance');
-  }else{
-    this.propertyPath = path;
-  }
-  this.base = base;
-  this.schemas = schemas;
-};
-
-SchemaContext.prototype.resolve = function resolve (target) {
-  return uri.resolve(this.base, target);
-};
-
-SchemaContext.prototype.makeChild = function makeChild(schema, propertyName){
-  var path = (propertyName===undefined) ? this.path : this.path.concat([propertyName]);
-  var id = schema.$id || schema.id;
-  var base = uri.resolve(this.base, id||'');
-  var ctx = new SchemaContext(schema, this.options, path, base, Object.create(this.schemas));
-  if(id && !ctx.schemas[base]){
-    ctx.schemas[base] = schema;
-  }
-  return ctx;
-};
-
-var FORMAT_REGEXPS = exports.FORMAT_REGEXPS = {
-  'date-time': /^\d{4}-(?:0[0-9]{1}|1[0-2]{1})-(3[01]|0[1-9]|[12][0-9])[tT ](2[0-4]|[01][0-9]):([0-5][0-9]):(60|[0-5][0-9])(\.\d+)?([zZ]|[+-]([0-5][0-9]):(60|[0-5][0-9]))$/,
-  'date': /^\d{4}-(?:0[0-9]{1}|1[0-2]{1})-(3[01]|0[1-9]|[12][0-9])$/,
-  'time': /^(2[0-4]|[01][0-9]):([0-5][0-9]):(60|[0-5][0-9])$/,
-
-  'email': /^(?:[\w\!\#\$\%\&\'\*\+\-\/\=\?\^\`\{\|\}\~]+\.)*[\w\!\#\$\%\&\'\*\+\-\/\=\?\^\`\{\|\}\~]+@(?:(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9\-](?!\.)){0,61}[a-zA-Z0-9]?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9\-](?!$)){0,61}[a-zA-Z0-9]?)|(?:\[(?:(?:[01]?\d{1,2}|2[0-4]\d|25[0-5])\.){3}(?:[01]?\d{1,2}|2[0-4]\d|25[0-5])\]))$/,
-  'ip-address': /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/,
-  'ipv6': /^\s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))(%.+)?\s*$/,
-
-  // TODO: A more accurate regular expression for "uri" goes:
-  // [A-Za-z][+\-.0-9A-Za-z]*:((/(/((%[0-9A-Fa-f]{2}|[!$&-.0-9;=A-Z_a-z~])+|(\[(([Vv][0-9A-Fa-f]+\.[!$&-.0-;=A-Z_a-z~]+)?|[.0-:A-Fa-f]+)\])?)(:\d*)?)?)?#(%[0-9A-Fa-f]{2}|[!$&-;=?-Z_a-z~])*|(/(/((%[0-9A-Fa-f]{2}|[!$&-.0-9;=A-Z_a-z~])+|(\[(([Vv][0-9A-Fa-f]+\.[!$&-.0-;=A-Z_a-z~]+)?|[.0-:A-Fa-f]+)\])?)(:\d*)?[/?]|[!$&-.0-;=?-Z_a-z~])|/?%[0-9A-Fa-f]{2}|[!$&-.0-;=?-Z_a-z~])(%[0-9A-Fa-f]{2}|[!$&-;=?-Z_a-z~])*(#(%[0-9A-Fa-f]{2}|[!$&-;=?-Z_a-z~])*)?|/(/((%[0-9A-Fa-f]{2}|[!$&-.0-9;=A-Z_a-z~])+(:\d*)?|(\[(([Vv][0-9A-Fa-f]+\.[!$&-.0-;=A-Z_a-z~]+)?|[.0-:A-Fa-f]+)\])?:\d*|\[(([Vv][0-9A-Fa-f]+\.[!$&-.0-;=A-Z_a-z~]+)?|[.0-:A-Fa-f]+)\])?)?)?
-  'uri': /^[a-zA-Z][a-zA-Z0-9+-.]*:[^\s]*$/,
-  'uri-reference': /^(((([A-Za-z][+\-.0-9A-Za-z]*(:%[0-9A-Fa-f]{2}|:[!$&-.0-;=?-Z_a-z~]|[/?])|\?)(%[0-9A-Fa-f]{2}|[!$&-;=?-Z_a-z~])*|([A-Za-z][+\-.0-9A-Za-z]*:?)?)|([A-Za-z][+\-.0-9A-Za-z]*:)?\/((%[0-9A-Fa-f]{2}|\/((%[0-9A-Fa-f]{2}|[!$&-.0-9;=A-Z_a-z~])+|(\[(([Vv][0-9A-Fa-f]+\.[!$&-.0-;=A-Z_a-z~]+)?|[.0-:A-Fa-f]+)\])?)(:\d*)?[/?]|[!$&-.0-;=?-Z_a-z~])(%[0-9A-Fa-f]{2}|[!$&-;=?-Z_a-z~])*|(\/((%[0-9A-Fa-f]{2}|[!$&-.0-9;=A-Z_a-z~])+|(\[(([Vv][0-9A-Fa-f]+\.[!$&-.0-;=A-Z_a-z~]+)?|[.0-:A-Fa-f]+)\])?)(:\d*)?)?))#(%[0-9A-Fa-f]{2}|[!$&-;=?-Z_a-z~])*|(([A-Za-z][+\-.0-9A-Za-z]*)?%[0-9A-Fa-f]{2}|[!$&-.0-9;=@_~]|[A-Za-z][+\-.0-9A-Za-z]*[!$&-*,;=@_~])(%[0-9A-Fa-f]{2}|[!$&-.0-9;=@-Z_a-z~])*((([/?](%[0-9A-Fa-f]{2}|[!$&-;=?-Z_a-z~])*)?#|[/?])(%[0-9A-Fa-f]{2}|[!$&-;=?-Z_a-z~])*)?|([A-Za-z][+\-.0-9A-Za-z]*(:%[0-9A-Fa-f]{2}|:[!$&-.0-;=?-Z_a-z~]|[/?])|\?)(%[0-9A-Fa-f]{2}|[!$&-;=?-Z_a-z~])*|([A-Za-z][+\-.0-9A-Za-z]*:)?\/((%[0-9A-Fa-f]{2}|\/((%[0-9A-Fa-f]{2}|[!$&-.0-9;=A-Z_a-z~])+|(\[(([Vv][0-9A-Fa-f]+\.[!$&-.0-;=A-Z_a-z~]+)?|[.0-:A-Fa-f]+)\])?)(:\d*)?[/?]|[!$&-.0-;=?-Z_a-z~])(%[0-9A-Fa-f]{2}|[!$&-;=?-Z_a-z~])*|\/((%[0-9A-Fa-f]{2}|[!$&-.0-9;=A-Z_a-z~])+(:\d*)?|(\[(([Vv][0-9A-Fa-f]+\.[!$&-.0-;=A-Z_a-z~]+)?|[.0-:A-Fa-f]+)\])?:\d*|\[(([Vv][0-9A-Fa-f]+\.[!$&-.0-;=A-Z_a-z~]+)?|[.0-:A-Fa-f]+)\])?)?|[A-Za-z][+\-.0-9A-Za-z]*:?)?$/,
-
-  'color': /^(#?([0-9A-Fa-f]{3}){1,2}\b|aqua|black|blue|fuchsia|gray|green|lime|maroon|navy|olive|orange|purple|red|silver|teal|white|yellow|(rgb\(\s*\b([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\b\s*,\s*\b([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\b\s*,\s*\b([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\b\s*\))|(rgb\(\s*(\d?\d%|100%)+\s*,\s*(\d?\d%|100%)+\s*,\s*(\d?\d%|100%)+\s*\)))$/,
-
-  // hostname regex from: http://stackoverflow.com/a/1420225/5628
-  'hostname': /^(?=.{1,255}$)[0-9A-Za-z](?:(?:[0-9A-Za-z]|-){0,61}[0-9A-Za-z])?(?:\.[0-9A-Za-z](?:(?:[0-9A-Za-z]|-){0,61}[0-9A-Za-z])?)*\.?$/,
-  'host-name': /^(?=.{1,255}$)[0-9A-Za-z](?:(?:[0-9A-Za-z]|-){0,61}[0-9A-Za-z])?(?:\.[0-9A-Za-z](?:(?:[0-9A-Za-z]|-){0,61}[0-9A-Za-z])?)*\.?$/,
-
-  'alpha': /^[a-zA-Z]+$/,
-  'alphanumeric': /^[a-zA-Z0-9]+$/,
-  'utc-millisec': function (input) {
-    return (typeof input === 'string') && parseFloat(input) === parseInt(input, 10) && !isNaN(input);
-  },
-  'regex': function (input) {
-    var result = true;
-    try {
-      new RegExp(input);
-    } catch (e) {
-      result = false;
-    }
-    return result;
-  },
-  'style': /\s*(.+?):\s*([^;]+);?/,
-  'phone': /^\+(?:[0-9] ?){6,14}[0-9]$/,
-};
-
-FORMAT_REGEXPS.regexp = FORMAT_REGEXPS.regex;
-FORMAT_REGEXPS.pattern = FORMAT_REGEXPS.regex;
-FORMAT_REGEXPS.ipv4 = FORMAT_REGEXPS['ip-address'];
-
-exports.isFormat = function isFormat (input, format, validator) {
-  if (typeof input === 'string' && FORMAT_REGEXPS[format] !== undefined) {
-    if (FORMAT_REGEXPS[format] instanceof RegExp) {
-      return FORMAT_REGEXPS[format].test(input);
-    }
-    if (typeof FORMAT_REGEXPS[format] === 'function') {
-      return FORMAT_REGEXPS[format](input);
-    }
-  } else if (validator && validator.customFormats &&
-      typeof validator.customFormats[format] === 'function') {
-    return validator.customFormats[format](input);
-  }
-  return true;
-};
-
-var makeSuffix = exports.makeSuffix = function makeSuffix (key) {
-  key = key.toString();
-  // This function could be capable of outputting valid a ECMAScript string, but the
-  // resulting code for testing which form to use would be tens of thousands of characters long
-  // That means this will use the name form for some illegal forms
-  if (!key.match(/[.\s\[\]]/) && !key.match(/^[\d]/)) {
-    return '.' + key;
-  }
-  if (key.match(/^\d+$/)) {
-    return '[' + key + ']';
-  }
-  return '[' + JSON.stringify(key) + ']';
-};
-
-exports.deepCompareStrict = function deepCompareStrict (a, b) {
-  if (typeof a !== typeof b) {
-    return false;
-  }
-  if (Array.isArray(a)) {
-    if (!Array.isArray(b)) {
-      return false;
-    }
-    if (a.length !== b.length) {
-      return false;
-    }
-    return a.every(function (v, i) {
-      return deepCompareStrict(a[i], b[i]);
-    });
-  }
-  if (typeof a === 'object') {
-    if (!a || !b) {
-      return a === b;
-    }
-    var aKeys = Object.keys(a);
-    var bKeys = Object.keys(b);
-    if (aKeys.length !== bKeys.length) {
-      return false;
-    }
-    return aKeys.every(function (v) {
-      return deepCompareStrict(a[v], b[v]);
-    });
-  }
-  return a === b;
-};
-
-function deepMerger (target, dst, e, i) {
-  if (typeof e === 'object') {
-    dst[i] = deepMerge(target[i], e);
-  } else {
-    if (target.indexOf(e) === -1) {
-      dst.push(e);
-    }
-  }
-}
-
-function copyist (src, dst, key) {
-  dst[key] = src[key];
-}
-
-function copyistWithDeepMerge (target, src, dst, key) {
-  if (typeof src[key] !== 'object' || !src[key]) {
-    dst[key] = src[key];
-  }
-  else {
-    if (!target[key]) {
-      dst[key] = src[key];
-    } else {
-      dst[key] = deepMerge(target[key], src[key]);
-    }
-  }
-}
-
-function deepMerge (target, src) {
-  var array = Array.isArray(src);
-  var dst = array && [] || {};
-
-  if (array) {
-    target = target || [];
-    dst = dst.concat(target);
-    src.forEach(deepMerger.bind(null, target, dst));
-  } else {
-    if (target && typeof target === 'object') {
-      Object.keys(target).forEach(copyist.bind(null, target, dst));
-    }
-    Object.keys(src).forEach(copyistWithDeepMerge.bind(null, target, src, dst));
-  }
-
-  return dst;
-}
-
-module.exports.deepMerge = deepMerge;
-
-/**
- * Validates instance against the provided schema
- * Implements URI+JSON Pointer encoding, e.g. "%7e"="~0"=>"~", "~1"="%2f"=>"/"
- * @param o
- * @param s The path to walk o along
- * @return any
- */
-exports.objectGetPath = function objectGetPath(o, s) {
-  var parts = s.split('/').slice(1);
-  var k;
-  while (typeof (k=parts.shift()) == 'string') {
-    var n = decodeURIComponent(k.replace(/~0/,'~').replace(/~1/g,'/'));
-    if (!(n in o)) return;
-    o = o[n];
-  }
-  return o;
-};
-
-function pathEncoder (v) {
-  return '/'+encodeURIComponent(v).replace(/~/g,'%7E');
-}
-/**
- * Accept an Array of property names and return a JSON Pointer URI fragment
- * @param Array a
- * @return {String}
- */
-exports.encodePath = function encodePointer(a){
-  // ~ must be encoded explicitly because hacks
-  // the slash is encoded by encodeURIComponent
-  return a.map(pathEncoder).join('');
-};
-
-
-/**
- * Calculate the number of decimal places a number uses
- * We need this to get correct results out of multipleOf and divisibleBy
- * when either figure is has decimal places, due to IEEE-754 float issues.
- * @param number
- * @returns {number}
- */
-exports.getDecimalPlaces = function getDecimalPlaces(number) {
-
-  var decimalPlaces = 0;
-  if (isNaN(number)) return decimalPlaces;
-
-  if (typeof number !== 'number') {
-    number = Number(number);
-  }
-
-  var parts = number.toString().split('e');
-  if (parts.length === 2) {
-    if (parts[1][0] !== '-') {
-      return decimalPlaces;
-    } else {
-      decimalPlaces = Number(parts[1].slice(1));
-    }
-  }
-
-  var decimalParts = parts[0].split('.');
-  if (decimalParts.length === 2) {
-    decimalPlaces += decimalParts[1].length;
-  }
-
-  return decimalPlaces;
-};
-
-exports.isSchema = function isSchema(val){
-  return (typeof val === 'object' && val) || (typeof val === 'boolean');
-};
-
-
-
-/***/ }),
-
-/***/ 819:
-/***/ (function(module) {
-
-module.exports = removeHook
-
-function removeHook (state, name, method) {
-  if (!state.registry[name]) {
-    return
-  }
-
-  var index = state.registry[name]
-    .map(function (registered) { return registered.orig })
-    .indexOf(method)
-
-  if (index === -1) {
-    return
-  }
-
-  state.registry[name].splice(index, 1)
-}
-
-
-/***/ }),
-
-/***/ 835:
-/***/ (function(module) {
-
-module.exports = require("url");
-
-/***/ }),
-
-/***/ 864:
-/***/ (function(__unusedmodule, exports) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.addParens = void 0;
-exports.addParens = (str) => {
-    if (!str) {
-        return str;
-    }
-    return `(${str})`;
-};
-
-
-/***/ }),
-
-/***/ 877:
-/***/ (function(module) {
-
-module.exports = eval("require")("encoding");
-
-
-/***/ }),
-
-/***/ 881:
-/***/ (function(__unusedmodule, exports) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.pluck = void 0;
-exports.pluck = (propName) => {
-    return (obj) => {
-        return obj[propName];
-    };
-};
-
-
-/***/ }),
-
-/***/ 914:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.getApiBaseUrl = exports.getProxyAgent = exports.getAuthString = void 0;
-const httpClient = __importStar(__webpack_require__(925));
-function getAuthString(token, options) {
-    if (!token && !options.auth) {
-        throw new Error('Parameter token or opts.auth is required');
-    }
-    else if (token && options.auth) {
-        throw new Error('Parameters token and opts.auth may not both be specified');
-    }
-    return typeof options.auth === 'string' ? options.auth : `token ${token}`;
-}
-exports.getAuthString = getAuthString;
-function getProxyAgent(destinationUrl) {
-    const hc = new httpClient.HttpClient();
-    return hc.getAgent(destinationUrl);
-}
-exports.getProxyAgent = getProxyAgent;
-function getApiBaseUrl() {
-    return process.env['GITHUB_API_URL'] || 'https://api.github.com';
-}
-exports.getApiBaseUrl = getApiBaseUrl;
-//# sourceMappingURL=utils.js.map
-
-/***/ }),
-
-/***/ 925:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-const http = __webpack_require__(605);
-const https = __webpack_require__(211);
-const pm = __webpack_require__(443);
-let tunnel;
-var HttpCodes;
-(function (HttpCodes) {
-    HttpCodes[HttpCodes["OK"] = 200] = "OK";
-    HttpCodes[HttpCodes["MultipleChoices"] = 300] = "MultipleChoices";
-    HttpCodes[HttpCodes["MovedPermanently"] = 301] = "MovedPermanently";
-    HttpCodes[HttpCodes["ResourceMoved"] = 302] = "ResourceMoved";
-    HttpCodes[HttpCodes["SeeOther"] = 303] = "SeeOther";
-    HttpCodes[HttpCodes["NotModified"] = 304] = "NotModified";
-    HttpCodes[HttpCodes["UseProxy"] = 305] = "UseProxy";
-    HttpCodes[HttpCodes["SwitchProxy"] = 306] = "SwitchProxy";
-    HttpCodes[HttpCodes["TemporaryRedirect"] = 307] = "TemporaryRedirect";
-    HttpCodes[HttpCodes["PermanentRedirect"] = 308] = "PermanentRedirect";
-    HttpCodes[HttpCodes["BadRequest"] = 400] = "BadRequest";
-    HttpCodes[HttpCodes["Unauthorized"] = 401] = "Unauthorized";
-    HttpCodes[HttpCodes["PaymentRequired"] = 402] = "PaymentRequired";
-    HttpCodes[HttpCodes["Forbidden"] = 403] = "Forbidden";
-    HttpCodes[HttpCodes["NotFound"] = 404] = "NotFound";
-    HttpCodes[HttpCodes["MethodNotAllowed"] = 405] = "MethodNotAllowed";
-    HttpCodes[HttpCodes["NotAcceptable"] = 406] = "NotAcceptable";
-    HttpCodes[HttpCodes["ProxyAuthenticationRequired"] = 407] = "ProxyAuthenticationRequired";
-    HttpCodes[HttpCodes["RequestTimeout"] = 408] = "RequestTimeout";
-    HttpCodes[HttpCodes["Conflict"] = 409] = "Conflict";
-    HttpCodes[HttpCodes["Gone"] = 410] = "Gone";
-    HttpCodes[HttpCodes["TooManyRequests"] = 429] = "TooManyRequests";
-    HttpCodes[HttpCodes["InternalServerError"] = 500] = "InternalServerError";
-    HttpCodes[HttpCodes["NotImplemented"] = 501] = "NotImplemented";
-    HttpCodes[HttpCodes["BadGateway"] = 502] = "BadGateway";
-    HttpCodes[HttpCodes["ServiceUnavailable"] = 503] = "ServiceUnavailable";
-    HttpCodes[HttpCodes["GatewayTimeout"] = 504] = "GatewayTimeout";
-})(HttpCodes = exports.HttpCodes || (exports.HttpCodes = {}));
-var Headers;
-(function (Headers) {
-    Headers["Accept"] = "accept";
-    Headers["ContentType"] = "content-type";
-})(Headers = exports.Headers || (exports.Headers = {}));
-var MediaTypes;
-(function (MediaTypes) {
-    MediaTypes["ApplicationJson"] = "application/json";
-})(MediaTypes = exports.MediaTypes || (exports.MediaTypes = {}));
-/**
- * Returns the proxy URL, depending upon the supplied url and proxy environment variables.
- * @param serverUrl  The server URL where the request will be sent. For example, https://api.github.com
- */
-function getProxyUrl(serverUrl) {
-    let proxyUrl = pm.getProxyUrl(new URL(serverUrl));
-    return proxyUrl ? proxyUrl.href : '';
-}
-exports.getProxyUrl = getProxyUrl;
-const HttpRedirectCodes = [
-    HttpCodes.MovedPermanently,
-    HttpCodes.ResourceMoved,
-    HttpCodes.SeeOther,
-    HttpCodes.TemporaryRedirect,
-    HttpCodes.PermanentRedirect
-];
-const HttpResponseRetryCodes = [
-    HttpCodes.BadGateway,
-    HttpCodes.ServiceUnavailable,
-    HttpCodes.GatewayTimeout
-];
-const RetryableHttpVerbs = ['OPTIONS', 'GET', 'DELETE', 'HEAD'];
-const ExponentialBackoffCeiling = 10;
-const ExponentialBackoffTimeSlice = 5;
-class HttpClientError extends Error {
-    constructor(message, statusCode) {
-        super(message);
-        this.name = 'HttpClientError';
-        this.statusCode = statusCode;
-        Object.setPrototypeOf(this, HttpClientError.prototype);
-    }
-}
-exports.HttpClientError = HttpClientError;
-class HttpClientResponse {
-    constructor(message) {
-        this.message = message;
-    }
-    readBody() {
-        return new Promise(async (resolve, reject) => {
-            let output = Buffer.alloc(0);
-            this.message.on('data', (chunk) => {
-                output = Buffer.concat([output, chunk]);
-            });
-            this.message.on('end', () => {
-                resolve(output.toString());
-            });
-        });
-    }
-}
-exports.HttpClientResponse = HttpClientResponse;
-function isHttps(requestUrl) {
-    let parsedUrl = new URL(requestUrl);
-    return parsedUrl.protocol === 'https:';
-}
-exports.isHttps = isHttps;
-class HttpClient {
-    constructor(userAgent, handlers, requestOptions) {
-        this._ignoreSslError = false;
-        this._allowRedirects = true;
-        this._allowRedirectDowngrade = false;
-        this._maxRedirects = 50;
-        this._allowRetries = false;
-        this._maxRetries = 1;
-        this._keepAlive = false;
-        this._disposed = false;
-        this.userAgent = userAgent;
-        this.handlers = handlers || [];
-        this.requestOptions = requestOptions;
-        if (requestOptions) {
-            if (requestOptions.ignoreSslError != null) {
-                this._ignoreSslError = requestOptions.ignoreSslError;
-            }
-            this._socketTimeout = requestOptions.socketTimeout;
-            if (requestOptions.allowRedirects != null) {
-                this._allowRedirects = requestOptions.allowRedirects;
-            }
-            if (requestOptions.allowRedirectDowngrade != null) {
-                this._allowRedirectDowngrade = requestOptions.allowRedirectDowngrade;
-            }
-            if (requestOptions.maxRedirects != null) {
-                this._maxRedirects = Math.max(requestOptions.maxRedirects, 0);
-            }
-            if (requestOptions.keepAlive != null) {
-                this._keepAlive = requestOptions.keepAlive;
-            }
-            if (requestOptions.allowRetries != null) {
-                this._allowRetries = requestOptions.allowRetries;
-            }
-            if (requestOptions.maxRetries != null) {
-                this._maxRetries = requestOptions.maxRetries;
-            }
-        }
-    }
-    options(requestUrl, additionalHeaders) {
-        return this.request('OPTIONS', requestUrl, null, additionalHeaders || {});
-    }
-    get(requestUrl, additionalHeaders) {
-        return this.request('GET', requestUrl, null, additionalHeaders || {});
-    }
-    del(requestUrl, additionalHeaders) {
-        return this.request('DELETE', requestUrl, null, additionalHeaders || {});
-    }
-    post(requestUrl, data, additionalHeaders) {
-        return this.request('POST', requestUrl, data, additionalHeaders || {});
-    }
-    patch(requestUrl, data, additionalHeaders) {
-        return this.request('PATCH', requestUrl, data, additionalHeaders || {});
-    }
-    put(requestUrl, data, additionalHeaders) {
-        return this.request('PUT', requestUrl, data, additionalHeaders || {});
-    }
-    head(requestUrl, additionalHeaders) {
-        return this.request('HEAD', requestUrl, null, additionalHeaders || {});
-    }
-    sendStream(verb, requestUrl, stream, additionalHeaders) {
-        return this.request(verb, requestUrl, stream, additionalHeaders);
-    }
-    /**
-     * Gets a typed object from an endpoint
-     * Be aware that not found returns a null.  Other errors (4xx, 5xx) reject the promise
-     */
-    async getJson(requestUrl, additionalHeaders = {}) {
-        additionalHeaders[Headers.Accept] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.Accept, MediaTypes.ApplicationJson);
-        let res = await this.get(requestUrl, additionalHeaders);
-        return this._processResponse(res, this.requestOptions);
-    }
-    async postJson(requestUrl, obj, additionalHeaders = {}) {
-        let data = JSON.stringify(obj, null, 2);
-        additionalHeaders[Headers.Accept] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.Accept, MediaTypes.ApplicationJson);
-        additionalHeaders[Headers.ContentType] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.ContentType, MediaTypes.ApplicationJson);
-        let res = await this.post(requestUrl, data, additionalHeaders);
-        return this._processResponse(res, this.requestOptions);
-    }
-    async putJson(requestUrl, obj, additionalHeaders = {}) {
-        let data = JSON.stringify(obj, null, 2);
-        additionalHeaders[Headers.Accept] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.Accept, MediaTypes.ApplicationJson);
-        additionalHeaders[Headers.ContentType] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.ContentType, MediaTypes.ApplicationJson);
-        let res = await this.put(requestUrl, data, additionalHeaders);
-        return this._processResponse(res, this.requestOptions);
-    }
-    async patchJson(requestUrl, obj, additionalHeaders = {}) {
-        let data = JSON.stringify(obj, null, 2);
-        additionalHeaders[Headers.Accept] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.Accept, MediaTypes.ApplicationJson);
-        additionalHeaders[Headers.ContentType] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.ContentType, MediaTypes.ApplicationJson);
-        let res = await this.patch(requestUrl, data, additionalHeaders);
-        return this._processResponse(res, this.requestOptions);
-    }
-    /**
-     * Makes a raw http request.
-     * All other methods such as get, post, patch, and request ultimately call this.
-     * Prefer get, del, post and patch
-     */
-    async request(verb, requestUrl, data, headers) {
-        if (this._disposed) {
-            throw new Error('Client has already been disposed.');
-        }
-        let parsedUrl = new URL(requestUrl);
-        let info = this._prepareRequest(verb, parsedUrl, headers);
-        // Only perform retries on reads since writes may not be idempotent.
-        let maxTries = this._allowRetries && RetryableHttpVerbs.indexOf(verb) != -1
-            ? this._maxRetries + 1
-            : 1;
-        let numTries = 0;
-        let response;
-        while (numTries < maxTries) {
-            response = await this.requestRaw(info, data);
-            // Check if it's an authentication challenge
-            if (response &&
-                response.message &&
-                response.message.statusCode === HttpCodes.Unauthorized) {
-                let authenticationHandler;
-                for (let i = 0; i < this.handlers.length; i++) {
-                    if (this.handlers[i].canHandleAuthentication(response)) {
-                        authenticationHandler = this.handlers[i];
-                        break;
-                    }
-                }
-                if (authenticationHandler) {
-                    return authenticationHandler.handleAuthentication(this, info, data);
-                }
-                else {
-                    // We have received an unauthorized response but have no handlers to handle it.
-                    // Let the response return to the caller.
-                    return response;
-                }
-            }
-            let redirectsRemaining = this._maxRedirects;
-            while (HttpRedirectCodes.indexOf(response.message.statusCode) != -1 &&
-                this._allowRedirects &&
-                redirectsRemaining > 0) {
-                const redirectUrl = response.message.headers['location'];
-                if (!redirectUrl) {
-                    // if there's no location to redirect to, we won't
-                    break;
-                }
-                let parsedRedirectUrl = new URL(redirectUrl);
-                if (parsedUrl.protocol == 'https:' &&
-                    parsedUrl.protocol != parsedRedirectUrl.protocol &&
-                    !this._allowRedirectDowngrade) {
-                    throw new Error('Redirect from HTTPS to HTTP protocol. This downgrade is not allowed for security reasons. If you want to allow this behavior, set the allowRedirectDowngrade option to true.');
-                }
-                // we need to finish reading the response before reassigning response
-                // which will leak the open socket.
-                await response.readBody();
-                // strip authorization header if redirected to a different hostname
-                if (parsedRedirectUrl.hostname !== parsedUrl.hostname) {
-                    for (let header in headers) {
-                        // header names are case insensitive
-                        if (header.toLowerCase() === 'authorization') {
-                            delete headers[header];
-                        }
-                    }
-                }
-                // let's make the request with the new redirectUrl
-                info = this._prepareRequest(verb, parsedRedirectUrl, headers);
-                response = await this.requestRaw(info, data);
-                redirectsRemaining--;
-            }
-            if (HttpResponseRetryCodes.indexOf(response.message.statusCode) == -1) {
-                // If not a retry code, return immediately instead of retrying
-                return response;
-            }
-            numTries += 1;
-            if (numTries < maxTries) {
-                await response.readBody();
-                await this._performExponentialBackoff(numTries);
-            }
-        }
-        return response;
-    }
-    /**
-     * Needs to be called if keepAlive is set to true in request options.
-     */
-    dispose() {
-        if (this._agent) {
-            this._agent.destroy();
-        }
-        this._disposed = true;
-    }
-    /**
-     * Raw request.
-     * @param info
-     * @param data
-     */
-    requestRaw(info, data) {
-        return new Promise((resolve, reject) => {
-            let callbackForResult = function (err, res) {
-                if (err) {
-                    reject(err);
-                }
-                resolve(res);
-            };
-            this.requestRawWithCallback(info, data, callbackForResult);
-        });
-    }
-    /**
-     * Raw request with callback.
-     * @param info
-     * @param data
-     * @param onResult
-     */
-    requestRawWithCallback(info, data, onResult) {
-        let socket;
-        if (typeof data === 'string') {
-            info.options.headers['Content-Length'] = Buffer.byteLength(data, 'utf8');
-        }
-        let callbackCalled = false;
-        let handleResult = (err, res) => {
-            if (!callbackCalled) {
-                callbackCalled = true;
-                onResult(err, res);
-            }
-        };
-        let req = info.httpModule.request(info.options, (msg) => {
-            let res = new HttpClientResponse(msg);
-            handleResult(null, res);
-        });
-        req.on('socket', sock => {
-            socket = sock;
-        });
-        // If we ever get disconnected, we want the socket to timeout eventually
-        req.setTimeout(this._socketTimeout || 3 * 60000, () => {
-            if (socket) {
-                socket.end();
-            }
-            handleResult(new Error('Request timeout: ' + info.options.path), null);
-        });
-        req.on('error', function (err) {
-            // err has statusCode property
-            // res should have headers
-            handleResult(err, null);
-        });
-        if (data && typeof data === 'string') {
-            req.write(data, 'utf8');
-        }
-        if (data && typeof data !== 'string') {
-            data.on('close', function () {
-                req.end();
-            });
-            data.pipe(req);
-        }
-        else {
-            req.end();
-        }
-    }
-    /**
-     * Gets an http agent. This function is useful when you need an http agent that handles
-     * routing through a proxy server - depending upon the url and proxy environment variables.
-     * @param serverUrl  The server URL where the request will be sent. For example, https://api.github.com
-     */
-    getAgent(serverUrl) {
-        let parsedUrl = new URL(serverUrl);
-        return this._getAgent(parsedUrl);
-    }
-    _prepareRequest(method, requestUrl, headers) {
-        const info = {};
-        info.parsedUrl = requestUrl;
-        const usingSsl = info.parsedUrl.protocol === 'https:';
-        info.httpModule = usingSsl ? https : http;
-        const defaultPort = usingSsl ? 443 : 80;
-        info.options = {};
-        info.options.host = info.parsedUrl.hostname;
-        info.options.port = info.parsedUrl.port
-            ? parseInt(info.parsedUrl.port)
-            : defaultPort;
-        info.options.path =
-            (info.parsedUrl.pathname || '') + (info.parsedUrl.search || '');
-        info.options.method = method;
-        info.options.headers = this._mergeHeaders(headers);
-        if (this.userAgent != null) {
-            info.options.headers['user-agent'] = this.userAgent;
-        }
-        info.options.agent = this._getAgent(info.parsedUrl);
-        // gives handlers an opportunity to participate
-        if (this.handlers) {
-            this.handlers.forEach(handler => {
-                handler.prepareRequest(info.options);
-            });
-        }
-        return info;
-    }
-    _mergeHeaders(headers) {
-        const lowercaseKeys = obj => Object.keys(obj).reduce((c, k) => ((c[k.toLowerCase()] = obj[k]), c), {});
-        if (this.requestOptions && this.requestOptions.headers) {
-            return Object.assign({}, lowercaseKeys(this.requestOptions.headers), lowercaseKeys(headers));
-        }
-        return lowercaseKeys(headers || {});
-    }
-    _getExistingOrDefaultHeader(additionalHeaders, header, _default) {
-        const lowercaseKeys = obj => Object.keys(obj).reduce((c, k) => ((c[k.toLowerCase()] = obj[k]), c), {});
-        let clientHeader;
-        if (this.requestOptions && this.requestOptions.headers) {
-            clientHeader = lowercaseKeys(this.requestOptions.headers)[header];
-        }
-        return additionalHeaders[header] || clientHeader || _default;
-    }
-    _getAgent(parsedUrl) {
-        let agent;
-        let proxyUrl = pm.getProxyUrl(parsedUrl);
-        let useProxy = proxyUrl && proxyUrl.hostname;
-        if (this._keepAlive && useProxy) {
-            agent = this._proxyAgent;
-        }
-        if (this._keepAlive && !useProxy) {
-            agent = this._agent;
-        }
-        // if agent is already assigned use that agent.
-        if (!!agent) {
-            return agent;
-        }
-        const usingSsl = parsedUrl.protocol === 'https:';
-        let maxSockets = 100;
-        if (!!this.requestOptions) {
-            maxSockets = this.requestOptions.maxSockets || http.globalAgent.maxSockets;
-        }
-        if (useProxy) {
-            // If using proxy, need tunnel
-            if (!tunnel) {
-                tunnel = __webpack_require__(294);
-            }
-            const agentOptions = {
-                maxSockets: maxSockets,
-                keepAlive: this._keepAlive,
-                proxy: {
-                    proxyAuth: `${proxyUrl.username}:${proxyUrl.password}`,
-                    host: proxyUrl.hostname,
-                    port: proxyUrl.port
-                }
-            };
-            let tunnelAgent;
-            const overHttps = proxyUrl.protocol === 'https:';
-            if (usingSsl) {
-                tunnelAgent = overHttps ? tunnel.httpsOverHttps : tunnel.httpsOverHttp;
-            }
-            else {
-                tunnelAgent = overHttps ? tunnel.httpOverHttps : tunnel.httpOverHttp;
-            }
-            agent = tunnelAgent(agentOptions);
-            this._proxyAgent = agent;
-        }
-        // if reusing agent across request and tunneling agent isn't assigned create a new agent
-        if (this._keepAlive && !agent) {
-            const options = { keepAlive: this._keepAlive, maxSockets: maxSockets };
-            agent = usingSsl ? new https.Agent(options) : new http.Agent(options);
-            this._agent = agent;
-        }
-        // if not using private agent and tunnel agent isn't setup then use global agent
-        if (!agent) {
-            agent = usingSsl ? https.globalAgent : http.globalAgent;
-        }
-        if (usingSsl && this._ignoreSslError) {
-            // we don't want to set NODE_TLS_REJECT_UNAUTHORIZED=0 since that will affect request for entire process
-            // http.RequestOptions doesn't expose a way to modify RequestOptions.agent.options
-            // we have to cast it to any and change it directly
-            agent.options = Object.assign(agent.options || {}, {
-                rejectUnauthorized: false
-            });
-        }
-        return agent;
-    }
-    _performExponentialBackoff(retryNumber) {
-        retryNumber = Math.min(ExponentialBackoffCeiling, retryNumber);
-        const ms = ExponentialBackoffTimeSlice * Math.pow(2, retryNumber);
-        return new Promise(resolve => setTimeout(() => resolve(), ms));
-    }
-    static dateTimeDeserializer(key, value) {
-        if (typeof value === 'string') {
-            let a = new Date(value);
-            if (!isNaN(a.valueOf())) {
-                return a;
-            }
-        }
-        return value;
-    }
-    async _processResponse(res, options) {
-        return new Promise(async (resolve, reject) => {
-            const statusCode = res.message.statusCode;
-            const response = {
-                statusCode: statusCode,
-                result: null,
-                headers: {}
-            };
-            // not found leads to null obj returned
-            if (statusCode == HttpCodes.NotFound) {
-                resolve(response);
-            }
-            let obj;
-            let contents;
-            // get the result from the body
-            try {
-                contents = await res.readBody();
-                if (contents && contents.length > 0) {
-                    if (options && options.deserializeDates) {
-                        obj = JSON.parse(contents, HttpClient.dateTimeDeserializer);
-                    }
-                    else {
-                        obj = JSON.parse(contents);
-                    }
-                    response.result = obj;
-                }
-                response.headers = res.message.headers;
-            }
-            catch (err) {
-                // Invalid resource (contents not json);  leaving result obj null
-            }
-            // note that 3xx redirects are handled by the http layer.
-            if (statusCode > 299) {
-                let msg;
-                // if exception/error in body, attempt to get better error
-                if (obj && obj.message) {
-                    msg = obj.message;
-                }
-                else if (contents && contents.length > 0) {
-                    // it may be the case that the exception is in the body message as string
-                    msg = contents;
-                }
-                else {
-                    msg = 'Failed request: (' + statusCode + ')';
-                }
-                let err = new HttpClientError(msg, statusCode);
-                err.result = response.result;
-                reject(err);
-            }
-            else {
-                resolve(response);
-            }
-        });
-    }
-}
-exports.HttpClient = HttpClient;
-
-
-/***/ }),
-
-/***/ 932:
-/***/ (function(__unusedmodule, exports) {
-
-"use strict";
-
-
-Object.defineProperty(exports, '__esModule', { value: true });
-
-class Deprecation extends Error {
-  constructor(message) {
-    super(message); // Maintains proper stack trace (only available on V8)
-
-    /* istanbul ignore next */
-
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, this.constructor);
-    }
-
-    this.name = 'Deprecation';
-  }
-
-}
-
-exports.Deprecation = Deprecation;
-
-
-/***/ }),
-
-/***/ 940:
-/***/ (function(module) {
+/***/ 2940:
+/***/ ((module) => {
 
 // Returns a wrapper function that returns a wrapped callback
 // The wrapper function should do some stuff, and return a
@@ -15360,119 +15446,169 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
-/***/ 976:
-/***/ (function(__unusedmodule, exports) {
+/***/ 2877:
+/***/ ((module) => {
 
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.capitalize = void 0;
-exports.capitalize = (str) => {
-    return `${str[0].toUpperCase()}${str.substring(1)}`;
-};
+module.exports = eval("require")("encoding");
 
 
 /***/ }),
 
-/***/ 978:
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ 2357:
+/***/ ((module) => {
 
 "use strict";
-
-
-var Validator = module.exports.Validator = __webpack_require__(486);
-
-module.exports.ValidatorResult = __webpack_require__(801).ValidatorResult;
-module.exports.ValidationError = __webpack_require__(801).ValidationError;
-module.exports.SchemaError = __webpack_require__(801).SchemaError;
-module.exports.SchemaScanResult = __webpack_require__(534).SchemaScanResult;
-module.exports.scan = __webpack_require__(534).scan;
-
-module.exports.validate = function (instance, schema, options) {
-  var v = new Validator();
-  return v.validate(instance, schema, options);
-};
-
+module.exports = require("assert");;
 
 /***/ }),
 
-/***/ 983:
-/***/ (function(__unusedmodule, exports) {
+/***/ 8614:
+/***/ ((module) => {
 
 "use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.parseIssueApiUrl = exports.parseIssueUrl = void 0;
-exports.parseIssueUrl = (issueUrl) => {
-    const uri = new URL(issueUrl);
-    const { pathname } = uri;
-    if (uri.hostname !== 'github.com') {
-        return null;
-    }
-    const split = pathname.split('/');
-    return {
-        owner: split[1],
-        repo: split[2],
-        issueNumber: parseInt(split[4], 10),
-    };
-};
-exports.parseIssueApiUrl = (issueUrl) => {
-    const uri = new URL(issueUrl);
-    const { pathname } = uri;
-    const split = pathname.split('/');
-    return {
-        owner: split[2],
-        repo: split[3],
-        issueNumber: parseInt(split[5], 10),
-    };
-};
-
+module.exports = require("events");;
 
 /***/ }),
 
-/***/ 996:
-/***/ (function(__unusedmodule, exports) {
+/***/ 5747:
+/***/ ((module) => {
 
 "use strict";
+module.exports = require("fs");;
 
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.parseFileUrl = void 0;
-exports.parseFileUrl = (fileUrl) => {
-    const uri = new URL(fileUrl);
-    const { pathname } = uri;
-    const split = pathname.split('/');
-    const path = decodeURIComponent(split.slice(4).join('/'));
-    return {
-        owner: split[1],
-        repo: split[2],
-        path: `/${path}`,
-    };
-};
+/***/ }),
 
+/***/ 8605:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("http");;
+
+/***/ }),
+
+/***/ 7211:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("https");;
+
+/***/ }),
+
+/***/ 1631:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("net");;
+
+/***/ }),
+
+/***/ 2087:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("os");;
+
+/***/ }),
+
+/***/ 5622:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("path");;
+
+/***/ }),
+
+/***/ 2413:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("stream");;
+
+/***/ }),
+
+/***/ 4016:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("tls");;
+
+/***/ }),
+
+/***/ 8835:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("url");;
+
+/***/ }),
+
+/***/ 1669:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("util");;
+
+/***/ }),
+
+/***/ 8761:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("zlib");;
 
 /***/ })
 
-/******/ },
-/******/ function(__webpack_require__) { // webpackRuntimeModules
-/******/ 	"use strict";
-/******/ 
+/******/ 	});
+/************************************************************************/
+/******/ 	// The module cache
+/******/ 	var __webpack_module_cache__ = {};
+/******/ 	
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/ 		// Check if module is in cache
+/******/ 		if(__webpack_module_cache__[moduleId]) {
+/******/ 			return __webpack_module_cache__[moduleId].exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = __webpack_module_cache__[moduleId] = {
+/******/ 			id: moduleId,
+/******/ 			loaded: false,
+/******/ 			exports: {}
+/******/ 		};
+/******/ 	
+/******/ 		// Execute the module function
+/******/ 		var threw = true;
+/******/ 		try {
+/******/ 			__webpack_modules__[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/ 			threw = false;
+/******/ 		} finally {
+/******/ 			if(threw) delete __webpack_module_cache__[moduleId];
+/******/ 		}
+/******/ 	
+/******/ 		// Flag the module as loaded
+/******/ 		module.loaded = true;
+/******/ 	
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/ 	
+/************************************************************************/
 /******/ 	/* webpack/runtime/node module decorator */
-/******/ 	!function() {
-/******/ 		__webpack_require__.nmd = function(module) {
+/******/ 	(() => {
+/******/ 		__webpack_require__.nmd = (module) => {
 /******/ 			module.paths = [];
 /******/ 			if (!module.children) module.children = [];
-/******/ 			Object.defineProperty(module, 'loaded', {
-/******/ 				enumerable: true,
-/******/ 				get: function() { return module.l; }
-/******/ 			});
-/******/ 			Object.defineProperty(module, 'id', {
-/******/ 				enumerable: true,
-/******/ 				get: function() { return module.i; }
-/******/ 			});
 /******/ 			return module;
 /******/ 		};
-/******/ 	}();
+/******/ 	})();
 /******/ 	
-/******/ }
-);
+/******/ 	/* webpack/runtime/compat */
+/******/ 	
+/******/ 	__webpack_require__.ab = __dirname + "/";/************************************************************************/
+/******/ 	// module exports must be returned from runtime so entry inlining is disabled
+/******/ 	// startup
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(3109);
+/******/ })()
+;
 //# sourceMappingURL=index.js.map

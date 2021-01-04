@@ -1,4 +1,4 @@
 export enum IIssueState {
-    Open = 'open',
-    Closed = 'closed',
+  Open = 'open',
+  Closed = 'closed',
 }

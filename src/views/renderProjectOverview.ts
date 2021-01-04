@@ -22,7 +22,7 @@ const renderPerLine = (
   const left = leftRatio.toFixed(1);
   const was = totalRatio.toFixed(1);
   return `${ident(identation)}- ${unit}: **${left}** left / **${was}** total`;
-};
+}
 
 // const renderDeveloper = (
 //   developer: IDeveloperWithIssuesCount,
@@ -45,7 +45,7 @@ const renderDeveloper = (
   identation = 0,
 ) => {
   return `${ident(identation)}- @${developer}`;
-};
+}
 
 const renderDevelopers = (
   developers: string[],
@@ -67,12 +67,9 @@ const renderDevelopers = (
     title,
     // devs,
   ].join('\n');
-};
+}
 
-const renderIssuesLoadSection = (
-  stats: IProjectStats,
-  identation = 0,
-) => {
+const renderIssuesLoadSection = (stats: IProjectStats, identation = 0) => {
   const {
     issuesDeveloperLeftRatio,
     issuesDeveloperRatio,
@@ -86,7 +83,12 @@ const renderIssuesLoadSection = (
   // Load - 🔥 <b>high</b>
 
   return [
-    renderPerLine('issues per day', issuesDayLeftRatio, issuesDayRatio, identation),
+    renderPerLine(
+      'issues per day',
+      issuesDayLeftRatio,
+      issuesDayRatio,
+      identation,
+    ),
     renderPerLine(
       'issues per developer',
       issuesDeveloperLeftRatio,
@@ -100,7 +102,7 @@ const renderIssuesLoadSection = (
       identation,
     ),
   ].join('\n');
-};
+}
 
 const renderIssuesLoad = (
   allStats: IProjectStats,
@@ -118,7 +120,7 @@ const renderIssuesLoad = (
     renderIssuesLoadSection(allStats, identation + 1),
     '</details>',
   ].join('\n');
-};
+}
 
 /**
  * Render the `🔭 Overview` section with project stats.
@@ -137,15 +139,18 @@ export const renderProjectOverview = (
   const allStats = getProjectStats(allData, config);
   const plannedStats = getProjectStats(plannedData, config);
 
-  const {
-    developers,
-  } = allStats;
+  const { developers } = allStats;
 
-  const addedIssues = renderNewItemsSuffix(allPlannedIssuesAdded, allPlannedIssues);
+  const addedIssues = renderNewItemsSuffix(
+    allPlannedIssuesAdded,
+    allPlannedIssues,
+  )
   return [
     `- 📅 ${renderDaysLeft(config)}`,
-    `- 🗒️ **${issuesToSolve.length}** issues left / **${allPlannedIssues.length}** total${addParens(addedIssues)}`,
+    `- 🗒️ **${issuesToSolve.length}** issues left / **${
+      allPlannedIssues.length
+    }** total${addParens(addedIssues)}`,
     renderDevelopers(developers, config),
     renderIssuesLoad(allStats, plannedStats, config),
   ].join('\n');
-};
+}

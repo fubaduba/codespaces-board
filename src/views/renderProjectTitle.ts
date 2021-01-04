@@ -9,27 +9,28 @@ import { addTitle } from './addTitle';
 export const renderProjectTitle = (
   project: TProject,
   allData: IProjectData,
-  config: IConfig
+  config: IConfig,
 ) => {
   const plannedData = filterPlannedProjectData(allData);
-  const {
-    doneRate,
-  } = getProjectStats(plannedData, config);
+  const { doneRate } = getProjectStats(plannedData, config);
 
   const { allPlannedIssues } = allData;
   const { allPlannedIssues: plannedAllPlannedIssues } = plannedData;
 
-  const surgeRate = (allPlannedIssues.length - plannedAllPlannedIssues.length) / plannedAllPlannedIssues.length;
-  const surgeEmoji = (surgeRate >= .1)
-    ? '💥'
-    : '';
+  const surgeRate =
+    (allPlannedIssues.length - plannedAllPlannedIssues.length) /
+    plannedAllPlannedIssues.length;
+  const surgeEmoji = surgeRate >= 0.1 ? '💥' : '';
 
-  const surgeString = (surgeRate > 0)
-    ? ` (**+${rateToPercent(surgeRate)} flood**${surgeEmoji})`
-    : '';
+  const surgeString =
+    surgeRate > 0
+      ? ` (**+${rateToPercent(surgeRate)} flood**${surgeEmoji})`
+      : '';
 
   const suffix = addTitle('Items added after sprint start date', surgeString);
 
-  const projectTitle = `## ${project.name} - ${rateToPercent(doneRate)} done${suffix}`;
+  const projectTitle = `## ${project.name} - ${rateToPercent(
+    doneRate,
+  )} done${suffix}`;
   return projectTitle;
-};
+}

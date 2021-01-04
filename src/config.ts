@@ -17,10 +17,11 @@ const getWorkspacePath = (configFilePath: string) => {
   console.log(`join the workspace path`);
 
   return path.join(rootPath, configFilePath);
-}
+};
 
 export const getConfigs = (configFilePath: string): IConfig[] => {
-  const configPath = getWorkspacePath(configFilePath) ?? path.join(PROJECT_ROOT, configFilePath);
+  const configPath =
+    getWorkspacePath(configFilePath) ?? path.join(PROJECT_ROOT, configFilePath);
 
   console.log(`config path: "${configPath}"`);
 

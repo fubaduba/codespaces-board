@@ -12,4 +12,4 @@ export const isBugCard = (card: ICardWithIssue): boolean => {
   const { labels } = issue;
   const isBug = labels.map(pluck('name')).map(toLowerCase).includes('bug');
   return isBug;
-};
+}

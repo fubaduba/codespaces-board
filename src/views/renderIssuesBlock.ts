@@ -20,11 +20,11 @@ const findLabel = (labelName: string, found = true) => {
 
     const foundLabel = issue.labels.find((issueLabel) => {
       return issueLabel.name === labelName;
-    });
+    })
 
     return !!foundLabel === found;
-  };
-};
+  }
+}
 
 const getIssuesForLabel = (
   label: string,
@@ -35,7 +35,7 @@ const getIssuesForLabel = (
   const rest = originalCards.filter(findLabel(label, false));
 
   return [result, rest];
-};
+}
 
 const groupIssuesByLabels = (
   cardsWithIssues: ICardWithIssue[],
@@ -48,7 +48,7 @@ const groupIssuesByLabels = (
     typeof projectConfig === 'number' ? [] : projectConfig.trackLabels ?? [];
 
   const includedIssues = new Set<ICardWithIssue>();
-  for (let label of labels) {
+  for (const label of labels) {
     const [cardsForLabel, restCards] = getIssuesForLabel(
       label,
       cardsWithIssues,
@@ -65,10 +65,13 @@ const groupIssuesByLabels = (
      */
     cardsWithIssues = restCards;
 
-    const sortedIssuesForLabel = sortCardsInPlace(cardsForLabel, projectWithConfig);
+    const sortedIssuesForLabel = sortCardsInPlace(
+      cardsForLabel,
+      projectWithConfig,
+    )
     result[label] = sortedIssuesForLabel;
 
-    for (let issueForLabel of sortedIssuesForLabel) {
+    for (const issueForLabel of sortedIssuesForLabel) {
       includedIssues.add(issueForLabel);
     }
   }
@@ -76,16 +79,16 @@ const groupIssuesByLabels = (
   // get all issues that have no label
   const notIncludedIssues = cardsWithIssues.filter((issue) => {
     return !includedIssues.has(issue);
-  });
+  })
 
   result[NONE_LABEL] = notIncludedIssues;
 
   return result;
-};
+}
 
 const renderTitle = (title: string) => {
   return `### **${title}**`;
-};
+}
 
 const renderIssuesSection = (
   cardsWithIssues: ICardWithIssue[],
@@ -100,13 +103,13 @@ const renderIssuesSection = (
       ? undefined
       : projectConfig.isCheckListItems;
 
-  for (let cardWithIssue of cardsWithIssues) {
+  for (const cardWithIssue of cardsWithIssues) {
     const item = renderCard(cardWithIssue, projectWithConfig, isCheckList);
     issueItems.push(`${ident(0)}${item}`);
   }
 
   return issueItems.filter(notEmpty).join('\n');
-};
+}
 
 const renderIssuesList = (
   issues: ICardWithIssue[],
@@ -140,10 +143,10 @@ const renderIssuesList = (
         labelName === NONE_LABEL ? undefined : `\n**${capitalize(labelName)}**`;
 
       return renderIssuesSection(issues, projectWithConfig, title);
-    });
+    })
 
   return items.filter(notEmpty).join('\n');
-};
+}
 
 export const renderIssuesBlock = (
   title: string,
@@ -164,4 +167,4 @@ export const renderIssuesBlock = (
   return [renderTitle(title), renderIssuesList(issues, projectConfig)].join(
     '\n',
   );
-};
+}

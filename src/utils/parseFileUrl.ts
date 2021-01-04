@@ -12,4 +12,4 @@ export const parseFileUrl = (fileUrl: string): IParsedFileUrl => {
     repo: split[2],
     path: `/${path}`,
   };
-};
+}

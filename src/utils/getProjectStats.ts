@@ -32,10 +32,12 @@ const getDevelopers = (
     })
     .filter(notEmpty);
 
-  const developers: string[] = arrayUnique(flattenArray(developersWithDuplicates));
+  const developers: string[] = arrayUnique(
+    flattenArray(developersWithDuplicates),
+  )
 
   return developers;
-};
+}
 
 // const asigneesToDevelopers = (assignees: TRepoIssue['assignees']) => {
 //   return assignees.map((as) => {
@@ -143,4 +145,4 @@ export const getProjectStats = (
     // developer with most assigned issues
     // devWithMostAssignedIssues: getBusiestDeveloper(toSolveIssues),
   };
-};
+}

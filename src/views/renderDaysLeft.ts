@@ -4,17 +4,17 @@ import { parseDate } from '../utils/parseDate';
 import moment from 'moment';
 
 const getBusinessDatesCount = (startDate: Date, endDate: Date) => {
-  var count = 0;
-  var curDate = startDate;
+  let count = 0;
+  const curDate = startDate;
 
   while (curDate <= endDate) {
-    var dayOfWeek = curDate.getDay();
+    const dayOfWeek = curDate.getDay();
     if (!(dayOfWeek == 6 || dayOfWeek == 0)) count++;
     curDate.setDate(curDate.getDate() + 1);
   }
 
   return count;
-};
+}
 
 const daysLeftToEmoj = (daysLeft: number, totalDays: number) => {
   const ratio = daysLeft / totalDays;
@@ -32,7 +32,7 @@ const daysLeftToEmoj = (daysLeft: number, totalDays: number) => {
   }
 
   return '';
-};
+}
 
 export const getWorkDays = (config: IConfig) => {
   const {
@@ -59,9 +59,9 @@ export const getWorkDays = (config: IConfig) => {
 
   return {
     businessDaysLeft,
-    totalBusinessDaysInSprint: totalBusinessDaysInSprint,
+    totalBusinessDaysInSprint,
   };
-}
+};
 
 export const renderDaysLeft = (config: IConfig) => {
   const days = getWorkDays(config);
@@ -76,4 +76,4 @@ export const renderDaysLeft = (config: IConfig) => {
     daysLeft,
     totalBusinessDaysInSprint,
   )} **${daysLeft}** work days left`;
-};
+}

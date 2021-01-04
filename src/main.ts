@@ -132,7 +132,9 @@ const updateBoardComment = async (
   //   return await overwriteBoardIssue(issueContents, config, projectKit);
   // }
 
-  console.log(`>> updating the comment ${commentUrl} with contents length: ${issueContents.length}`);
+  console.log(
+    `>> updating the comment ${commentUrl} with contents length: ${issueContents.length}`,
+  );
 
   return await projectKit.updateBoardComment(commentUrl, issueContents);
 };
@@ -161,11 +163,11 @@ const processConfigRecordComment = async (
   const projectsWithData = [];
   for (let { repo, projects } of repoProjects) {
     for (let project of projects) {
-        console.log(`- Getting Project data for ${project.project.name}.`);
-        projectsWithData.push({
-          project,
-          data: await getProjectData(readProjectKit, config, project),
-        });
+      console.log(`- Getting Project data for ${project.project.name}.`);
+      projectsWithData.push({
+        project,
+        data: await getProjectData(readProjectKit, config, project),
+      });
     }
 
     for (let { project, data } of projectsWithData) {
@@ -188,8 +190,10 @@ const processConfigRecordComment = async (
 async function run(): Promise<void> {
   try {
     const token = core.getInput('token');
-    const readToken = env(TOKEN_READ_NAME) ?? core.getInput('readToken') ?? token;
-    const writeToken = env(TOKEN_WRITE_NAME) ?? core.getInput('writeToken') ?? token;
+    const readToken =
+      env(TOKEN_READ_NAME) ?? core.getInput('readToken') ?? token;
+    const writeToken =
+      env(TOKEN_WRITE_NAME) ?? core.getInput('writeToken') ?? token;
 
     if (!readToken) {
       throw new AuthorizationError('No read token found.');

@@ -1,4 +1,4 @@
-import { IDeveloperWithIssuesCount } from "./IDeveloperWithIssuesCount";
+import { IDeveloperWithIssuesCount } from './IDeveloperWithIssuesCount'
 
 export interface IProjectStats {
   doneRate: number;

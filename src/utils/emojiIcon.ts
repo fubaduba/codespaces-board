@@ -7,4 +7,4 @@ export const emojiIcon = (icon: string, title?: string) => {
   }
 
   return `<i title="${title}">${iconString}</i>`;
-};
+}

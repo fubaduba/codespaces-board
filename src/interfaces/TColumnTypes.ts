@@ -6,4 +6,4 @@ export enum TColumnTypes {
   InReview = 'In review',
   WaitingToDeploy = 'Waiting to deploy',
   Done = 'Done',
-};
+}

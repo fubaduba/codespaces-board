@@ -1,4 +1,4 @@
 export interface IParsedRepo {
-    owner: string;
-    repo: string;
+  owner: string;
+  repo: string;
 }

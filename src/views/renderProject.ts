@@ -35,15 +35,12 @@ export const renderProject = (
     doneOrDeployIssues: plannedDoneOrDeployIssues,
   } = plannedData;
 
-  const {
-    doneRate,
-    inWorkRate,
-    committedRate,
-  } = getProjectStats(plannedData, config);
+  const { doneRate, inWorkRate, committedRate } = getProjectStats(
+    plannedData,
+    config,
+  )
 
-  const {
-    project,
-  } = projectWithConfig;
+  const { project } = projectWithConfig;
 
   const blockedIssuesString = renderIssuesBlock(
     `⚠️  ${blockedIssues.length} Blocked`,
@@ -66,9 +63,15 @@ export const renderProject = (
   );
 
   const doneCount = `${plannedDoneOrDeployIssues.length}/${plannedAllPlannedIssues.length}`;
-  const newItemsDone = renderNewItemsSuffix(plannedAllPlannedIssues, allPlannedIssues);
+  const newItemsDone = renderNewItemsSuffix(
+    plannedAllPlannedIssues,
+    allPlannedIssues,
+  )
   const doneIssuesString = renderIssuesBlock(
-    `🙌 ${doneCount} Done (${rateToPercent(doneRate)})${addTitle('Items added after sprint start date', newItemsDone)}`,
+    `🙌 ${doneCount} Done (${rateToPercent(doneRate)})${addTitle(
+      'Items added after sprint start date',
+      newItemsDone,
+    )}`,
     doneOrDeployIssues,
     projectWithConfig,
   );
@@ -89,4 +92,4 @@ export const renderProject = (
     doneIssuesString,
     backlogIssuesCountString,
   ].join('\n');
-};
+}

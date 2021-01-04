@@ -1,7 +1,6 @@
-
 export const ident = (steps: number) => {
-    const step = `  `;
-    const items = new Array(steps).fill(step);
+  const step = `  `;
+  const items = new Array(steps).fill(step);
 
-    return items.join();
-};
+  return items.join();
+}

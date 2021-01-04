@@ -6,9 +6,8 @@ export const renderNewItemsSuffix = (
   allIssues: ICardWithIssue[],
 ) => {
   const addedIssues = allIssues.length - plannedIssues.length;
-  const addedIssuesString = (addedIssues > 0)
-    ? ` **+${addedIssues} new** ${emojiIcon('💥', 'New')}`
-    : '';
+  const addedIssuesString =
+    addedIssues > 0 ? ` **+${addedIssues} new** ${emojiIcon('💥', 'New')}` : '';
 
   return addedIssuesString;
-};
+}

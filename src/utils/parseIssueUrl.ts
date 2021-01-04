@@ -16,7 +16,7 @@ export const parseIssueUrl = (issueUrl: string): IParsedIssue | null => {
     repo: split[2],
     issueNumber: parseInt(split[4], 10),
   };
-};
+}
 
 export const parseCommentUrl = (issueUrl: string): IParsedComment | null => {
   const uri = new URL(issueUrl);
@@ -34,8 +34,7 @@ export const parseCommentUrl = (issueUrl: string): IParsedComment | null => {
     issueNumber: parseInt(split[4], 10),
     commentId: parseInt(hash.split('#issuecomment-')[1], 10),
   };
-};
-
+}
 
 export const parseIssueApiUrl = (issueUrl: string): IParsedIssue => {
   const uri = new URL(issueUrl);
@@ -48,4 +47,4 @@ export const parseIssueApiUrl = (issueUrl: string): IParsedIssue => {
     repo: split[3],
     issueNumber: parseInt(split[5], 10),
   };
-};
+}

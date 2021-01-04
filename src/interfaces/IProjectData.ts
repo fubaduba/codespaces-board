@@ -17,5 +17,3 @@ export interface IProjectData {
   waitingToDeployIssues: ICardWithIssue[];
   doneIssues: ICardWithIssue[];
 }
-
-

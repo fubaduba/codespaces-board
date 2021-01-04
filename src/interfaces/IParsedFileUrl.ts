@@ -1,5 +1,5 @@
 export interface IParsedFileUrl {
-    owner: string;
-    repo: string;
-    path: string;
+  owner: string;
+  repo: string;
+  path: string;
 }

@@ -9,7 +9,7 @@ import { IProjectWithConfig } from '../interfaces/IProjectWithConfig';
 
 const sum = (a: number, b: number): number => {
   return a + b;
-};
+}
 
 const getTotalRate = (
   config: IConfig,
@@ -18,17 +18,17 @@ const getTotalRate = (
 ): number => {
   const allStats = projectsData.map((data) => {
     return getProjectStats(data, config);
-  });
+  })
 
   const stats = allStats.map((stat) => {
     return stat[statName];
-  });
+  })
 
   const totalStats = stats.reduce(sum, 0);
   const rate = totalStats / stats.length;
 
   return rate;
-};
+}
 
 const getTotalPercent = (
   config: IConfig,
@@ -37,7 +37,7 @@ const getTotalPercent = (
 ): string => {
   const rate = getTotalRate(config, projectsData, statName);
   return rateToPercent(rate);
-};
+}
 
 interface IProjectWithStats {
   projectWithLabels: IProjectWithConfig;
@@ -48,7 +48,7 @@ const renderPowerEngines = (
   projectsWithStats: IProjectWithStats[],
 ): string | undefined => {
   let maxProject = projectsWithStats[0];
-  for (let projectWithStats of projectsWithStats) {
+  for (const projectWithStats of projectsWithStats) {
     const { stats } = projectWithStats;
     if (stats.doneRate > maxProject.stats.doneRate) {
       maxProject = projectWithStats;
@@ -61,7 +61,7 @@ const renderPowerEngines = (
 
   const projects = projectsWithStats.filter(({ projectWithLabels, stats }) => {
     return maxProject.stats.doneRate === stats.doneRate;
-  });
+  })
 
   const projectsString = projects
     .map(({ projectWithLabels }) => {
@@ -70,8 +70,10 @@ const renderPowerEngines = (
     })
     .join(', ');
 
-  return `- 🚂 ${projectsString} **${rateToPercent(projects[0].stats.doneRate)}**`;
-};
+  return `- 🚂 ${projectsString} **${rateToPercent(
+    projects[0].stats.doneRate,
+  )}**`;
+}
 
 export interface IProjectsWithData {
   project: IProjectWithConfig;
@@ -92,7 +94,7 @@ export const renderOverview = (
 
   const projectsData = projectsWithData.map(({ data }) => {
     return data;
-  });
+  })
 
   const projectsWithStats = projectsWithData.map(({ project, data }) => {
     const stats = getProjectStats(data, config);
@@ -101,13 +103,17 @@ export const renderOverview = (
       projectWithLabels: project,
       stats,
     };
-  });
+  })
 
   return [
     `## 🔭 Overview - ${projectsData.length} projects`,
     `- ${renderDaysLeft(config)}`,
-    `- **${getTotalPercent(config, projectsData, 'doneRate')}** done across projects`,
+    `- **${getTotalPercent(
+      config,
+      projectsData,
+      'doneRate',
+    )}** done across projects`,
     `- **${getTotalPercent(config, projectsData, 'inWorkRate')}** in work`,
     renderPowerEngines(projectsWithStats),
   ].join('\n');
-};
+}

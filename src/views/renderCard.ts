@@ -58,26 +58,23 @@ const mapColumnToEmoji = (
 const mapIssueTypeToEmoji = (cardWithIssue: ICardWithIssue) => {
   const { issue } = cardWithIssue;
   if (!issue) {
-    return emojiIcon('🃏', 'Card');;
+    return emojiIcon('🃏', 'Card')
   }
-
 
   if (isBugCard(cardWithIssue)) {
     return emojiIcon('🐛', 'Bug');
   }
 
   return '';
-};
+}
 
-const newToEmpoji = (
-  { isNew }: ICardWithIssue,
-) => {
+const newToEmpoji = ({ isNew }: ICardWithIssue) => {
   if (isNew) {
     return emojiIcon('🆕', 'New');
   }
 
   return '';
-};
+}
 
 const renderAssignees = (cardWithIssue: ICardWithIssue) => {
   const { issue, card } = cardWithIssue;
@@ -94,10 +91,10 @@ const renderAssignees = (cardWithIssue: ICardWithIssue) => {
 
   const users = assignees.map((user) => {
     return `@${user.login}`;
-  });
+  })
 
   return users.join(' ');
-};
+}
 
 const renderItemIssueStatus = (
   cardWithIssue: ICardWithIssue,
@@ -115,7 +112,7 @@ const renderItemIssueStatus = (
   }
 
   return issue.state === IIssueState.Open ? '[ ] ' : '[x] ';
-};
+}
 
 type TIssueLabel = TRepoIssue['labels'][0];
 
@@ -125,7 +122,7 @@ const renderLabelImage = (label: TIssueLabel): string => {
   const encodedName = encodeURIComponent(name);
 
   return `<img src="https://img.shields.io/badge/-${encodedName}-${cleanColor}" height="15" alt="label: ${name}" />`;
-};
+}
 
 const renderIssueLabel = (label: TIssueLabel): string => {
   const { url, description } = label;
@@ -134,8 +131,10 @@ const renderIssueLabel = (label: TIssueLabel): string => {
   uri.hostname = uri.hostname.replace('api.', '');
   uri.pathname = uri.pathname.replace(/^\/repos/, '');
 
-  return `<a href="${uri}" title="${description}">${renderLabelImage(label)}</a>`;
-};
+  return `<a href="${uri}" title="${description}">${renderLabelImage(
+    label,
+  )}</a>`;
+}
 
 const renderPriorityLabels = (
   cardWithIssue: ICardWithIssue,
@@ -160,7 +159,7 @@ const renderPriorityLabels = (
     .map((label) => {
       const issueLabel = issue.labels.find((issueLabel) => {
         return issueLabel.name === label;
-      });
+      })
 
       return issueLabel;
     })
@@ -169,10 +168,8 @@ const renderPriorityLabels = (
 
   const result = cardLabels.join('');
 
-  return (result)
-    ? `${result} `
-    : '';
-};
+  return result ? `${result} ` : '';
+}
 
 export const renderCard = (
   cardWithIssue: ICardWithIssue,
@@ -181,15 +178,13 @@ export const renderCard = (
 ) => {
   const { column, issue, card } = cardWithIssue;
 
-  const title = (!issue)
-    ? card.note
-    : issue.title;
+  const title = !issue ? card.note : issue.title;
 
   /**
    * If no associated issue found, item `url` it the URL to the
    * card itself, otherwise `url` is the link to the issue.
    */
-  const url = (!issue)
+  const url = !issue
     ? `[#card-${card.id}](${cardLink(card, projectWithConfig)})`
     : issue.html_url;
 
@@ -201,4 +196,4 @@ export const renderCard = (
   const issueStatus = renderItemIssueStatus(cardWithIssue, column, asCheckList);
 
   return `- ${issueStatus}${labels}${newEmoji}${stateEmoji}${typeEmoji}${title} ${url} ${assignees}`;
-};
+}

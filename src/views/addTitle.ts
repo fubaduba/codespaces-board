@@ -4,4 +4,4 @@ export const addTitle = (title: string, str?: string) => {
   }
 
   return `<i title="${title}">${str}</i>`;
-};
+}

@@ -6,28 +6,29 @@ import { ICardWithIssue } from '../interfaces/ICardWithIssue';
 //   return filterUnassignedIssues(cards);
 // };
 
-export const filterUnassignedIssues = (cardsWithIssue: ICardWithIssue[]): ICardWithIssue[] => {
+export const filterUnassignedIssues = (
+  cardsWithIssue: ICardWithIssue[],
+): ICardWithIssue[] => {
   const cards = cardsWithIssue.filter(({ issue }) => {
     if (!issue) {
       return true;
     }
 
-    return (issue.assignees.length > 0);
+    return issue.assignees.length > 0
   });
 
   return cards;
-};
+}
 
 const filterNewCards = (cardsWithIssue: ICardWithIssue[]): ICardWithIssue[] => {
   const cards = cardsWithIssue.filter((card) => {
     return !card.isNew;
-  });
+  })
 
   return cards;
-};
+}
 
 export const filterPlannedProjectData = (data: IProjectData): IProjectData => {
-
   return {
     ...data,
     // combined
@@ -44,4 +45,4 @@ export const filterPlannedProjectData = (data: IProjectData): IProjectData => {
     waitingToDeployIssues: filterNewCards(data.waitingToDeployIssues),
     doneIssues: filterNewCards(data.doneIssues),
   };
-};
+}

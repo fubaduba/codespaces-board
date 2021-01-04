@@ -1,5 +1,9 @@
 import { OctoKitBase } from './OctoKitBase';
-import { parseCommentUrl, parseIssueApiUrl, parseIssueUrl } from '../utils/parseIssueUrl';
+import {
+  parseCommentUrl,
+  parseIssueApiUrl,
+  parseIssueUrl,
+} from '../utils/parseIssueUrl';
 import { parseFileUrl } from '../utils/parseFileUrl';
 import { notEmpty } from '../utils/functional/notEmpty';
 
@@ -33,17 +37,17 @@ const findColumn = (
 ): TProjectColumn | undefined => {
   const result = columns.find((column) => {
     return column.name.toLowerCase() === columnName.toLowerCase();
-  });
+  })
 
   return result;
-};
+}
 
 const getProjectId = (project: IProject | number) => {
   return typeof project === 'number' ? project : project.id;
-};
+}
 
 export class ProjectsOctoKit extends OctoKitBase {
-  public getRepoProjects = async (
+  getRepoProjects = async (
     repo: IRepoSourceConfig,
   ): Promise<IProjectWithConfig[]> => {
     const { data: projectsResponse } = await this.kit.projects.listForRepo({
@@ -63,7 +67,7 @@ export class ProjectsOctoKit extends OctoKitBase {
 
         const proj = projects.find((p) => {
           return project.number === getProjectId(p);
-        });
+        })
 
         if (!proj) {
           return;
@@ -78,14 +82,14 @@ export class ProjectsOctoKit extends OctoKitBase {
       .filter(notEmpty);
 
     return fetchedProjects;
-  };
+  }
 
-  public getAllProjects = async (
+  getAllProjects = async (
     repos: IRepoSourceConfig[],
   ): Promise<{ repo: IRepoSourceConfig; projects: IProjectWithConfig[] }[]> => {
     const result = [];
 
-    for (let repo of repos) {
+    for (const repo of repos) {
       const projects = await this.getRepoProjects(repo);
       result.push({
         repo,
@@ -94,9 +98,9 @@ export class ProjectsOctoKit extends OctoKitBase {
     }
 
     return result;
-  };
+  }
 
-  public getColumns = async (
+  getColumns = async (
     projectWithLabels: IProjectWithConfig,
   ): Promise<TColumnsMap> => {
     const { project } = projectWithLabels;
@@ -119,39 +123,37 @@ export class ProjectsOctoKit extends OctoKitBase {
     };
 
     return map;
-  };
+  }
 
-  public getColumnCards = async (
-    column: TProjectColumn,
-  ): Promise<TColumnCard[]> => {
+  getColumnCards = async (column: TProjectColumn): Promise<TColumnCard[]> => {
     const cards = await this.kit.paginate(this.kit.projects.listCards, {
       column_id: column.id,
       archived_state: 'not_archived',
     });
 
     return cards;
-  };
+  }
 
-  public getCards = async (
-    columns: TColumnsMap,
-  ): Promise<TColumnsWithCardsMap> => {
-    const cardPromises = Object.entries(columns).map(async ([ type, column ]) => {
-      if (!column) {
-        return;
-      }
+  getCards = async (columns: TColumnsMap): Promise<TColumnsWithCardsMap> => {
+    const cardPromises = Object.entries(columns)
+      .map(async ([type, column]) => {
+        if (!column) {
+          return;
+        }
 
-      return {
-        type,
-        column,
-        cards: await this.getColumnCards(column),
-      };
-    }).filter(notEmpty);
+        return {
+          type,
+          column,
+          cards: await this.getColumnCards(column),
+        }
+      })
+      .filter(notEmpty);
 
     const columnCardsWithEmpty = await Promise.all(cardPromises);
     const columnCards = columnCardsWithEmpty.filter(notEmpty);
 
     const result: any = {};
-    for (let columnCard of columnCards) {
+    for (const columnCard of columnCards) {
       const { type } = columnCard;
 
       result[type] = {
@@ -161,11 +163,9 @@ export class ProjectsOctoKit extends OctoKitBase {
     }
 
     return result as TColumnsWithCardsMap;
-  };
+  }
 
-  public getRepoIssues = async (
-    repo: IRepoSourceConfig,
-  ): Promise<TRepoIssue[]> => {
+  getRepoIssues = async (repo: IRepoSourceConfig): Promise<TRepoIssue[]> => {
     const issues = await this.kit.paginate(this.kit.issues.listForRepo, {
       repo: repo.repo,
       owner: repo.owner,
@@ -173,38 +173,33 @@ export class ProjectsOctoKit extends OctoKitBase {
     });
 
     return issues;
-  };
+  }
 
   private reposCache: Record<string, TRepoIssue[] | undefined> = {};
 
-  public getReposIssues = async (
-    repos: IParsedRepo[],
-  ): Promise<TRepoIssue[]> => {
-
+  getReposIssues = async (repos: IParsedRepo[]): Promise<TRepoIssue[]> => {
     const resultPromises: Promise<TRepoIssue[]>[] = repos.map(async (repo) => {
       const repoKey = `${repo.owner}/${repo.repo}`;
 
-      return await measure(
-        `Getting new isues for "${repoKey}"`,
-        async () => {
-          const cachedIssues = this.reposCache[repoKey];
-          if (cachedIssues) {
-            return cachedIssues;
-          }
+      return await measure(`Getting new isues for "${repoKey}"`, async () => {
+        const cachedIssues = this.reposCache[repoKey];
+        if (cachedIssues) {
+          return cachedIssues;
+        }
 
-          const result = await this.getRepoIssues(repo);
-          this.reposCache[repoKey] = result;
+        const result = await this.getRepoIssues(repo);
+        this.reposCache[repoKey] = result;
 
-          return result;
-        });
+        return result;
+      })
     });
 
     return flattenArray(await Promise.all(resultPromises));
-  };
+  }
 
   private isCardIssue = (card: TColumnCard, issue: TRepoIssue): boolean => {
-    return (card.content_url === issue.url) || (card.note === issue.html_url);
-  };
+    return card.content_url === issue.url || card.note === issue.html_url
+  }
 
   private getCardIssueFromNote = (card: TColumnCard): IParsedIssue | null => {
     try {
@@ -233,17 +228,17 @@ export class ProjectsOctoKit extends OctoKitBase {
       }
       const { cards } = columnWithCards;
       return cards ?? [];
-    });
+    })
 
     return flattenArray(cards);
-  };
+  }
 
-  public getCardRepos = (columns: TColumnsWithCardsMap): IParsedRepo[] => {
+  getCardRepos = (columns: TColumnsWithCardsMap): IParsedRepo[] => {
     const cards = this.getAllCards(columns);
 
     const repos: Record<string, IParsedRepo> = {};
 
-    for (let card of cards) {
+    for (const card of cards) {
       const issueFromNote = this.getCardIssueFromNote(card);
       const issueFromContent = this.getCardIssueFromContentUrl(card);
       const issue = issueFromNote ?? issueFromContent;
@@ -257,9 +252,9 @@ export class ProjectsOctoKit extends OctoKitBase {
     }
 
     return Object.values(repos);
-  };
+  }
 
-  public mergeCardsWithIssuesForColumn = (
+  mergeCardsWithIssuesForColumn = (
     issues: TRepoIssue[],
     columns: TColumnsWithCardsMap,
     columnType: TColumnTypes,
@@ -274,24 +269,23 @@ export class ProjectsOctoKit extends OctoKitBase {
     }
 
     const { cards } = column;
-    const cardIssues: ICardWithIssue[] = cards
-      .map((card) => {
-        const cardIssue = issues.find((issue) => {
-          return this.isCardIssue(card, issue);
-        });
+    const cardIssues: ICardWithIssue[] = cards.map((card) => {
+      const cardIssue = issues.find((issue) => {
+        return this.isCardIssue(card, issue);
+      })
 
-        return {
-          card,
-          issue: cardIssue,
-          column: columnType,
-          isNew: isNewCard(card, config, project),
-        }
-      });
+      return {
+        card,
+        issue: cardIssue,
+        column: columnType,
+        isNew: isNewCard(card, config, project),
+      }
+    });
 
     return cardIssues;
-  };
+  }
 
-  public updateBoardIssue = async (issueUrl: string, body: string) => {
+  updateBoardIssue = async (issueUrl: string, body: string) => {
     const issue = parseIssueUrl(issueUrl);
 
     if (!issue) {
@@ -305,9 +299,9 @@ export class ProjectsOctoKit extends OctoKitBase {
       issue_number: issueNumber,
       body,
     });
-  };
+  }
 
-  public getBoardIssue = async (issueUrl: string) => {
+  getBoardIssue = async (issueUrl: string) => {
     const issue = parseIssueUrl(issueUrl);
 
     if (!issue) {
@@ -327,12 +321,9 @@ export class ProjectsOctoKit extends OctoKitBase {
     }
 
     return data;
-  };
+  }
 
-  public updateBoardComment = async (
-    commentUrl: string,
-    body: string,
-  ) => {
+  updateBoardComment = async (commentUrl: string, body: string) => {
     const comment = parseCommentUrl(commentUrl);
     if (!comment) {
       throw new Error(`cannot parse the comment ${commentUrl}`);
@@ -352,7 +343,7 @@ export class ProjectsOctoKit extends OctoKitBase {
     }
   };
 
-  public getBoardHeaderText = async (fileUrl: string): Promise<string> => {
+  getBoardHeaderText = async (fileUrl: string): Promise<string> => {
     const fileRef = parseFileUrl(fileUrl);
 
     const { data } = await this.kit.repos.getContent({
@@ -366,5 +357,5 @@ export class ProjectsOctoKit extends OctoKitBase {
     const text = buff.toString('ascii');
 
     return text;
-  };
+  }
 }

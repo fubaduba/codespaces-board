@@ -7,7 +7,7 @@ const dateAddDays = (startDate: Date, days: number) => {
   date.setDate(startDate.getDate() + days);
 
   return date;
-};
+}
 
 /**
  * Check if card is a new - was created after
@@ -29,9 +29,13 @@ export const isNewCard = (
 
   const { projectConfig } = projectWithConfig;
 
-  const newCardsCutoffDays = (typeof projectConfig === 'number' || !projectConfig.newCardsCutoffDays)
-    ? 0
-    : projectConfig.newCardsCutoffDays;
+  const newCardsCutoffDays =
+    typeof projectConfig === 'number' || !projectConfig.newCardsCutoffDays
+      ? 0
+      : projectConfig.newCardsCutoffDays;
 
-  return cardCreationDate.getTime() >= dateAddDays(sprintStartDate, newCardsCutoffDays).getTime();
-};
+  return (
+    cardCreationDate.getTime() >=
+    dateAddDays(sprintStartDate, newCardsCutoffDays).getTime()
+  )
+}
