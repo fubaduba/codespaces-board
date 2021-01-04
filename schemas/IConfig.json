@@ -45,7 +45,6 @@
   },
   "additionalProperties": false,
   "required": [
-    "boardIssue",
     "repos"
   ],
   "definitions": {
@@ -116,6 +115,10 @@
         "newCardsCutoffDays": {
           "description": "How many days should elapse since the beginning of\nthe sprint for a card to be treated as `new`.",
           "type": "number"
+        },
+        "boardComment": {
+          "description": "The issue that is used as aggregated board.",
+          "type": "string"
         }
       },
       "additionalProperties": false,

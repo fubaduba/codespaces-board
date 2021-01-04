@@ -1,10 +1,9 @@
 [
   {
-    "$schema": "https://gist.githubusercontent.com/legomushroom/e997b3c9f15e647a2c62e5414c68deba/raw/2b87b907f926cbe74281b87a26367ea47bf11818/botspaces-config-schema.json",
+    "$schema": "https://gist.githubusercontent.com/legomushroom/e997b3c9f15e647a2c62e5414c68deba/raw/5b5de51d93fa5679f7fa4dc9e9701d45513fe404/botspaces-config-schema.json",
     "sprintDuration": 21,
     "sprintNumberHolidays": 0,
     "sprintStartDate": "2020-10-19",
-    "boardIssue": "https://github.com/legomushroom/codespaces-board-action-runner/issues/1",
     "repos": [{
         "owner": "microsoft",
         "repo": "vssaas-planning",
@@ -26,7 +25,8 @@
               "wachaudh",
               "klvnraju"
             ],
-            "isCheckListItems": true
+            "isCheckListItems": true,
+            "boardComment": "https://github.com/legomushroom/codespaces-board-action-runner/issues/1#issuecomment-753744362"
           },
           {
             "id": 3,
@@ -44,7 +44,8 @@
               "osortega",
               "jkeech"
             ],
-            "isCheckListItems": true
+            "isCheckListItems": true,
+            "boardComment": "https://github.com/legomushroom/codespaces-board-action-runner/issues/1#issuecomment-753744397"
           }
         ]
       }

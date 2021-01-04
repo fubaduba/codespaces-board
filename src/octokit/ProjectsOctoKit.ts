@@ -1,5 +1,5 @@
 import { OctoKitBase } from './OctoKitBase';
-import { parseIssueApiUrl, parseIssueUrl } from '../utils/parseIssueUrl';
+import { parseCommentUrl, parseIssueApiUrl, parseIssueUrl } from '../utils/parseIssueUrl';
 import { parseFileUrl } from '../utils/parseFileUrl';
 import { notEmpty } from '../utils/functional/notEmpty';
 
@@ -299,7 +299,6 @@ export class ProjectsOctoKit extends OctoKitBase {
     }
 
     const { owner, repo, issueNumber } = issue;
-
     return await this.kit.issues.update({
       owner,
       repo,
@@ -328,6 +327,29 @@ export class ProjectsOctoKit extends OctoKitBase {
     }
 
     return data;
+  };
+
+  public updateBoardComment = async (
+    commentUrl: string,
+    body: string,
+  ) => {
+    const comment = parseCommentUrl(commentUrl);
+    if (!comment) {
+      throw new Error(`cannot parse the comment ${commentUrl}`);
+    }
+
+    const { owner, repo, issueNumber, commentId } = comment;
+    const { status } = await this.kit.issues.updateComment({
+      owner,
+      repo,
+      issue_number: issueNumber,
+      comment_id: commentId,
+      body,
+    });
+
+    if (status !== 200) {
+      throw new Error(`Failed to update the comment ${commentUrl}`);
+    }
   };
 
   public getBoardHeaderText = async (fileUrl: string): Promise<string> => {

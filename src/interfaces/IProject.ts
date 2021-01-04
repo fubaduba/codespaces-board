@@ -49,4 +49,9 @@ export interface IProject {
    * the sprint for a card to be treated as `new`.
    */
   newCardsCutoffDays?: number;
+
+  /**
+   * The issue that is used as aggregated board.
+   */
+  boardComment?: string;
 }

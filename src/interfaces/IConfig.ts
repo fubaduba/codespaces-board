@@ -4,7 +4,7 @@ export interface IConfig {
   /**
    * The issue that is used as aggregated board.
    */
-  boardIssue: string;
+  boardIssue?: string;
 
   /**
    * List of the repositories/projects to track.
