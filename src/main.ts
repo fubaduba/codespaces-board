@@ -14,7 +14,7 @@ import { getConfigs, validateConfig } from './config';
 import { IConfig } from './interfaces/IConfig';
 
 const TOKEN_READ_NAME = 'REPO_GITHUB_READ_PAT';
-const TOKEN_WRITE_NAME = 'REPO_GITHUB_READ_PAT';
+const TOKEN_WRITE_NAME = 'REPO_GITHUB_WRITE_PAT';
 const CONFIG_PATH = 'CONFIG_PATH';
 
 // const overwriteBoardIssue = async (
@@ -189,7 +189,7 @@ async function run(): Promise<void> {
   try {
     const token = core.getInput('token');
     const readToken = env(TOKEN_READ_NAME) ?? core.getInput('readToken') ?? token;
-    const writeToken = env(TOKEN_READ_NAME) ?? core.getInput('writeToken') ?? token;
+    const writeToken = env(TOKEN_WRITE_NAME) ?? core.getInput('writeToken') ?? token;
 
     if (!readToken) {
       throw new AuthorizationError('No read token found.');

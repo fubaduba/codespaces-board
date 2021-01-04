@@ -2,9 +2,12 @@ name: 'codespaces-board'
 description: 'Action to aggregate GitHub Project Cards into a single issue'
 author: 'Oleg Solomka @legomushroom'
 inputs:
-  token:
+  readToken:
     required: true
-    description: 'GitHub token for API requests'
+    description: 'GitHub token for read API requests'
+  writeToken:
+    required: true
+    description: 'GitHub token for write API requests'
   config:
     required: true
     description: 'Path to the config'
