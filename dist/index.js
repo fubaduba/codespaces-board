@@ -1669,7 +1669,16 @@ const renderPriorityLabels = (cardWithIssue, projectWithConfig) => {
 };
 const renderCard = (cardWithIssue, projectWithConfig, asCheckList = false) => {
     const { column, issue, card } = cardWithIssue;
-    const title = !issue ? card.note : issue.title;
+    /**
+     * Recently GitHub made the change that is the issue reference
+     * is included into markdown, the title of the issue is
+     * automatically rendered as the issue link text, so we don't
+     * have to add the title now.
+     */
+    // const title = (!issue)
+    //   ? card.note
+    //   : issue.title;
+    const title = '';
     /**
      * If no associated issue found, item `url` it the URL to the
      * card itself, otherwise `url` is the link to the issue.
