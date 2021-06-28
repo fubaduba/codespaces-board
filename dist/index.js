@@ -446,6 +446,7 @@ class ProjectsOctoKit extends OctoKitBase_1.OctoKitBase {
                 accept: 'application/vnd.github.inertia-preview+json',
                 owner: repo.owner,
                 repo: repo.repo,
+                state: 'all',
                 per_page: 100,
             });
             const fetchedProjects = projectsResponse
@@ -6052,9 +6053,12 @@ validators.type = function validateType (instance, schema, options, ctx) {
 
 function testSchemaNoThrow(instance, options, ctx, callback, schema){
   var throwError = options.throwError;
+  var throwAll = options.throwAll;
   options.throwError = false;
+  options.throwAll = false;
   var res = this.validateSchema(instance, schema, options, ctx);
   options.throwError = throwError;
+  options.throwAll = throwAll;
 
   if (!res.valid && callback instanceof Function) {
     callback(res);
@@ -6974,10 +6978,13 @@ ValidationError.prototype.toString = function toString() {
 var ValidatorResult = exports.ValidatorResult = function ValidatorResult(instance, schema, options, ctx) {
   this.instance = instance;
   this.schema = schema;
+  this.options = options;
   this.path = ctx.path;
   this.propertyPath = ctx.propertyPath;
   this.errors = [];
   this.throwError = options && options.throwError;
+  this.throwFirst = options && options.throwFirst;
+  this.throwAll = options && options.throwAll;
   this.disableFormat = options && options.disableFormat === true;
 };
 
@@ -6992,10 +6999,12 @@ ValidatorResult.prototype.addError = function addError(detail) {
     err = new ValidationError(detail.message, this.instance, this.schema, this.path, detail.name, detail.argument);
   }
 
-  if (this.throwError) {
+  this.errors.push(err);
+  if (this.throwFirst) {
+    throw new ValidatorResultError(this);
+  }else if(this.throwError){
     throw err;
   }
-  this.errors.push(err);
   return err;
 };
 
@@ -7017,6 +7026,20 @@ ValidatorResult.prototype.toString = function toString(res) {
 Object.defineProperty(ValidatorResult.prototype, "valid", { get: function() {
   return !this.errors.length;
 } });
+
+module.exports.ValidatorResultError = ValidatorResultError;
+function ValidatorResultError(result) {
+  if(Error.captureStackTrace){
+    Error.captureStackTrace(this, ValidatorResultError);
+  }
+  this.instance = result.instance;
+  this.schema = result.schema;
+  this.options = result.options;
+  this.errors = result.errors;
+}
+ValidatorResultError.prototype = new Error();
+ValidatorResultError.prototype.constructor = ValidatorResultError;
+ValidatorResultError.prototype.name = "Validation Error";
 
 /**
  * Describes a problem with a Schema which prevents validation of an instance
@@ -7297,6 +7320,7 @@ exports.isSchema = function isSchema(val){
 var Validator = module.exports.Validator = __webpack_require__(8669);
 
 module.exports.ValidatorResult = __webpack_require__(4801).ValidatorResult;
+module.exports.ValidatorResultError = __webpack_require__(4801).ValidatorResultError;
 module.exports.ValidationError = __webpack_require__(4801).ValidationError;
 module.exports.SchemaError = __webpack_require__(4801).SchemaError;
 module.exports.SchemaScanResult = __webpack_require__(9534).SchemaScanResult;
@@ -7405,6 +7429,7 @@ var attribute = __webpack_require__(1568);
 var helpers = __webpack_require__(4801);
 var scanSchema = __webpack_require__(9534).scan;
 var ValidatorResult = helpers.ValidatorResult;
+var ValidatorResultError = helpers.ValidatorResultError;
 var SchemaError = helpers.SchemaError;
 var SchemaContext = helpers.SchemaContext;
 //var anonymousBase = 'vnd.jsonschema:///';
@@ -7448,13 +7473,15 @@ Validator.prototype.addSchema = function addSchema (schema, base) {
     return null;
   }
   var scan = scanSchema(base||anonymousBase, schema);
-  var ourUri = base || schema.id;
+  var ourUri = base || schema.$id || schema.id;
   for(var uri in scan.id){
     this.schemas[uri] = scan.id[uri];
   }
   for(var uri in scan.ref){
+    // If this schema is already defined, it will be filtered out by the next step
     this.unresolvedRefs.push(uri);
   }
+  // Remove newly defined schemas from unresolvedRefs
   this.unresolvedRefs = this.unresolvedRefs.filter(function(uri){
     return typeof self.schemas[uri]==='undefined';
   });
@@ -7508,6 +7535,7 @@ Validator.prototype.validate = function validate (instance, schema, options, ctx
   if (!options) {
     options = {};
   }
+  // This section indexes subschemas in the provided schema, so they don't need to be added with Validator#addSchema
   // This will work so long as the function at uri.resolve() will resolve a relative URI to a relative URI
   var id = schema.$id || schema.id;
   var base = urilib.resolve(options.base||anonymousBase, id||'');
@@ -7522,9 +7550,16 @@ Validator.prototype.validate = function validate (instance, schema, options, ctx
       ctx.schemas[n] = sch;
     }
   }
+  if(options.required && instance===undefined){
+    var result = new ValidatorResult(instance, schema, options, ctx);
+    result.addError('is required, but is undefined');
+    return result;
+  }
   var result = this.validateSchema(instance, schema, options, ctx);
   if (!result) {
     throw new Error('Result undefined');
+  }else if(options.throwAll && result.errors.length){
+    throw new ValidatorResultError(result);
   }
   return result;
 };
