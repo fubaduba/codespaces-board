@@ -54,6 +54,7 @@ export class ProjectsOctoKit extends OctoKitBase {
       accept: 'application/vnd.github.inertia-preview+json',
       owner: repo.owner,
       repo: repo.repo,
+      state: 'all',
       per_page: 100,
     });
 
